@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+      
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
+    <link href="/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="style.css">
+    <title>Hey Chatbot - 歡迎</title>
+</head>
+<body>
+<div class="wrap">
+      <p><%=message %><br/></p>
+   <div class="login">
+    <form action="http://127.0.0.1:3000/login"  method="post">
+        <input type="text" name="ID" placeholder="請輸入帳號"/>
+        <input type="password" name="pwd" placeholder="請輸入密碼"/>
+     <input type="submit" value="登入"/>    
+    </form>
+    </div>
+    <div class="login">
+    <form action="http://127.0.0.1:3000/signup">
+        <input type="submit" value="註冊" />
+    </form>
+    </div>
+    <div class="login">
+    <form action="http://127.0.0.1:3000/trytrylook">
+        <input type="submit" value="試用" />
+    </form>
+    </div>
+    </div>
+</div>
+ 
+</body>
+</html>

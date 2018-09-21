@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+      
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
+    <link href="/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="style.css">
+    <title>Hey Chatbot  -搜尋功能</title>
+</head>
+<body>
+<div class="wrap">
+        <p><%=message%></p>
+        <form action="http://127.0.0.1:3000/addstr" method="post" class="form" >
+        <div class="echo"><p><%-send %></p></div>
+                <div class="text">
+                <input type="text" name="addstr">
+        </div>               
+                <div class="send">
+                <input type="submit" class="submit" name="submit" value="提交">
+        </div>  
+        </form>
+        <div class="logout">
+        <form action="http://127.0.0.1:3000/logout" method="post" class="form" >
+                        <input type="submit" class="submit" name="submit" value="登出">
+                </form>
+        </div>    
+</div>
+ 
+</body>
+</html>
