@@ -287,7 +287,7 @@ app.post('/addstr', function (req, res) {
           canadd: 0
         }
         bot[bot.length] = {
-          message: "BOT：<br/><table border=1><tr><td>溫度</td><td>體感溫度</td><td>天氣現象</td><td>降雨機率</td><td>舒適度</td></tr>",
+          message: "BOT：<br/><table class='sss' border=1><tr><td>溫度</td><td>體感溫度</td><td>天氣現象</td><td>降雨機率</td><td>舒適度</td></tr>",
           class: "notif",
           canadd: 0
         }
