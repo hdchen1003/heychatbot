@@ -50,26 +50,33 @@
 <body>
     <div class="app">
 
-       
-        <h1>歡迎使用</h1>
+       <h1>歡迎使用</h1>
         <div id="deviceready" class="blink">
             <p class="event listening">背包客不孤單</p>
             <p class="event received">Have a nice trip</p>
         </div>
         <p class="index_word">第一次使用</p>       
-        <input class="home_buttom" type="button" value="使用說明" onclick="location.href='guide.html'">
+        <input class="home_buttom" type="button" value="使用說明" onclick="location.href='http://127.0.0.1:3000/guide'">
         <!-- <br/> -->
-        <p class="index_word">已有帳號</p>
-         <input class="home_buttom" type="button" value="我要登入" onclick="location.href='login.html'">
+        <br/>
+        <br/>
+         <input class="home_buttom2" type="button" value="我要登入" onclick="location.href='login.html'">
+         <input class="home_buttom2" type="button" value="我要註冊" onclick="location.href='http://127.0.0.1:3000/signup'">
+
+         <div class="non_login"><a href="http://127.0.0.1:3000/trytrylook">免登入，直接開啟</a></div>
+        
+
+        <p class="mb-1">&copy; 2018-2019 Heychatbot</p>
         
     </div>
-    <script type="text/javascript" src="cordova.js"></script>
+
+    <!-- <script type="text/javascript" src="cordova.js"></script> -->
     <script type="text/javascript" src="js/index.js"></script>
     <script type="text/javascript">
         app.initialize();
     </script>
     <script type="text/javascript">
-     alert("本App將開啟地理定位功能");
+     //alert("本App將開啟地理定位功能");
    </script>
 </body>
 

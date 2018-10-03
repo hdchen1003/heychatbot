@@ -1,41 +1,149 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-      
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="viewport" content="width=device-width, minimun-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+
+    <link rel="import" href="components/bower_components/core-toolbar/core-toolbar.html">
+    <link rel="import" href="components/bower_components/paper-elements/paper-elements.html">
     
-    <link href="/style.css" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="style.css">
-    <title>Hey Chatbot - 註冊</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.2.1.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+
+
+    <title>Signup</title>
 </head>
 <body>
-<div class="wrap">
-      <p><%=message %><br/></p>
-   <div class="login">
-    <form action="http://127.0.0.1:3000/doSignup"  method="post">
-        <input type="text" name="ID" placeholder="帳號"/>
-        <input type="password" name="pwd" placeholder="密碼"/>
-        <input type="password" name="pwd2" placeholder="確認密碼"/>
-        <input type="text" name="name" placeholder="姓名"/>
-        <input type="text" name="email" placeholder="電子信箱"/>
-        <input type="date" name="birth" placeholder="生日"/>
-        <select name="gender"  placeholder="性別" >
-            　<option value="male">男生</option>
-            　<option value="female">女生</option>
-        </select>
-     <input type="reset" value="重填"/>    
-     <input type="submit" value="註冊"/>    
-    </form>
-    </div>
-    <div class="login">
-    <form action="http://127.0.0.1:3000/">
-        <input type="submit" value="回主頁" />
-    </form>
     
-</div>
- 
+    <core-toolbar class="toolbar">
+      <paper-icon-button  icon="menu"></paper-icon-button>
+       <a class="list-group-item" href="#"><i class="fa fa-chevron-left fa-3x"></i> </a>
+            <!-- <span class="toolbar_title" flex>I am a toolbar!!!!</span> -->
+            <a class="list-rightbars" href="#"><i class="fa fa-bars fa-3x" ></i> </a>
+
+     </core-toolbar>  
+
+
+    
+    <div class="app_inside">
+
+     <div class="sign_container">
+        <div class="py-5 text-center">
+       <!--  <img class="d-block mx-auto mb-4" src="img/logo.png" alt="" width="72" height="72"> -->
+        <h2 class="sign_title">歡迎加入Heychatbot</h2>
+       </div>
+
+
+        <div class="col-md-8 order-md-1">
+          <h4 class="sign_sectitle">請填寫下列資料</h4>
+          <form class="needs-validation" action="http://127.0.0.1:3000/doSignup" method="post"novalidate>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="sign_boxtitle">姓名</label>
+                <input type="text" class="sign_form" name="name" placeholder="" value="" required>
+                <div class="invalid-feedback">
+                  請填寫有效的姓名
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="sign_boxtitle">帳號</label>
+                <input type="text" class="sign_form" name="ID" placeholder="" value="" required>
+                <div class="invalid-feedback">
+                  請填寫有效的帳號
+                </div>
+              </div>
+            </div>
+
+              <div class="mb-3">
+                <label class="sign_boxtitle">密碼</label>
+                <input type="password" class="sign_form" name="pwd" placeholder="" required>
+                <div class="invalid-feedback">
+                  請填寫有效的密碼
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="sign_boxtitle">確認密碼</label>
+                <input type="password" class="sign_form" name="pwd2" placeholder="" required>
+                <div class="invalid-feedback">
+                  請填寫正確的密碼
+                </div>
+              </div>
+
+            <div class="mb-3">
+              <label class="sign_boxtitle">電子信箱<span class="text-muted"></span></label>
+              <input type="email" class="sign_form" name="email" placeholder="you@example.com">
+              <div class="invalid-feedback">
+                請填寫一個有效的電子信箱
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="sign_boxtitle">生日</label>
+              <input type="date" class="sign_form" name="birth" placeholder="" required>
+              <div class="invalid-feedback">
+                請填寫出生日期
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-5 mb-3">
+                <label class="sign_boxtitle">性別</label>
+                <select class="sign_gender" name="gender" required>
+                  　<option value="male">男生</option>
+                  　<option value="female">女生</option>
+                </select>
+                <div class="invalid-feedback">
+                  請選擇性別
+                </div>
+              </div>
+            </div>
+
+
+            <hr class="mb-4">
+            <input class="sign_submit" type="submit" value="註冊">
+          </form>
+        </div>
+    </div>
+        <footer >
+          <p class="mb-1">&copy; 2018-2019 Heychatbot</p>
+
+        </footer>
+    </div>
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="https://bootstrap.hexschool.com/assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script src="https://bootstrap.hexschool.com/assets/js/vendor/popper.min.js"></script>
+    <script src="https://bootstrap.hexschool.com/dist/js/bootstrap.min.js"></script>
+    <script src="https://bootstrap.hexschool.com/assets/js/vendor/holder.min.js"></script>
+    <script>
+    //   // Example starter JavaScript for disabling form submissions if there are invalid fields
+    //   (function() {
+    //     'use strict';
+
+    //     window.addEventListener('load', function() {
+    //       // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    //       var forms = document.getElementsByClassName('needs-validation');
+
+    //       // Loop over them and prevent submission
+    //       var validation = Array.prototype.filter.call(forms, function(form) {
+    //         form.addEventListener('submit', function(event) {
+    //           if (form.checkValidity() === false) {
+    //             event.preventDefault();
+    //             event.stopPropagation();
+    //           }
+    //           form.classList.add('was-validated');
+    //         }, false);
+    //       });
+    //     }, false);
+    //   })();
+    </script>
+
+
 </body>
 </html>

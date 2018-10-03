@@ -24,11 +24,11 @@ body {
     -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
     -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
     -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
-    background-color:#E4E4E4;
-    background-image:linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%);
-    background-image:-webkit-linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%);
-    background-image:-ms-linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%);
-    background-image:-webkit-gradient(
+    background-color:#ace9e7;
+    /*background-image:linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%);*/
+    /*background-image:-webkit-linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%);*/
+    /*background-image:-ms-linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%);*/
+    /*background-image:-webkit-gradient(*/
         linear,
         left top,
         left bottom,
@@ -41,7 +41,7 @@ body {
     height:100%;
     margin:0px;
     padding:0px;
-    text-transform:uppercase;
+    text-transform:none;
     width:100%;
 }
 
@@ -51,11 +51,24 @@ body {
     position:absolute;             /* position in the center of the screen */
     left:50%;
     top:50%;
-    height:50px;                   /* text area height */
+    height:500px;                   /* text area height */
     width:225px;                   /* text area width */
     text-align:center;
     padding:180px 0px 0px 0px;     /* image height is 200px (bottom 20px are overlapped with text) */
-    margin:-115px 0px 0px -112px;  /* offset vertical: half of image height and text area height */
+    margin:-165px 0px 0px -112px;  /* offset vertical: half of image height and text area height */
+                                   /* offset horizontal: half of text area width */
+}
+
+.app_inside {
+    /*background:url(../img/) no-repeat center top; /* 170px x 200px */*/
+    position:absolute;             /* position in the center of the screen */
+    left:50%;
+    top:50%;
+    height:500px;                   /* text area height */
+    width:300px;                   /* text area width */
+    text-align:center;
+    padding:180px 0px 0px 0px;     /* image height is 200px (bottom 20px are overlapped with text) */
+    margin:0 auto;   offset vertical: half of image height and text area height 
                                    /* offset horizontal: half of text area width */
 }
 
@@ -63,11 +76,13 @@ body {
 @media screen and (min-aspect-ratio: 18/9) and (min-width:414px) {
     .app {
         background-position:left center;
-        padding:75px 0px 75px 170px;  
+        padding:75px 0px 75px 200px;  
         margin:-90px 0px 0px -198px;  /* offset vertical: half of image height 
                                       /* offset horizontal: half of image width and text area width */
    }
 }
+
+
 
 h1 {
     font-size:35px;
@@ -77,6 +92,10 @@ h1 {
     overflow:visible;
     padding:0px;
     text-align:center;
+}
+
+.sch_title{
+    margin-top:-100px;
 }
 
 .event {
@@ -110,6 +129,21 @@ h1 {
     /*display:block;*/
 }
 
+.home_buttom2{
+    /*margin-left: 80px;*/
+    border-radius: 2px;
+    font-family: "微軟正黑體";
+    width: 80px;
+    height: 40px;
+    /*vertical-align: center;*/
+    margin:0 auto;
+    /*display:block;*/
+}
+
+.non_login{
+    margin-top: 20px;
+}
+
 .back_button{
      border-radius: 2px;
     font-family: "微軟正黑體";
@@ -122,6 +156,7 @@ h1 {
 .index_word{
     font-family: "微軟正黑體";
     font-size: 13px;
+    height:8px;
 }
 
 .account{
@@ -182,6 +217,138 @@ h1 {
     background:url(../img/background.gif);
 }
 
+.pro_table{
+    margin:0 auto;
+}
+
+.pro_font{
+     font-size: 15px;
+    font-family: "微軟正黑體";
+}
+
+.pro_info{
+    font-size: 25px;
+    font-family: "微軟正黑體";
+}
+
+.att_table{
+   margin-left: -25px;
+   float: left;
+}
+
+.att_righttable{
+   margin-left: 110px;
+   
+   
+}
+
+.att_title{
+    font-size: 20px;
+     font-family: "微軟正黑體";
+}
+
+.att_save{
+    margin-top: -100px;
+    margin-bottom:  50px;
+    font-size: 35px;
+    font-family: "微軟正黑體";
+}
+
+.att_font{
+    font-size: 15px;
+    font-family: "微軟正黑體";
+}
+
+.sch_saveatt{
+    border: 2px solid;
+    margin-top: 50px;
+    padding-top: 25px;
+    padding-bottom: 25px;
+}
+
+.gui_title{
+    margin-top: -100px;
+    font-size: 35px;
+    font-family: "微軟正黑體";
+}
+
+.gui_context{
+    font-size: 20px;
+    margin-top: 50px;
+    font-family: "微軟正黑體";
+}
+
+.pri_title{
+    margin-top: -100px;
+    font-size: 35px;
+    font-family: "微軟正黑體";
+}
+
+.pri_context{
+    font-size: 20px;
+    margin-top: 50px;
+    font-family: "微軟正黑體";
+}
+
+.slide_box{
+    margin-top: -177px;
+    margin-left: 160px;
+    float: right;
+    border: 1px solid;
+}
+
+.slide_column{
+    /*border: 1px solid;*/
+    font-size: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-family: "微軟正黑體";
+}
+
+.sign_container {
+    margin-top: -80px;
+  font-family: "微軟正黑體";
+}
+
+.sign_title{
+    font-size: 30px;
+}
+
+.sign_sectitle{
+    font-size: 25px;
+}
+
+.sign_boxtitle{
+    font-size: 15px;
+    font-weight: bold;
+    float: left;
+}
+
+.sign_submit{
+    display: block;
+    width: 100%;
+    font-family: "微軟正黑體";
+    font-size: 20px;
+    background:  #33ccff;
+    margin-top: 20px;
+}
+
+.sign_gender{
+    display: block;
+    width: 100%;
+    height: 30px;
+    border-radius: .25rem;
+}
+.sign_form{
+    display: block;
+    width: 100%;
+    height: 30px;
+    border-radius: .25rem;
+}
+
+.footer{
+  background: #ace9e7;
+}
 
 @keyframes fade {
     from { opacity: 1.0; }

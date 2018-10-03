@@ -209,6 +209,15 @@ app.get('/favorite', function (req, res) {
 
 });
 
+app.get('/guide', function (req, res) {
+
+  res.render('pages/guide', {
+    message: "歡迎加入我們",
+    send: get_str_mylove()
+  });
+
+});
+
 //回應後
 app.post('/addstr', function (req, res) {
 

@@ -49,3 +49,15 @@ var app = {
         console.log('Received Event: ' + id);
     }
 };
+
+
+
+        $(function(){
+  
+        $('.list-rightbars').on('click', function(){
+        $('.slide_box').slideToggle();
+        // $('.slide_box').next().animate({width: 'toggle'})
+        });
+
+    });
+
