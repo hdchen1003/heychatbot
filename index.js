@@ -259,207 +259,52 @@ app.post('/addstr', function (req, res) {
     });
   }
   else {
-    if (session[0] == "place") {
-
-      request('https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=' + req.body.addstr + '&inputtype=textquery&fields=photos,formatted_address,name,rating,opening_hours,geometry&key=AIzaSyCt3g5gLr475dheyZYlJFXBlSgKa6YMqXk', {
-        json: true
-      }, function (err, data) {
-        if (err) throw err
-        bot[bot.length] = {
-          message: "YOU：" + req.body.addstr + "<br/>",
-          class: "input",
-          canadd: 0
-        }
-        bot[bot.length] = {
-          message: "BOT：地區 - " + data.candidates[0].formatted_address + "<br/>",
-          class: "notif",
-          canadd: 0
-        }
-
-        res.render('pages/main.ejs', {
-          message: "早安",
-          send: get_str(),
-        });
-      });
-      session[0] = ""
-    }
-    else if (session[0] == "weather") {
-
-      var placecode = placeTocode(req.body.addstr);
-      request('http://opendata.cwb.gov.tw/opendataapi?dataid=' + placecode + '&authorizationkey=CWB-357C384E-33A3-4DFA-BBE8-AFF232297CF5&format=json', {
-        json: true
-      }, function (err, data) {
-        if (err) throw err
-        bot[bot.length] = {
-          message: "YOU：" + req.body.addstr + "<br/>",
-          class: "input",
-          canadd: 0
-        }
-        bot[bot.length] = {
-          message: "BOT：<br/><table class='sss' border=1><tr><td>溫度</td><td>體感溫度</td><td>天氣現象</td><td>降雨機率</td><td>舒適度</td></tr>",
-          class: "notif",
-          canadd: 0
-        }
-        for (var i = 0; i < 3; i++) {
+    
+    switch (session[0]) {
+      case "place":
+        request('https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=' + req.body.addstr + '&inputtype=textquery&fields=photos,formatted_address,name,rating,opening_hours,geometry&key=AIzaSyCt3g5gLr475dheyZYlJFXBlSgKa6YMqXk', {
+          json: true
+        }, function (err, data) {
+          if (err) throw err
           bot[bot.length] = {
-            message: "<tr><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[0].time[i].elementValue.value + "°C</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[8].time[i].elementValue.value + "°C</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[9].time[i].elementValue[0].value + "</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[3].time[i].elementValue.value + "%</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[7].time[i].elementValue[1].value + "</td></tr>",
-            class: "weather",
-            canadd: 1
+            message: "YOU：" + req.body.addstr + "<br/>",
+            class: "input",
+            canadd: 0
           }
-        }
-        bot[bot.length] = {
-          message: "</table><br/>",
-          class: "notif",
-          canadd: 0
-        }
-
-        res.render('pages/main.ejs', {
-          message: "早安",
-          send: get_str(),
-        });
-      });
-      session[0] = ""
-    }
-    else if (session[0] == "traffic") {
-      search(req.body.addstr)
-      res.render('pages/main.ejs', {
-        message: "早安",
-        send: get_str(),
-      });
-
-    }
-    else if (session[0] == "traffic_BUSnum") {
-      session[1] = findPlace(req.body.addstr)
-      search(req.body.addstr)
-      res.render('pages/main.ejs', {
-        message: "早安",
-        send: get_str(),
-      });
-    }
-    else if (session[0] == "traffic_BUS") {
-      session[2] = showIntFromString(req.body.addstr);
-      axios.get('http://ptx.transportdata.tw/MOTC/v2/Bus/StopOfRoute/City/' + session[1] + '?$format=json', { // 參考(抄襲XD)noobTW
-        headers: getAuthorizationHeader(),
-      })
-        .then(function (response) {
-          for (var i = 0; i < response.data.length; i++) {
-            if (response.data[i].RouteName.Zh_tw.match(session[2])) {
-              bot[bot.length] = {
-                message: "<table border=1> <tr><td>編號</td> <td>去程</td> <td>回程</td></tr>",
-                class: "notif",
-                canadd: 0
-              }
-              for (var j = 0; j < response.data[i].Stops.length; j++) {
-
-                bot[bot.length] = {
-                  message: "<tr><td>" + (j + 1) + "</td><td>" + response.data[i].Stops[j].StopName.Zh_tw + "</td><td>" + response.data[i].Stops[response.data[i].Stops.length - j - 1].StopName.Zh_tw + "</td></tr>",
-                  class: "bus",
-                  canadd: 1
-                }
-
-              }
-              bot[bot.length] = {
-                message: "</table><br/>",
-                class: "notif",
-                canadd: 0
-              }
-            }
-            break;
+          bot[bot.length] = {
+            message: "BOT：地區 - " + data.candidates[0].formatted_address + "<br/>",
+            class: "notif",
+            canadd: 0
           }
-          session[0] = "", session[1] = "", session[2] = "";
+
           res.render('pages/main.ejs', {
             message: "早安",
             send: get_str(),
           });
-
         });
+        session[0] = ""
+        break;
+      case "weather":
 
-
-
-    }
-    else if (session[0] == "traffic_TRA") {
-      bot[bot.length] = {
-        message: "YOU：" + req.body.addstr + "<br/>",
-        class: "input",
-        canadd: 0
-      }
-      var originName, destinationName, originID, destinationID
-      axios.get('https://ptx.transportdata.tw/MOTC/v2/Rail/TRA/Station?$select=StationName%2CStationID&$format=JSON', { // 參考(抄襲XD)noobTW
-        headers: getAuthorizationHeader(),
-      })
-        .then(function (response) {
-          var find2
-          for (var i = 0; i < response.data.length; i++) {
-            if (req.body.addstr.match(response.data[i].StationName.Zh_tw)) {
-              originName = response.data[i].StationName.Zh_tw
-              originID = response.data[i].StationID
-              find2 = i + 1
-              break;
-            }
-          }
-          for (var j = find2; j < response.data.length; j++) {
-            if (req.body.addstr.match(response.data[j].StationName.Zh_tw)) {
-              destinationName = response.data[j].StationName.Zh_tw
-              destinationID = response.data[j].StationID
-              break;
-            }
-          }
-          if (req.body.addstr.indexOf(originName) > req.body.addstr.indexOf(destinationName)) {
-            var a
-            a = destinationName
-            destinationName = originName
-            originName = a
-
-            a = destinationID
-            destinationID = originID
-            originID = a
-          }//比對字串，如果先列出終點就把他們交換
+        var placecode = placeTocode(req.body.addstr);
+        request('http://opendata.cwb.gov.tw/opendataapi?dataid=' + placecode + '&authorizationkey=CWB-357C384E-33A3-4DFA-BBE8-AFF232297CF5&format=json', {
+          json: true
+        }, function (err, data) {
+          if (err) throw err
           bot[bot.length] = {
-            message: "BOT：起站 - " + originName + " ，迄站 -  " + destinationName + "<br/>",
-            class: "notif",
+            message: "YOU：" + req.body.addstr + "<br/>",
+            class: "input",
             canadd: 0
           }
           bot[bot.length] = {
-            message: "BOT：要搭幾月幾號的車？<br/>",
+            message: "BOT：<br/><table class='sss' border=1><tr><td>溫度</td><td>體感溫度</td><td>天氣現象</td><td>降雨機率</td><td>舒適度</td></tr>",
             class: "notif",
             canadd: 0
           }
-          Train = [originName, originID, destinationName, destinationID]
-          delTRA = bot.length
-          bot[bot.length] = {
-            message: "<input type=\"date\" class=\"input\" name=\"time\">",
-            class: "notif",
-            canadd: 0
-          }
-          res.render('pages/main.ejs', {
-            message: "早安",
-            send: get_str(),
-          });
-          session[0] = "need_TRA_time";
-        });
-
-
-    }
-    else if (session[0] == "need_TRA_time") {
-      //bot.splice(delTRA, 1, "")
-      bot[bot.length] = {
-        message: "YOU：" + req.body.time + "<br/>",
-        class: "input",
-        canadd: 0
-      }
-      axios.get('http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/DailyTimetable/OD/' + Train[1] + '/to/' + Train[3] + '/' + req.body.time + '?&$format=json', { // 參考(抄襲XD)noobTW
-        headers: getAuthorizationHeader(),
-      })
-        .then(function (response) {
-          bot[bot.length] = {
-            message: "BOT：<br/><table border=1><tr><td>車種</td><td>車次代碼</td><td>到站時間</td><td>備註</td></tr>",
-            class: "notif",
-            cabadd: 0
-          }
-          for (var i = 0; i < response.data.length; i++) {
+          for (var i = 0; i < 3; i++) {
             bot[bot.length] = {
-              message: "<tr><td>" + response.data[i].DailyTrainInfo.TrainTypeName.Zh_tw + "</td><td>" + response.data[i].DailyTrainInfo.TrainNo + "</td><td>" + response.data[i].OriginStopTime.ArrivalTime + "</td><td>" + response.data[i].DailyTrainInfo.Note.Zh_tw + "</td></tr>",
-              class: "notif",
+              message: "<tr><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[0].time[i].elementValue.value + "°C</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[8].time[i].elementValue.value + "°C</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[9].time[i].elementValue[0].value + "</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[3].time[i].elementValue.value + "%</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[7].time[i].elementValue[1].value + "</td></tr>",
+              class: "weather",
               canadd: 1
             }
           }
@@ -468,20 +313,176 @@ app.post('/addstr', function (req, res) {
             class: "notif",
             canadd: 0
           }
+
           res.render('pages/main.ejs', {
             message: "早安",
             send: get_str(),
           });
-        })
+        });
+        session[0] = ""
+        break;
+      case "traffic":
+        search(req.body.addstr)
+        res.render('pages/main.ejs', {
+          message: "早安",
+          send: get_str(),
+        });
 
-      session[0] = ""
-    }
-    else {
-      search(req.body.addstr)
-      res.render('pages/main.ejs', {
-        message: "早安",
-        send: get_str(),
-      });
+        break;
+      case "traffic_BUSnum":
+        session[1] = findPlace(req.body.addstr)
+        search(req.body.addstr)
+        res.render('pages/main.ejs', {
+          message: "早安",
+          send: get_str(),
+        });
+        break;
+      case "traffic_BUS":
+        session[2] = showIntFromString(req.body.addstr);
+        axios.get('http://ptx.transportdata.tw/MOTC/v2/Bus/StopOfRoute/City/' + session[1] + '?$format=json', { // 參考(抄襲XD)noobTW
+          headers: getAuthorizationHeader(),
+        })
+          .then(function (response) {
+            for (var i = 0; i < response.data.length; i++) {
+              if (response.data[i].RouteName.Zh_tw.match(session[2])) {
+                bot[bot.length] = {
+                  message: "<table border=1> <tr><td>編號</td> <td>去程</td> <td>回程</td></tr>",
+                  class: "notif",
+                  canadd: 0
+                }
+                for (var j = 0; j < response.data[i].Stops.length; j++) {
+
+                  bot[bot.length] = {
+                    message: "<tr><td>" + (j + 1) + "</td><td>" + response.data[i].Stops[j].StopName.Zh_tw + "</td><td>" + response.data[i].Stops[response.data[i].Stops.length - j - 1].StopName.Zh_tw + "</td></tr>",
+                    class: "bus",
+                    canadd: 1
+                  }
+
+                }
+                bot[bot.length] = {
+                  message: "</table><br/>",
+                  class: "notif",
+                  canadd: 0
+                }
+              }
+              break;
+            }
+            session[0] = "", session[1] = "", session[2] = "";
+            res.render('pages/main.ejs', {
+              message: "早安",
+              send: get_str(),
+            });
+
+          });
+
+
+
+        break;
+      case "traffic_TRA":
+        bot[bot.length] = {
+          message: "YOU：" + req.body.addstr + "<br/>",
+          class: "input",
+          canadd: 0
+        }
+        var originName, destinationName, originID, destinationID
+        axios.get('https://ptx.transportdata.tw/MOTC/v2/Rail/TRA/Station?$select=StationName%2CStationID&$format=JSON', { // 參考(抄襲XD)noobTW
+          headers: getAuthorizationHeader(),
+        })
+          .then(function (response) {
+            var find2
+            for (var i = 0; i < response.data.length; i++) {
+              if (req.body.addstr.match(response.data[i].StationName.Zh_tw)) {
+                originName = response.data[i].StationName.Zh_tw
+                originID = response.data[i].StationID
+                find2 = i + 1
+                break;
+              }
+            }
+            for (var j = find2; j < response.data.length; j++) {
+              if (req.body.addstr.match(response.data[j].StationName.Zh_tw)) {
+                destinationName = response.data[j].StationName.Zh_tw
+                destinationID = response.data[j].StationID
+                break;
+              }
+            }
+            if (req.body.addstr.indexOf(originName) > req.body.addstr.indexOf(destinationName)) {
+              var a
+              a = destinationName
+              destinationName = originName
+              originName = a
+
+              a = destinationID
+              destinationID = originID
+              originID = a
+            }//比對字串，如果先列出終點就把他們交換
+            bot[bot.length] = {
+              message: "BOT：起站 - " + originName + " ，迄站 -  " + destinationName + "<br/>",
+              class: "notif",
+              canadd: 0
+            }
+            bot[bot.length] = {
+              message: "BOT：要搭幾月幾號的車？<br/>",
+              class: "notif",
+              canadd: 0
+            }
+            Train = [originName, originID, destinationName, destinationID]
+            delTRA = bot.length
+            bot[bot.length] = {
+              message: "<input type=\"date\" class=\"input\" name=\"time\">",
+              class: "notif",
+              canadd: 0
+            }
+            res.render('pages/main.ejs', {
+              message: "早安",
+              send: get_str(),
+            });
+            session[0] = "need_TRA_time";
+          });
+
+
+        break;
+      case "need_TRA_time":
+        //bot.splice(delTRA, 1, "")
+        bot[bot.length] = {
+          message: "YOU：" + req.body.time + "<br/>",
+          class: "input",
+          canadd: 0
+        }
+        axios.get('http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/DailyTimetable/OD/' + Train[1] + '/to/' + Train[3] + '/' + req.body.time + '?&$format=json', { // 參考(抄襲XD)noobTW
+          headers: getAuthorizationHeader(),
+        })
+          .then(function (response) {
+            bot[bot.length] = {
+              message: "BOT：<br/><table border=1><tr><td>車種</td><td>車次代碼</td><td>到站時間</td><td>備註</td></tr>",
+              class: "notif",
+              cabadd: 0
+            }
+            for (var i = 0; i < response.data.length; i++) {
+              bot[bot.length] = {
+                message: "<tr><td>" + response.data[i].DailyTrainInfo.TrainTypeName.Zh_tw + "</td><td>" + response.data[i].DailyTrainInfo.TrainNo + "</td><td>" + response.data[i].OriginStopTime.ArrivalTime + "</td><td>" + response.data[i].DailyTrainInfo.Note.Zh_tw + "</td></tr>",
+                class: "notif",
+                canadd: 1
+              }
+            }
+            bot[bot.length] = {
+              message: "</table><br/>",
+              class: "notif",
+              canadd: 0
+            }
+            res.render('pages/main.ejs', {
+              message: "早安",
+              send: get_str(),
+            });
+          })
+
+        session[0] = ""
+        break;
+      default:
+        search(req.body.addstr)
+        res.render('pages/main.ejs', {
+          message: "早安",
+          send: get_str(),
+        });
     }
   }
 
@@ -662,7 +663,7 @@ function get_str() {
 function get_str_mylove() {
   var str = "<table border='1'>"
   mylove.forEach(input => {
-    str += "<tr><td>"+ input.message+ "</td></tr>"
+    str += "<tr><td>" + input.message + "</td></tr>"
   });
   str += "</table>"
   console.log(str);
