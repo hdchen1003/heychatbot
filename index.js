@@ -23,6 +23,7 @@
 }
 //宣告一些會用到的變數
 {
+  var ip = "127.0.0.1:3000"
   var when_login_select_num = 8 //當登入時讀取幾則訊息
   var ID = ""
   var Train = []; //紀錄起站到迄站
@@ -67,6 +68,7 @@ app.get('/', function (req, res) {
     message: "歡迎使用本產品",
     send: get_str(),
     ID: ID,
+    ip: ip,
   });
 });
 
@@ -92,6 +94,7 @@ app.post('/login', function (req, res) {
           res.render('pages/main', {
             message: "早安" + username,
             send: get_str(),
+            ip: ip,
           });
         })
       }
@@ -100,6 +103,7 @@ app.post('/login', function (req, res) {
       res.render('pages/index', {
         message: "帳密錯誤",
         send: get_str(),
+        ip: ip,
       });
     }
   });
@@ -110,6 +114,7 @@ app.get('/trytrylook', function (req, res) {
   res.render('pages/main', {
     message: "早安",
     send: get_str(),
+    ip: ip,
   });
 
 });
@@ -127,6 +132,7 @@ app.post('/logout', function (req, res) {
     message: "登出成功",
     send: get_str(),
     ID: ID,
+    ip: ip,
   });
 
 
@@ -136,6 +142,7 @@ app.get('/signup', function (req, res) {
 
   res.render('pages/signup', {
     message: "歡迎加入我們",
+    ip: ip,
   });
 
 });
@@ -152,6 +159,7 @@ app.post('/doSignup', function (req, res) {
           console.log("密碼不一致")
           res.render('pages/index', {
             message: "密碼不一致",
+            ip: ip,
           });
         }
         else {
@@ -159,6 +167,7 @@ app.post('/doSignup', function (req, res) {
           con.query('INSERT INTO `heychatbot`.`user` (`id`, `pwd`, `name`, `email`, `birth`, `gender`) VALUES (\'' + req.body.ID + '\', \'' + req.body.pwd + '\', \'' + req.body.name + '\', \'' + req.body.email + '\', \'' + req.body.birth + '\', \'' + req.body.gender + '\')', function (err, result, fields) {
             res.render('pages/index', {
               message: "註冊成功",
+              ip: ip,
             });
           })
 
@@ -168,6 +177,7 @@ app.post('/doSignup', function (req, res) {
         console.log("帳號已經被註冊")
         res.render('pages/index', {
           message: "帳號已經被註冊了",
+          ip: ip,
         });
 
       }
@@ -178,6 +188,7 @@ app.post('/doSignup', function (req, res) {
     console.log("有欄位漏填")
     res.render('pages/index', {
       message: "有欄位漏填",
+      ip: ip,
     });
   }
 
@@ -188,14 +199,17 @@ app.get('/info', function (req, res) {
 
   res.render('pages/info', {
     message: "歡迎加入我們",
+    ip: ip,
   });
 
 });
+
 app.get('/addstr', function (req, res) {
 
   res.render('pages/main', {
     send: get_str(),
-    message: "歡迎加入我們"
+    message: "歡迎加入我們",
+    ip: ip,
   });
 
 });
@@ -204,6 +218,7 @@ app.get('/favorite', function (req, res) {
 
   res.render('pages/favorite', {
     message: "歡迎加入我們",
+    ip: ip,
     send: get_str_mylove()
   });
 
@@ -213,6 +228,7 @@ app.get('/guide', function (req, res) {
 
   res.render('pages/guide', {
     message: "歡迎加入我們",
+    ip: ip,
     send: get_str_mylove()
   });
 
@@ -222,6 +238,7 @@ app.get('/setting', function (req, res) {
 
   res.render('pages/setting', {
     message: "歡迎加入我們",
+    ip: ip,
     send: get_str_mylove()
   });
 
@@ -231,6 +248,7 @@ app.get('/private', function (req, res) {
 
   res.render('pages/private', {
     message: "歡迎加入我們",
+    ip: ip,
     send: get_str_mylove()
   });
 
@@ -262,6 +280,7 @@ app.post('/addstr', function (req, res) {
     res.render('pages/main.ejs', {
       message: "早安",
       send: get_str(),
+      ip: ip,
     });
   }
   else if (req.body.addstr == "我的最愛") {
@@ -274,6 +293,7 @@ app.post('/addstr', function (req, res) {
     res.render('pages/main.ejs', {
       message: "早安",
       send: get_str(),
+      ip: ip,
     });
   }
   else {
@@ -298,6 +318,7 @@ app.post('/addstr', function (req, res) {
           res.render('pages/main.ejs', {
             message: "早安",
             send: get_str(),
+            ip: ip,
           });
         });
         session[0] = ""
@@ -335,6 +356,7 @@ app.post('/addstr', function (req, res) {
           res.render('pages/main.ejs', {
             message: "早安",
             send: get_str(),
+            ip: ip,
           });
         });
         session[0] = ""
@@ -344,6 +366,7 @@ app.post('/addstr', function (req, res) {
         res.render('pages/main.ejs', {
           message: "早安",
           send: get_str(),
+          ip: ip,
         });
 
         break;
@@ -353,6 +376,7 @@ app.post('/addstr', function (req, res) {
         res.render('pages/main.ejs', {
           message: "早安",
           send: get_str(),
+          ip: ip,
         });
         break;
       case "traffic_BUS":
@@ -389,6 +413,7 @@ app.post('/addstr', function (req, res) {
             res.render('pages/main.ejs', {
               message: "早安",
               send: get_str(),
+              ip: ip,
             });
 
           });
@@ -453,6 +478,7 @@ app.post('/addstr', function (req, res) {
             res.render('pages/main.ejs', {
               message: "早安",
               send: get_str(),
+              ip: ip,
             });
             session[0] = "need_TRA_time";
           });
@@ -490,6 +516,7 @@ app.post('/addstr', function (req, res) {
             res.render('pages/main.ejs', {
               message: "早安",
               send: get_str(),
+              ip: ip,
             });
           })
 
@@ -500,6 +527,7 @@ app.post('/addstr', function (req, res) {
         res.render('pages/main.ejs', {
           message: "早安",
           send: get_str(),
+          ip: ip,
         });
     }
   }
@@ -509,13 +537,36 @@ app.post('/addstr', function (req, res) {
 //判斷使用者要找什麼
 function search(input) {
   if (input.match("add") || input.match("加入")) {
+    
     // Session[5]="add";
-    mylove[mylove.length] = bot[(bot.length - 1)]
-    bot[bot.length] = {
-      message: "BOT：我的最愛加入成功<br/>",
-      class: "notif",
-      canadd: 0
+    if(bot[(bot.length - 2)].canadd == 1){
+      console.log(bot[(bot.length - 2)].message+"-") 
+      console.log(bot[(bot.length - 2)].canadd+"-")  
+      mylove[mylove.length] = bot[(bot.length - 1)]
+      con.query('INSERT INTO heychatbot.favorite (`u_id`, `message`, `class`) VALUES (\'' + ID + '\',\'' + mylove[mylove.length-1].message + '\',\'' +mylove[mylove.length-1].class + '\')', function (err, result, fields) {
+        if (err){
+        }
+        else{
+          console.log("成功")
+        }
+        bot[bot.length] = {
+          message: "BOT：我的最愛加入成功<br/>",
+          class: "notif",
+          canadd: 0
+        }
+      });
     }
+    else{
+      console.log(bot[(bot.length-2)].message+"+") 
+      console.log(bot[(bot.length-2)].canadd+"+") 
+      bot[bot.length] = {
+        message: "BOT：此項目不能加入最愛<br/>",
+        class: "notif",
+        canadd: 0
+      }
+    }
+   
+  
   }
   else if (input.match("-h") || input.match("help") || input.match("HELP") || input.match("幫助") || input.match("如何使用")) {
     // Session[5]="add";
@@ -679,14 +730,17 @@ function get_str() {
 }
 //把mylove[]轉成字串
 function get_str_mylove() {
-  var str = "<table border='1'>"
+  var str = ""
+  
   mylove.forEach(input => {
+    
     str += "<tr><td>" + input.message + "</td></tr>"
   });
-  str += "</table>"
+ 
   console.log(str);
   var re = /BOT：/g;
   var result = str.replace(re, "");
+  console.log(str)
   return result
 }
 //把我的最愛放入bot[]

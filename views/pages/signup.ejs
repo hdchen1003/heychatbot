@@ -44,7 +44,7 @@
 
         <div class="col-md-8 order-md-1">
           <h4 class="sign_sectitle">請填寫下列資料</h4>
-          <form class="needs-validation"  action="http://127.0.0.1:3000/doSignup" method="post" novalidate>
+          <form class="needs-validation"  action="http://<%=ip%>/doSignup" method="post" novalidate>
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="sign_boxtitle">姓名</label>
@@ -123,22 +123,22 @@
             if(document.querySelector('.sign_form').value == ""  )
             {
               document.querySelector('.invalid-name').textContent = "請填寫有效的姓名";
-            }||
+            }
             if(document.querySelector('.sign_form').value == ""  )
             {
               document.querySelector('invalid-account').value = "請填寫有效的帳號";
-            }||
+            }
             if(document.querySelector('.sign_form').value == ""  )
             {
               document.querySelector('invalid-password').value = "請填寫有效的密碼";
-            }|| if(document.querySelector('.sign_form').value == ""  )
+            }if(document.querySelector('.sign_form').value == ""  )
             {
               document.querySelector('invalid-email').value = "請填寫一個有效的電子信箱";
-            }||
+            }
             if(document.querySelector('.sign_form').value == ""  )
             {
               document.querySelector('invalid-birthday').value = "請填寫出生日期";
-            }||
+            }
             if(document.querySelector('.sign_form').value == ""  )
             {
               document.querySelector('invalid-gender').value = "請選擇性別";
