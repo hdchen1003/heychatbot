@@ -1,5 +1,8 @@
+
+
 //import something
 {
+ 
   var express = require('express');
   var app = express();
   var http = require('http');
@@ -10,9 +13,13 @@
   var now = new Date().toLocaleString();
   var axios = require('axios');
   var jsSHA = require('jssha');
+  var cookieParser = require('cookie-parser');
+  
 }
 //一些路徑設置
 {
+ // app.use(cookieParser(credentials.cookieSecret));
+ app.use(cookieParser());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.set('view engine', 'ejs')
   app.use('/js', express.static(__dirname + '/node_modules/bootstrap/dist/js'));
@@ -64,6 +71,16 @@
 
 //初始畫面
 app.get('/', function (req, res) {
+  // if (req.cookies.aaab) {
+  //   console.log(req.cookies.aaab)
+  //   res.send("二次訪問");
+  // } else {
+  //   res.cookie('aaab', "10");
+  //   res.send("初次訪問");
+  // }
+ 
+ 
+
   res.render('pages/index', {
     message: "歡迎使用本產品",
     send: get_str(),
@@ -77,9 +94,10 @@ app.post('/login', function (req, res) {
     if (result != "") {
       if (result[0].id == req.body.ID && result[0].pwd == req.body.pwd) {
         var username = result[0].name
-        ID = result[0].id //當作session使用 
+        
+        res.cookie('accountStatus', result[0].id ) //當作session使用 
+        
         con.query('SELECT * FROM heychatbot.message WHERE u_id=\'' + req.body.ID + '\' order by m_id desc limit ' + when_login_select_num + ' ', function (err, result, fields) {
-          console.log(result)
           for (var i = (result.length) - 1; i >= 0; i--) {
             bot[bot.length] = {
               message: result[i].message,
@@ -87,15 +105,18 @@ app.post('/login', function (req, res) {
               canadd: result[i].canadd
             }
           }
-
+          
           // result.forEach(input => {
           //   bot[bot.length] = input.message;
           // });
-          res.render('pages/main', {
+          
+          res.render('pages/loginSuccess', {
             message: "早安" + username,
             send: get_str(),
+            ID : req.cookies.accountStatus,
             ip: ip,
           });
+          
         })
       }
     }
@@ -103,37 +124,43 @@ app.post('/login', function (req, res) {
       res.render('pages/index', {
         message: "帳密錯誤",
         send: get_str(),
+        ID : req.cookies.accountStatus,
         ip: ip,
       });
     }
   });
 });
 
+
+
 app.get('/trytrylook', function (req, res) {
 
   res.render('pages/main', {
     message: "早安",
     send: get_str(),
+    ID : req.cookies.accountStatus,
     ip: ip,
   });
 
 });
 
-app.post('/logout', function (req, res) {
+
+
+app.get('/logout', function (req, res) {
   if (ID != "") {
     bot.forEach(input => {
       con.query('INSERT INTO heychatbot.message (`u_id`, `message`, `time`,`class`,`canadd`) VALUES (\'' + ID + '\',\'' + input.message + '\', \'' + now + '\',\'' + input.class + '\',\'' + input.canadd + '\')', function (err, result, fields) {
       });
     });
   }
-  ID = ""
+  res.cookie('accountStatus', "")
   bot.length = 0;
-  res.render('pages/index', {
+  setTimeout(function(){  res.render('pages/logoutSuccess', {
     message: "登出成功",
     send: get_str(),
-    ID: ID,
+    ID : req.cookies.accountStatus,
     ip: ip,
-  });
+  });},500);
 
 
 });
@@ -142,6 +169,7 @@ app.get('/signup', function (req, res) {
 
   res.render('pages/signup', {
     message: "歡迎加入我們",
+    ID : req.cookies.accountStatus,
     ip: ip,
   });
 
@@ -159,6 +187,7 @@ app.post('/doSignup', function (req, res) {
           console.log("密碼不一致")
           res.render('pages/index', {
             message: "密碼不一致",
+            ID : req.cookies.accountStatus,
             ip: ip,
           });
         }
@@ -167,6 +196,7 @@ app.post('/doSignup', function (req, res) {
           con.query('INSERT INTO `heychatbot`.`user` (`id`, `pwd`, `name`, `email`, `birth`, `gender`) VALUES (\'' + req.body.ID + '\', \'' + req.body.pwd + '\', \'' + req.body.name + '\', \'' + req.body.email + '\', \'' + req.body.birth + '\', \'' + req.body.gender + '\')', function (err, result, fields) {
             res.render('pages/index', {
               message: "註冊成功",
+              ID : req.cookies.accountStatus,
               ip: ip,
             });
           })
@@ -177,6 +207,7 @@ app.post('/doSignup', function (req, res) {
         console.log("帳號已經被註冊")
         res.render('pages/index', {
           message: "帳號已經被註冊了",
+          ID : req.cookies.accountStatus,
           ip: ip,
         });
 
@@ -188,6 +219,7 @@ app.post('/doSignup', function (req, res) {
     console.log("有欄位漏填")
     res.render('pages/index', {
       message: "有欄位漏填",
+      ID : req.cookies.accountStatus,
       ip: ip,
     });
   }
@@ -199,6 +231,7 @@ app.get('/info', function (req, res) {
 
   res.render('pages/info', {
     message: "歡迎加入我們",
+    ID : req.cookies.accountStatus,
     ip: ip,
   });
 
@@ -209,6 +242,7 @@ app.get('/addstr', function (req, res) {
   res.render('pages/main', {
     send: get_str(),
     message: "歡迎加入我們",
+    ID : req.cookies.accountStatus,
     ip: ip,
   });
 
@@ -219,6 +253,7 @@ app.get('/favorite', function (req, res) {
   res.render('pages/favorite', {
     message: "歡迎加入我們",
     ip: ip,
+    ID : req.cookies.accountStatus,
     send: get_str_mylove()
   });
 
@@ -229,6 +264,7 @@ app.get('/guide', function (req, res) {
   res.render('pages/guide', {
     message: "歡迎加入我們",
     ip: ip,
+    ID : req.cookies.accountStatus,
     send: get_str_mylove()
   });
 
@@ -239,6 +275,7 @@ app.get('/setting', function (req, res) {
   res.render('pages/setting', {
     message: "歡迎加入我們",
     ip: ip,
+    ID : req.cookies.accountStatus,
     send: get_str_mylove()
   });
 
@@ -248,12 +285,16 @@ app.get('/private', function (req, res) {
 
   res.render('pages/private', {
     message: "歡迎加入我們",
+    ID : req.cookies.accountStatus,
     ip: ip,
     send: get_str_mylove()
   });
 
 });
 
+app.get('/friend', function (req, res){
+
+});
 //回應後
 app.post('/addstr', function (req, res) {
 
@@ -279,6 +320,7 @@ app.post('/addstr', function (req, res) {
 
     res.render('pages/main.ejs', {
       message: "早安",
+      ID : req.cookies.accountStatus,
       send: get_str(),
       ip: ip,
     });
@@ -293,6 +335,7 @@ app.post('/addstr', function (req, res) {
     res.render('pages/main.ejs', {
       message: "早安",
       send: get_str(),
+      ID : req.cookies.accountStatus,
       ip: ip,
     });
   }
@@ -317,6 +360,7 @@ app.post('/addstr', function (req, res) {
 
           res.render('pages/main.ejs', {
             message: "早安",
+            ID : req.cookies.accountStatus,
             send: get_str(),
             ip: ip,
           });
@@ -333,6 +377,7 @@ app.post('/addstr', function (req, res) {
           bot[bot.length] = {
             message: "YOU：" + req.body.addstr + "<br/>",
             class: "input",
+            
             canadd: 0
           }
           bot[bot.length] = {
@@ -356,6 +401,7 @@ app.post('/addstr', function (req, res) {
           res.render('pages/main.ejs', {
             message: "早安",
             send: get_str(),
+            ID : req.cookies.accountStatus,
             ip: ip,
           });
         });
@@ -365,6 +411,7 @@ app.post('/addstr', function (req, res) {
         search(req.body.addstr)
         res.render('pages/main.ejs', {
           message: "早安",
+          ID : req.cookies.accountStatus,
           send: get_str(),
           ip: ip,
         });
@@ -377,6 +424,7 @@ app.post('/addstr', function (req, res) {
           message: "早安",
           send: get_str(),
           ip: ip,
+          ID : req.cookies.accountStatus,
         });
         break;
       case "traffic_BUS":
@@ -413,6 +461,7 @@ app.post('/addstr', function (req, res) {
             res.render('pages/main.ejs', {
               message: "早安",
               send: get_str(),
+              ID : req.cookies.accountStatus,
               ip: ip,
             });
 
@@ -478,6 +527,7 @@ app.post('/addstr', function (req, res) {
             res.render('pages/main.ejs', {
               message: "早安",
               send: get_str(),
+              ID : req.cookies.accountStatus,
               ip: ip,
             });
             session[0] = "need_TRA_time";
@@ -516,6 +566,7 @@ app.post('/addstr', function (req, res) {
             res.render('pages/main.ejs', {
               message: "早安",
               send: get_str(),
+              ID : req.cookies.accountStatus,
               ip: ip,
             });
           })
@@ -527,6 +578,7 @@ app.post('/addstr', function (req, res) {
         res.render('pages/main.ejs', {
           message: "早安",
           send: get_str(),
+          ID : req.cookies.accountStatus,
           ip: ip,
         });
     }
