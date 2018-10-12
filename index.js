@@ -2,7 +2,7 @@
 
 //import something
 {
- 
+
   var express = require('express');
   var app = express();
   var http = require('http');
@@ -14,12 +14,12 @@
   var axios = require('axios');
   var jsSHA = require('jssha');
   var cookieParser = require('cookie-parser');
-  
+
 }
 //一些路徑設置
 {
- // app.use(cookieParser(credentials.cookieSecret));
- app.use(cookieParser());
+  // app.use(cookieParser(credentials.cookieSecret));
+  app.use(cookieParser());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.set('view engine', 'ejs')
   app.use('/js', express.static(__dirname + '/node_modules/bootstrap/dist/js'));
@@ -30,15 +30,18 @@
 }
 //宣告一些會用到的變數
 {
+
   var ip = "127.0.0.1:3000"
   var when_login_select_num = 8 //當登入時讀取幾則訊息
   var ID = ""
   var Train = []; //紀錄起站到迄站
   var delTRA = "";
   var bot = [];
+  var friendList = [];
   bot[bot.length] = "BOT：安安你好!!<br/>";
   var session = [];
   var mylove = [];
+  var invite = [];
 
   var getAuthorizationHeader = function () {
     var AppID = 'FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF';
@@ -78,8 +81,8 @@ app.get('/', function (req, res) {
   //   res.cookie('aaab', "10");
   //   res.send("初次訪問");
   // }
- 
- 
+
+
 
   res.render('pages/index', {
     message: "歡迎使用本產品",
@@ -88,15 +91,14 @@ app.get('/', function (req, res) {
     ip: ip,
   });
 });
-
 app.post('/login', function (req, res) {
   con.query('SELECT * FROM heychatbot.user WHERE id=\'' + req.body.ID + '\' and pwd=\'' + req.body.pwd + '\'', function (err, result, fields) {
     if (result != "") {
       if (result[0].id == req.body.ID && result[0].pwd == req.body.pwd) {
         var username = result[0].name
-        
-        res.cookie('accountStatus', result[0].id ) //當作session使用 
-        
+
+        res.cookie('accountStatus', result[0].id) //當作session使用 
+
         con.query('SELECT * FROM heychatbot.message WHERE u_id=\'' + req.body.ID + '\' order by m_id desc limit ' + when_login_select_num + ' ', function (err, result, fields) {
           for (var i = (result.length) - 1; i >= 0; i--) {
             bot[bot.length] = {
@@ -105,18 +107,18 @@ app.post('/login', function (req, res) {
               canadd: result[i].canadd
             }
           }
-          
+
           // result.forEach(input => {
           //   bot[bot.length] = input.message;
           // });
-          
+
           res.render('pages/loginSuccess', {
             message: "早安" + username,
             send: get_str(),
-            ID : req.cookies.accountStatus,
+            ID: req.cookies.accountStatus,
             ip: ip,
           });
-          
+
         })
       }
     }
@@ -124,28 +126,22 @@ app.post('/login', function (req, res) {
       res.render('pages/index', {
         message: "帳密錯誤",
         send: get_str(),
-        ID : req.cookies.accountStatus,
+        ID: req.cookies.accountStatus,
         ip: ip,
       });
     }
   });
 });
-
-
-
 app.get('/trytrylook', function (req, res) {
 
   res.render('pages/main', {
     message: "早安",
     send: get_str(),
-    ID : req.cookies.accountStatus,
+    ID: req.cookies.accountStatus,
     ip: ip,
   });
 
 });
-
-
-
 app.get('/logout', function (req, res) {
   if (ID != "") {
     bot.forEach(input => {
@@ -155,26 +151,26 @@ app.get('/logout', function (req, res) {
   }
   res.cookie('accountStatus', "")
   bot.length = 0;
-  setTimeout(function(){  res.render('pages/logoutSuccess', {
-    message: "登出成功",
-    send: get_str(),
-    ID : req.cookies.accountStatus,
-    ip: ip,
-  });},500);
+  setTimeout(function () {
+    res.render('pages/logoutSuccess', {
+      message: "登出成功",
+      send: get_str(),
+      ID: req.cookies.accountStatus,
+      ip: ip,
+    });
+  }, 500);
 
 
 });
-
 app.get('/signup', function (req, res) {
 
   res.render('pages/signup', {
     message: "歡迎加入我們",
-    ID : req.cookies.accountStatus,
+    ID: req.cookies.accountStatus,
     ip: ip,
   });
 
 });
-
 app.post('/doSignup', function (req, res) {
 
   if (req.body.ID != "" && req.body.pwd != "" && req.body.pwd2 != "" && req.body.name != "" && req.body.birth != "" && req.body.email != "" && req.body.gender != "") {
@@ -187,7 +183,7 @@ app.post('/doSignup', function (req, res) {
           console.log("密碼不一致")
           res.render('pages/index', {
             message: "密碼不一致",
-            ID : req.cookies.accountStatus,
+            ID: req.cookies.accountStatus,
             ip: ip,
           });
         }
@@ -196,7 +192,7 @@ app.post('/doSignup', function (req, res) {
           con.query('INSERT INTO `heychatbot`.`user` (`id`, `pwd`, `name`, `email`, `birth`, `gender`) VALUES (\'' + req.body.ID + '\', \'' + req.body.pwd + '\', \'' + req.body.name + '\', \'' + req.body.email + '\', \'' + req.body.birth + '\', \'' + req.body.gender + '\')', function (err, result, fields) {
             res.render('pages/index', {
               message: "註冊成功",
-              ID : req.cookies.accountStatus,
+              ID: req.cookies.accountStatus,
               ip: ip,
             });
           })
@@ -207,7 +203,7 @@ app.post('/doSignup', function (req, res) {
         console.log("帳號已經被註冊")
         res.render('pages/index', {
           message: "帳號已經被註冊了",
-          ID : req.cookies.accountStatus,
+          ID: req.cookies.accountStatus,
           ip: ip,
         });
 
@@ -219,82 +215,157 @@ app.post('/doSignup', function (req, res) {
     console.log("有欄位漏填")
     res.render('pages/index', {
       message: "有欄位漏填",
-      ID : req.cookies.accountStatus,
+      ID: req.cookies.accountStatus,
       ip: ip,
     });
   }
 
 
 });
-
 app.get('/info', function (req, res) {
 
   res.render('pages/info', {
     message: "歡迎加入我們",
-    ID : req.cookies.accountStatus,
+    ID: req.cookies.accountStatus,
     ip: ip,
   });
 
 });
-
 app.get('/addstr', function (req, res) {
 
   res.render('pages/main', {
     send: get_str(),
     message: "歡迎加入我們",
-    ID : req.cookies.accountStatus,
+    ID: req.cookies.accountStatus,
     ip: ip,
   });
 
 });
-
 app.get('/favorite', function (req, res) {
 
   res.render('pages/favorite', {
     message: "歡迎加入我們",
     ip: ip,
-    ID : req.cookies.accountStatus,
+    ID: req.cookies.accountStatus,
     send: get_str_mylove()
   });
 
 });
-
 app.get('/guide', function (req, res) {
 
   res.render('pages/guide', {
     message: "歡迎加入我們",
     ip: ip,
-    ID : req.cookies.accountStatus,
+    ID: req.cookies.accountStatus,
     send: get_str_mylove()
   });
 
 });
-
 app.get('/setting', function (req, res) {
 
   res.render('pages/setting', {
     message: "歡迎加入我們",
     ip: ip,
-    ID : req.cookies.accountStatus,
+    ID: req.cookies.accountStatus,
     send: get_str_mylove()
   });
 
 });
-
 app.get('/private', function (req, res) {
 
   res.render('pages/private', {
     message: "歡迎加入我們",
-    ID : req.cookies.accountStatus,
+    ID: req.cookies.accountStatus,
     ip: ip,
     send: get_str_mylove()
   });
 
 });
+app.get('/friend', function (req, res) {
+  con.query('SELECT * FROM heychatbot.myfriend WHERE u_id1= \'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {
+    if (err) {
+    }
+    else {
+      if (result) {
+        for (var i = 0; i < result.length; i++) {
+          if (result[i].u_id1 == req.cookies.accountStatus) {
+            friendList[friendList.length] = {
+              item: result[i].u_id2,
+              user: req.cookies.accountStatus
+            }
+          }
+          else {
+            friendList[friendList.length] = {
+              item: result[i].u_id1,
+              user: req.cookies.accountStatus
+            }
+          }
+        }
+      }
 
-app.get('/friend', function (req, res){
+
+      res.render('pages/seeMyfriend', {
+        message: "歡迎加入我們",
+        ID: req.cookies.accountStatus,
+        ip: ip,
+        send: get_str_mylove(),
+        myfriends: get_fstr(req.cookies.accountStatus)
+      });
+    }
+  })
+  // OR   u_id2=\'' + req.cookies.accountStatus + '\'  ,,,,\'' + req.cookies.accountStatus + '\' .....for (var i = 0; i < result.length; i++) {
+});
+app.get('/invite', function (req, res) {
+  con.query('SELECT * FROM heychatbot.inviting WHERE invitee=\'' + req.cookies.accountStatus + '\'', function (err, result, fields) {
+    if (err) {
+    }
+    else {
+      if (result) {
+        for (var i = 0; i < result.length; i++) {
+          invite[invite.length] = {
+            user: req.cookies.accountStatus,
+            item: result[i].inviter
+          }
+        }
+      }
+      res.render('pages/addfriend', {
+        message: "歡迎加入我們",
+        ID: req.cookies.accountStatus,
+        ip: ip,
+        invite: get_istr(req.cookies.accountStatus)
+      });
+    }
+  })
+});
+
+app.post('/do_invite', function (req, res) {
+  console.log(req.body.f_id)
+  con.query('INSERT INTO `heychatbot`.`inviting` (`inviter`, `invitee`) VALUES (\'' + req.cookies.accountStatus + '\', \'' + req.body.f_id + '\')', function (err, result, fields) {
+    if (err) {
+    }
+    else {
+      res.render('pages/index', {
+        message: "歡迎加入我們",
+        ID: req.cookies.accountStatus,
+        ip: ip,
+        send: get_str_mylove()
+      });
+    }
+  });
 
 });
+app.post('/accept_refuse', function (req, res) {
+  con.query('INSERT INTO `heychatbot`.`myfriend` (`inviter`, `invitee`) VALUES (\'' + req.cookies.accountStatus + '\', \'' + req.body.f_id + '\')', function (err, result, fields) {
+    res.render('pages/addfriend', {
+      message: "歡迎加入我們",
+      ID: req.cookies.accountStatus,
+      ip: ip,
+      invite: get_istr(req.cookies.accountStatus)
+    });
+
+  });
+});
+
 //回應後
 app.post('/addstr', function (req, res) {
 
@@ -320,7 +391,7 @@ app.post('/addstr', function (req, res) {
 
     res.render('pages/main.ejs', {
       message: "早安",
-      ID : req.cookies.accountStatus,
+      ID: req.cookies.accountStatus,
       send: get_str(),
       ip: ip,
     });
@@ -335,12 +406,12 @@ app.post('/addstr', function (req, res) {
     res.render('pages/main.ejs', {
       message: "早安",
       send: get_str(),
-      ID : req.cookies.accountStatus,
+      ID: req.cookies.accountStatus,
       ip: ip,
     });
   }
   else {
-    
+
     switch (session[0]) {
       case "place":
         request('https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=' + req.body.addstr + '&inputtype=textquery&fields=photos,formatted_address,name,rating,opening_hours,geometry&key=AIzaSyCt3g5gLr475dheyZYlJFXBlSgKa6YMqXk', {
@@ -360,7 +431,7 @@ app.post('/addstr', function (req, res) {
 
           res.render('pages/main.ejs', {
             message: "早安",
-            ID : req.cookies.accountStatus,
+            ID: req.cookies.accountStatus,
             send: get_str(),
             ip: ip,
           });
@@ -377,7 +448,7 @@ app.post('/addstr', function (req, res) {
           bot[bot.length] = {
             message: "YOU：" + req.body.addstr + "<br/>",
             class: "input",
-            
+
             canadd: 0
           }
           bot[bot.length] = {
@@ -401,7 +472,7 @@ app.post('/addstr', function (req, res) {
           res.render('pages/main.ejs', {
             message: "早安",
             send: get_str(),
-            ID : req.cookies.accountStatus,
+            ID: req.cookies.accountStatus,
             ip: ip,
           });
         });
@@ -411,7 +482,7 @@ app.post('/addstr', function (req, res) {
         search(req.body.addstr)
         res.render('pages/main.ejs', {
           message: "早安",
-          ID : req.cookies.accountStatus,
+          ID: req.cookies.accountStatus,
           send: get_str(),
           ip: ip,
         });
@@ -424,7 +495,7 @@ app.post('/addstr', function (req, res) {
           message: "早安",
           send: get_str(),
           ip: ip,
-          ID : req.cookies.accountStatus,
+          ID: req.cookies.accountStatus,
         });
         break;
       case "traffic_BUS":
@@ -461,7 +532,7 @@ app.post('/addstr', function (req, res) {
             res.render('pages/main.ejs', {
               message: "早安",
               send: get_str(),
-              ID : req.cookies.accountStatus,
+              ID: req.cookies.accountStatus,
               ip: ip,
             });
 
@@ -527,7 +598,7 @@ app.post('/addstr', function (req, res) {
             res.render('pages/main.ejs', {
               message: "早安",
               send: get_str(),
-              ID : req.cookies.accountStatus,
+              ID: req.cookies.accountStatus,
               ip: ip,
             });
             session[0] = "need_TRA_time";
@@ -566,7 +637,7 @@ app.post('/addstr', function (req, res) {
             res.render('pages/main.ejs', {
               message: "早安",
               send: get_str(),
-              ID : req.cookies.accountStatus,
+              ID: req.cookies.accountStatus,
               ip: ip,
             });
           })
@@ -578,7 +649,7 @@ app.post('/addstr', function (req, res) {
         res.render('pages/main.ejs', {
           message: "早安",
           send: get_str(),
-          ID : req.cookies.accountStatus,
+          ID: req.cookies.accountStatus,
           ip: ip,
         });
     }
@@ -589,16 +660,16 @@ app.post('/addstr', function (req, res) {
 //判斷使用者要找什麼
 function search(input) {
   if (input.match("add") || input.match("加入")) {
-    
+
     // Session[5]="add";
-    if(bot[(bot.length - 2)].canadd == 1){
-      console.log(bot[(bot.length - 2)].message+"-") 
-      console.log(bot[(bot.length - 2)].canadd+"-")  
+    if (bot[(bot.length - 2)].canadd == 1) {
+      console.log(bot[(bot.length - 2)].message + "-")
+      console.log(bot[(bot.length - 2)].canadd + "-")
       mylove[mylove.length] = bot[(bot.length - 1)]
-      con.query('INSERT INTO heychatbot.favorite (`u_id`, `message`, `class`) VALUES (\'' + ID + '\',\'' + mylove[mylove.length-1].message + '\',\'' +mylove[mylove.length-1].class + '\')', function (err, result, fields) {
-        if (err){
+      con.query('INSERT INTO heychatbot.favorite (`u_id`, `message`, `class`) VALUES (\'' + ID + '\',\'' + mylove[mylove.length - 1].message + '\',\'' + mylove[mylove.length - 1].class + '\')', function (err, result, fields) {
+        if (err) {
         }
-        else{
+        else {
           console.log("成功")
         }
         bot[bot.length] = {
@@ -608,17 +679,17 @@ function search(input) {
         }
       });
     }
-    else{
-      console.log(bot[(bot.length-2)].message+"+") 
-      console.log(bot[(bot.length-2)].canadd+"+") 
+    else {
+      console.log(bot[(bot.length - 2)].message + "+")
+      console.log(bot[(bot.length - 2)].canadd + "+")
       bot[bot.length] = {
         message: "BOT：此項目不能加入最愛<br/>",
         class: "notif",
         canadd: 0
       }
     }
-   
-  
+
+
   }
   else if (input.match("-h") || input.match("help") || input.match("HELP") || input.match("幫助") || input.match("如何使用")) {
     // Session[5]="add";
@@ -772,6 +843,27 @@ function search(input) {
 };
 
 
+//把invite[]轉成字串
+function get_istr(user) {
+  var str = "<table border='1'>"
+  invite.forEach(input => {
+    if (input.user == user) {
+      str += "<tr><td>"+input.item+"</td><td><form action='#' method='post'><input type='hidden' name='yn' value='accept'><input type='submit' value='接受'></form></td><td><form action='#' method='post'><input type='hidden' name='yn' value='refuse'><input type='submit' value='拒絕'></form></td></tr>"
+    }
+  });
+  str += "</table>"
+  return str
+}
+//把friendList[]轉成字串
+function get_fstr(user) {
+  var str = ""
+  friendList.forEach(input => {
+    if (input.user == user) {
+      str += input.item
+    }
+  });
+  return str
+}
 //把bot[]轉成字串
 function get_str() {
   var str = ""
@@ -783,12 +875,12 @@ function get_str() {
 //把mylove[]轉成字串
 function get_str_mylove() {
   var str = ""
-  
+
   mylove.forEach(input => {
-    
+
     str += "<tr><td>" + input.message + "</td></tr>"
   });
- 
+
   console.log(str);
   var re = /BOT：/g;
   var result = str.replace(re, "");
