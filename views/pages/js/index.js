@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
 var app = {
     // Application Constructor
     initialize: function() {
@@ -49,15 +47,3 @@ var app = {
         console.log('Received Event: ' + id);
     }
 };
-
-
-
-        $(function(){
-  
-        $('.list-rightbars').on('click', function(){
-        $('.slide_box').slideToggle();
-        // $('.slide_box').next().animate({width: 'toggle'})
-        });
-
-    });
-

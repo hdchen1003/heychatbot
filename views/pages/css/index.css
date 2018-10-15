@@ -20,7 +20,7 @@
     -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
 }
 
-body {
+body{
     -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
     -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
     -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
@@ -92,6 +92,21 @@ h1 {
     overflow:visible;
     padding:0px;
     text-align:center;
+}
+
+.bar{
+    background-color: #FF7744;
+    height:60px; 
+}
+
+.bar_left{
+    margin-left: 30px;
+}
+
+.bar_title{
+    font-size: 30px;
+    color: black;
+    padding-left: 80px;
 }
 
 .sch_title{
@@ -212,6 +227,27 @@ h1 {
     width: 90%;
 }
 
+.log_account{
+    border-radius: 2px;
+    height: 30px;
+    margin-top: 20px;
+}
+
+.log_password{
+    border-radius: 2px;
+    height: 30px;
+    margin-top: 20px;
+}
+
+.login_submit{
+     margin-top: 20px;
+     width: 65%;
+     height: 40px;
+     border-radius: 2px;
+     font-family: "微軟正黑體";
+     font-size: 15px;
+}
+
 .chatroom_background{
     height: 500px;
     background:url(../img/background.gif);
@@ -232,13 +268,15 @@ h1 {
 }
 
 .att_table{
-   margin-left: -25px;
+   /*margin-left: -25px;*/
    float: left;
+   margin-bottom: 30px;
 }
 
 .att_righttable{
-   margin-left: 110px;
-   
+   /*margin-left: 180px;*/
+   float: right;
+    margin-bottom: 30px;
    
 }
 
@@ -344,6 +382,164 @@ h1 {
     width: 100%;
     height: 30px;
     border-radius: .25rem;
+}
+
+.bud_title{
+    float: left;
+    margin-top: -70px;
+    font-size: 35px;
+    font-family: "微軟正黑體";
+}
+
+.bud_list{
+    width: 100%;
+    /*height:70px;*/
+    /*border:1px solid;*/
+    margin-bottom: 20px;
+}
+
+.bud_box{
+    margin-top: 20px;
+    height: 75px;
+    /*border:1px solid;*/
+    font-size: 25px;
+    font-family: "微軟正黑體";
+    margin-bottom: 20px;
+}
+
+.bud_img{
+    float: left;
+}
+
+.bud_name{
+    float: left;
+    margin-left: 20px;
+    margin-top: 20px;
+}
+
+.bud_input {
+    height: 30px;
+    border-radius: 4px;
+    border: 1px solid #c8cccf;
+    color: #6a6f77;
+    display: inline-block;
+    outline: 0;
+    margin: 20px 10px 10px 10px;
+    text-decoration: none;
+    width: 25%;
+    float: right;
+}
+
+.add_title{
+    margin-top: -70px;
+    margin-bottom: 30px;
+    font-size: 35px;
+    font-family: "微軟正黑體";
+}
+
+.add_input{
+    width: 50%;
+    padding: .375rem .75rem;
+    font-size: 1.25rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+}
+
+.add_submit{
+    display: block;
+    width: 50%;
+    padding: .375rem .75rem;
+    margin-top: 15px;
+    margin-left: 75px;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    font-size: 18px;
+    font-family: "微軟正黑體";
+    font-weight:  bold;
+}
+
+.add_hr{
+    width: 105%;
+    margin-top: 25px;
+    border: 0;
+    height: 1.75px;
+    background: #333;
+    background-image: linear-gradient(to right, #ccc, #333, #ccc);
+}
+
+.add_sectitle{
+    font-family: "微軟正黑體";
+    float: left;
+    font-size: 20px;
+    margin-top: 15px;
+}
+
+.add_invite{
+    margin-top: 80px;
+    width: 105%;
+    font-family: "微軟正黑體";
+    border-style: double;
+}
+
+.add_list{
+     border-style: none;
+}
+
+.add_idnum{
+     font-family: "微軟正黑體";
+     font-size: 25px;
+     padding: 1.375rem .75rem;
+      border-style: none;
+}
+
+.add_box{
+    border-style: none;
+}
+
+.add_accept{
+    display: block;
+    width: 70%;
+    padding: .375rem .75rem;
+    margin: 15px 15px 15px 15px;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    font-size: 20px;
+    font-family: "微軟正黑體";
+}
+
+.add_refuse{
+    display: block;
+    width: 70%;
+    padding: .375rem .75rem;
+    margin: 15px 15px 15px 15px;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    font-size: 20px;
+    font-family: "微軟正黑體";
+}
+
+.seeMf_title{
+    margin-top: -70px;
+    margin-bottom: 30px;
+    font-size: 35px;
+    font-family: "微軟正黑體";
+}
+
+.seeMf_table{
+    width: 100%;
+    border-style:dashed;
+    border-width: 3px;
+
+}
+
+.seeMf_content{
+     font-size: 20px;
+    font-family: "微軟正黑體";
+    border-style:none;
 }
 
 .footer{

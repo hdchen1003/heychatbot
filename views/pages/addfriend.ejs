@@ -3,18 +3,108 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+
+  
+
+    <meta name="viewport" content="width=device-width, minimun-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+
+    <link rel="import" href="components/bower_components/core-toolbar/core-toolbar.html">
+    <link rel="import" href="components/bower_components/paper-elements/paper-elements.html">
+    
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+
+
+
+
+    <title>Addfriend</title>
 </head>
 
 <body>
+
+    <core-toolbar class="toolbar">
+      <paper-icon-button  icon="menu"></paper-icon-button>
+       <a class="list-group-item" href="http://127.0.0.1:3000"><i class="fa fa-chevron-left fa-3x"></i> </a>
+            <!-- <span class="toolbar_title" flex>I am a toolbar!!!!</span> -->
+            <a class="list-rightbars" href="#"><i class="fa fa-bars fa-3x"></i> </a>
+     </core-toolbar>  
+
+
+
+
+    <div class="app_inside">
+
+       
+        <h1 class="add_title">邀請好友<h1>
+        
+        <!--這個表單是讓使用者藉由輸入別人帳號去邀請別人當好友 看你想放在最上面或最下面都可以-->
     <form action="http://127.0.0.1:3000/do_invite" method="POST">
-        <input type="text" name="f_id">
-        <input type="submit">
+        <input class="add_input" type="text" name="f_id">
+        <input class="add_submit" type="submit" value="送出邀請">
     </form>
 
-    <div class="invite"><%-invite %></div>
+    <hr class="add_hr" ></hr>
+
+    <h2 class="add_sectitle">有誰邀請我...</h2>
+    <div class="add_invite"><%-invite %><!--這個被備註的地方傳過來的值會長得跟下面的table一樣 我把他打出來給你參考長怎樣-->
+       <!-- <table>
+                <tr>
+                    <td class="add_idnum">abc123</td>
+                    <td class="add_box">
+                        <form action='#'>
+                        <input type='hidden' name='yn' value=1><input class="add_accept" type='submit' value='接受'>
+                        </form>
+                    </td>
+                    <td class="add_box"><form action='#'><input type='hidden' name='yn' value=0>
+                        <input class="add_refuse" type='submit' value='拒絕'>
+                        </form>
+                    </td>
+                </tr>   
+                <tr>        
+                    <td class="add_idnum">abc123</td>
+                    <td class="add_box">
+                        <form action='#'>
+                        <input type='hidden' name='yn' value=1><input class="add_accept" type='submit' value='接受'>
+                    </td>
+                    <td class="add_box"><form action='#'><input type='hidden' name='yn' value=0>
+                        <input class="add_refuse" type='submit' value='拒絕'>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="add_idnum">abc123</td>
+                    <td class="add_box">
+                        <form action='#'>
+                        <input type='hidden' name='yn' value=1><input class="add_accept" type='submit' value='接受'>
+                    </td>
+                    <td class="add_box"><form action='#'><input type='hidden' name='yn' value=0>
+                       <input class="add_refuse" type='submit' value='拒絕'>
+                    </td>
+                    
+                </tr>
+                <tr>
+                    <td class="add_idnum">abc123</td>
+                    <td class="add_box">
+                        <form action='#'>
+                        <input type='hidden' name='yn' value=1><input class="add_accept" type='submit' value='接受'>
+                    </td>
+                    <td class="add_box"><form action='#'><input type='hidden' name='yn' value=0>
+                       <input class="add_refuse" type='submit' value='拒絕'>
+                    </td>
+                    
+                </tr>
+            </table> </div>-->
+        
+        <br/>
+        <br/>
+        
+
+
+    </div>
+
+
 </body>
 
 </html>

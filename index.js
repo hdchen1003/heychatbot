@@ -337,7 +337,6 @@ app.get('/invite', function (req, res) {
     }
   })
 });
-
 app.post('/do_invite', function (req, res) {
   console.log(req.body.f_id)
   con.query('INSERT INTO `heychatbot`.`inviting` (`inviter`, `invitee`) VALUES (\'' + req.cookies.accountStatus + '\', \'' + req.body.f_id + '\')', function (err, result, fields) {
@@ -848,7 +847,7 @@ function get_istr(user) {
   var str = "<table border='1'>"
   invite.forEach(input => {
     if (input.user == user) {
-      str += "<tr><td>"+input.item+"</td><td><form action='#' method='post'><input type='hidden' name='yn' value='accept'><input type='submit' value='接受'></form></td><td><form action='#' method='post'><input type='hidden' name='yn' value='refuse'><input type='submit' value='拒絕'></form></td></tr>"
+      str += "<tr><td class='add_idnum'>"+input.item+"</td><td class='add_box'><form action='#' method='post'><input type='hidden' name='yn' value='accept'><input class='add_accept' type='submit' value='接受'></form></td><td  class='add_box'><form action='#' method='post'><input type='hidden' name='yn' value='refuse'><input class='add_refuse' type='submit' value='拒絕'></form></td></tr>"
     }
   });
   str += "</table>"
@@ -856,12 +855,13 @@ function get_istr(user) {
 }
 //把friendList[]轉成字串
 function get_fstr(user) {
-  var str = ""
+  var str = "<table class='seeMf_table' border=1>"
   friendList.forEach(input => {
     if (input.user == user) {
-      str += input.item
+      str += "<tr><td class='seeMf_content'>"+input.item+"</td><td class='seeMf_content'>備註</td></tr>"
     }
   });
+  str += "</table>"
   return str
 }
 //把bot[]轉成字串

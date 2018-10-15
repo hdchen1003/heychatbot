@@ -1,12 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+	<meta name="viewport" content="width=device-width, minimun-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+	<link rel="stylesheet" type="text/css" href="css/index.css" />
+
+	<link rel="import" href="components/bower_components/core-toolbar/core-toolbar.html">
+	<link rel="import" href="components/bower_components/paper-elements/paper-elements.html">
+
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+
+
+	<title>seeMyfriend</title>
 </head>
+
 <body>
-    <div class="friendList"><%=myfriends %></div>
+
+
+
+	<core-toolbar class="toolbar">
+		<paper-icon-button icon="menu"></paper-icon-button>
+		<a class="list-group-item" href="http://127.0.0.1:3000"><i class="fa fa-chevron-left fa-3x"></i> </a>
+		<!-- <span class="toolbar_title" flex>I am a toolbar!!!!</span> -->
+		<a class="list-rightbars" href="#"><i class="fa fa-bars fa-3x"></i> </a>
+	</core-toolbar>
+
+
+
+	<div class="app_inside">
+
+		<div class="seeMf_title">我的帳號資訊</div>
+		<div class="friendList">
+			<%-myfriends %>
+		<!--		這個被備註的地方傳過來的值會長得跟下面的table一樣-->
+			<!--<table class="seeMf_table" border=1>
+		<tr>
+			<td class="seeMf_content">
+			朋友id
+			</td>
+			<td class="seeMf_content">
+			備註
+			</td>
+		</tr>
+		<tr>
+			<td class="seeMf_content">
+			朋友id
+			</td>
+			<td class="seeMf_content">
+			備註
+			</td>
+		</tr>
+		<tr>
+			<td class="seeMf_content">
+			朋友id
+			</td>
+			<td class="seeMf_content">
+			備註
+			</td>
+		</tr>
+		<tr>
+			<td class="seeMf_content">
+			朋友id
+			</td>
+			<td class="seeMf_content">
+			備註
+			</td>
+		</tr>
+		<tr>
+			<td class="seeMf_content">
+			朋友id
+			</td>
+			<td class="seeMf_content">
+			備註
+			</td>
+		</tr>
+	</table>-->
+		</div>
+
+
+
+
+	</div>
+
+
 </body>
+
 </html>
