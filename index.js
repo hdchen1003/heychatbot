@@ -291,19 +291,19 @@ app.get('/friend', function (req, res) {
           if (result[i].u_id1 == req.cookies.accountStatus) {
             friendList[friendList.length] = {
               item: result[i].u_id2,
-              user: req.cookies.accountStatus
+              user: req.cookies.accountStatus,
+              f_id: result[i].f_id
             }
           }
           else {
             friendList[friendList.length] = {
               item: result[i].u_id1,
-              user: req.cookies.accountStatus
+              user: req.cookies.accountStatus,
+              f_id: result[i].f_id
             }
           }
         }
       }
-
-
       res.render('pages/seeMyfriend', {
         message: "歡迎加入我們",
         ID: req.cookies.accountStatus,
@@ -321,10 +321,18 @@ app.get('/invite', function (req, res) {
     }
     else {
       if (result) {
+        for(var i=0;i<invite.length;i++){
+          console.log(invite[i].user)
+          if(invite[i].user == req.cookies.accountStatus){
+            console.log("刪除F陣列")
+            invite.splice(i, 1, "")
+          }
+        }
         for (var i = 0; i < result.length; i++) {
           invite[invite.length] = {
             user: req.cookies.accountStatus,
-            item: result[i].inviter
+            item: result[i].inviter,
+            i_id: result[i].i_id
           }
         }
       }
@@ -338,31 +346,113 @@ app.get('/invite', function (req, res) {
   })
 });
 app.post('/do_invite', function (req, res) {
-  console.log(req.body.f_id)
+  
   con.query('INSERT INTO `heychatbot`.`inviting` (`inviter`, `invitee`) VALUES (\'' + req.cookies.accountStatus + '\', \'' + req.body.f_id + '\')', function (err, result, fields) {
     if (err) {
     }
     else {
-      res.render('pages/index', {
+      res.render('pages/addfriend', {
         message: "歡迎加入我們",
         ID: req.cookies.accountStatus,
         ip: ip,
-        send: get_str_mylove()
+        invite: get_istr(req.cookies.accountStatus)
       });
     }
   });
 
 });
 app.post('/accept_refuse', function (req, res) {
-  con.query('INSERT INTO `heychatbot`.`myfriend` (`inviter`, `invitee`) VALUES (\'' + req.cookies.accountStatus + '\', \'' + req.body.f_id + '\')', function (err, result, fields) {
-    res.render('pages/addfriend', {
-      message: "歡迎加入我們",
-      ID: req.cookies.accountStatus,
-      ip: ip,
-      invite: get_istr(req.cookies.accountStatus)
-    });
+  if (req.body.yn == 'accept') {
+    con.query('INSERT INTO `heychatbot`.`myfriend` (`u_id1`, `u_id2`) VALUES (\'' + req.cookies.accountStatus + '\', \'' + req.body.id + '\')', function (err, result, fields) {
+      if (err) {
+        console.log("新增好友失敗")
+      }
+      else {
+        con.query('DELETE FROM `heychatbot`.`inviting` WHERE i_id = \'' + req.body.i_id + '\'', function (err, result, fields) {
+          if (err) {
+            console.log("刪除i_id失敗")
+          }
+          else {
+            con.query('SELECT * FROM heychatbot.inviting WHERE invitee=\'' + req.cookies.accountStatus + '\' OR inviter=\'' + req.cookies.accountStatus + '\'', function (err, result, fields) {
+              console.log(result)
+              if (err) {
+              }
+              else {
+               
+                  for(var i=0;i<invite.length;i++){
+                    console.log(invite[i].user)
+                    if(invite[i].user == req.cookies.accountStatus){
+                      console.log("刪除F陣列")
+                      invite.splice(i, 1, "")
+                    }
+                  }
+                  for (var i = 0; i < result.length; i++) {
+                    console.log("從新列出邀請清單")
+                    invite[invite.length] = {
+                      user: req.cookies.accountStatus,
+                      item: result[i].inviter,
+                      i_id: result[i].i_id
+                    }
+                  }
+                
+                console.log("導向addfriend")
+                res.render('pages/addfriend', {
+                  message: "歡迎加入我們",
+                  ID: req.cookies.accountStatus,
+                  ip: ip,
+                  invite: get_istr(req.cookies.accountStatus)
+                });
+              }
+            })
+            // res.render('pages/addfriend', {
+            //   message: "歡迎加入我們",
+            //   ID: req.cookies.accountStatus,
+            //   ip: ip,
+            //   invite: get_istr(req.cookies.accountStatus)
+            // });
+          }
+        });
+      }
 
-  });
+    });
+  }
+  else {
+
+    con.query('DELETE FROM `heychatbot`.`inviting` WHERE i_id = \'' + req.body.i_id + '\'', function (err, result, fields) {
+      if (err) {
+        console.log("刪除i_id失敗")
+      }
+      else {
+        con.query('SELECT * FROM heychatbot.inviting WHERE invitee=\'' + req.cookies.accountStatus + '\' OR inviter=\'' + req.cookies.accountStatus + '\'', function (err, result, fields) {
+          if (err) {
+          }
+          else {
+            for(var i=0;i<invite.length;i++){
+              console.log(invite[i].user)
+              if(invite[i].user == req.cookies.accountStatus){
+                console.log("刪除F陣列")
+                invite.splice(i, 1, "")
+              }
+            }
+              for (var i = 0; i < result.length; i++) {
+                invite[invite.length] = {
+                  user: req.cookies.accountStatus,
+                  item: result[i].inviter,
+                  i_id: result[i].i_id
+                }
+              }
+            
+            res.render('pages/addfriend', {
+              message: "歡迎加入我們",
+              ID: req.cookies.accountStatus,
+              ip: ip,
+              invite: get_istr(req.cookies.accountStatus)
+            });
+          }
+        })
+      }
+    });
+  }
 });
 
 //回應後
@@ -847,7 +937,7 @@ function get_istr(user) {
   var str = "<table border='1'>"
   invite.forEach(input => {
     if (input.user == user) {
-      str += "<tr><td class='add_idnum'>"+input.item+"</td><td class='add_box'><form action='#' method='post'><input type='hidden' name='yn' value='accept'><input class='add_accept' type='submit' value='接受'></form></td><td  class='add_box'><form action='#' method='post'><input type='hidden' name='yn' value='refuse'><input class='add_refuse' type='submit' value='拒絕'></form></td></tr>"
+      str += "<tr><td class='add_idnum'>" + input.item + "</td><td class='add_box'><form action='http://" + ip + "/accept_refuse' method='post'><input type='hidden' name='yn' value='accept'><input type='hidden' name='id' value=" + input.item + "><input type='hidden' name='i_id' value=" + input.i_id + "><input class='add_accept' type='submit' value='接受'></form></td><td  class='add_box'><form action='http://" + ip + "/accept_refuse' method='post'><input type='hidden' name='yn' value='refuse'><input type='hidden' name='id' value=" + input.item + "><input type='hidden' name='i_id' value=" + input.i_id + "><input class='add_refuse' type='submit' value='拒絕'></form></td></tr>"
     }
   });
   str += "</table>"
@@ -858,7 +948,7 @@ function get_fstr(user) {
   var str = "<table class='seeMf_table' border=1>"
   friendList.forEach(input => {
     if (input.user == user) {
-      str += "<tr><td class='seeMf_content'>"+input.item+"</td><td class='seeMf_content'>備註</td></tr>"
+      str += "<tr><td class='seeMf_content'>" + input.item + "</td><td class='seeMf_content'>備註</td></tr>"
     }
   });
   str += "</table>"
