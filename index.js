@@ -74,15 +74,7 @@
 
 //初始畫面
 app.get('/', function (req, res) {
-  // if (req.cookies.aaab) {
-  //   console.log(req.cookies.aaab)
-  //   res.send("二次訪問");
-  // } else {
-  //   res.cookie('aaab', "10");
-  //   res.send("初次訪問");
-  // }
-
-
+ 
 
   res.render('pages/index', {
     message: "歡迎使用本產品",
@@ -91,6 +83,27 @@ app.get('/', function (req, res) {
     ip: ip,
   });
 });
+
+app.get('/loginin', function (req, res) {
+
+  if(req.cookies.accountStatus){
+    res.render('pages/main', {
+      message: "歡迎使用本產品",
+      send: get_str(),
+      ID: ID,
+      ip: ip,
+    });
+  }
+  else{
+  res.render('pages/login', {
+    message: "歡迎使用本產品",
+    send: get_str(),
+    ID: ID,
+    ip: ip,
+  });
+}
+});
+
 app.post('/login', function (req, res) {
   con.query('SELECT * FROM heychatbot.user WHERE id=\'' + req.body.ID + '\' and pwd=\'' + req.body.pwd + '\'', function (err, result, fields) {
     if (result != "") {
