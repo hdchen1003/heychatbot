@@ -24,17 +24,20 @@
 <body>
 
 	<div class="list-group">
-	  <a class="list-group-item" href="http://127.0.0.1:3000"><i class="fa fa-chevron-left fa-3x"></i> </a>
+	  <a class="list-group-item" href="http://<%=ip %>"><i class="fa fa-chevron-left fa-3x"></i> </a>
 	  <a class="list-rightbars" href="#"><i class="fa fa-bars fa-3x"></i> </a>	  
 	</div>
 
 	<div class="app">
-		<form action="http://127.0.0.1:3000/login"  method="post">
+		<form action="http://<%=ip %>/login"  method="post">
 			<input class="log_account" type="text" name="ID" placeholder="請輸入帳號"/>
 			<input class="log_password" type="password" name="pwd" placeholder="請輸入密碼"/>
 			<br/>
 			<input class="login_submit" type="submit" value="登入"/>   
-    </div>
+		</form>
+			<div class="modify"><button class="login_submit" onclick="window.location.href='http://<%=ip %>/findpwd'">忘記密碼</button></div>
+	</div>
+	
 
 
 </body>

@@ -74,7 +74,7 @@
 
 //初始畫面
 app.get('/', function (req, res) {
- 
+
 
   res.render('pages/index', {
     message: "歡迎使用本產品",
@@ -86,7 +86,7 @@ app.get('/', function (req, res) {
 
 app.get('/loginin', function (req, res) {
 
-  if(req.cookies.accountStatus){
+  if (req.cookies.accountStatus) {
     res.render('pages/main', {
       message: "歡迎使用本產品",
       send: get_str(),
@@ -94,14 +94,14 @@ app.get('/loginin', function (req, res) {
       ip: ip,
     });
   }
-  else{
-  res.render('pages/login', {
-    message: "歡迎使用本產品",
-    send: get_str(),
-    ID: ID,
-    ip: ip,
-  });
-}
+  else {
+    res.render('pages/login', {
+      message: "歡迎使用本產品",
+      send: get_str(),
+      ID: ID,
+      ip: ip,
+    });
+  }
 });
 
 app.post('/login', function (req, res) {
@@ -334,9 +334,9 @@ app.get('/invite', function (req, res) {
     }
     else {
       if (result) {
-        for(var i=0;i<invite.length;i++){
+        for (var i = 0; i < invite.length; i++) {
           console.log(invite[i].user)
-          if(invite[i].user == req.cookies.accountStatus){
+          if (invite[i].user == req.cookies.accountStatus) {
             console.log("刪除F陣列")
             invite.splice(i, 1, "")
           }
@@ -359,20 +359,24 @@ app.get('/invite', function (req, res) {
   })
 });
 app.post('/do_invite', function (req, res) {
-  
-  con.query('INSERT INTO `heychatbot`.`inviting` (`inviter`, `invitee`) VALUES (\'' + req.cookies.accountStatus + '\', \'' + req.body.f_id + '\')', function (err, result, fields) {
+  con.query('SELECT * FROM heychatbot.myfriend WHERE invitee=\'' + req.cookies.accountStatus + '\'', function (err, result, fields) {
     if (err) {
     }
     else {
-      res.render('pages/addfriend', {
-        message: "歡迎加入我們",
-        ID: req.cookies.accountStatus,
-        ip: ip,
-        invite: get_istr(req.cookies.accountStatus)
+      con.query('INSERT INTO `heychatbot`.`inviting` (`inviter`, `invitee`) VALUES (\'' + req.cookies.accountStatus + '\', \'' + req.body.f_id + '\')', function (err, result, fields) {
+        if (err) {
+        }
+        else {
+          res.render('pages/addfriend', {
+            message: "歡迎加入我們",
+            ID: req.cookies.accountStatus,
+            ip: ip,
+            invite: get_istr(req.cookies.accountStatus)
+          });
+        }
       });
     }
   });
-
 });
 app.post('/accept_refuse', function (req, res) {
   if (req.body.yn == 'accept') {
@@ -391,23 +395,23 @@ app.post('/accept_refuse', function (req, res) {
               if (err) {
               }
               else {
-               
-                  for(var i=0;i<invite.length;i++){
-                    console.log(invite[i].user)
-                    if(invite[i].user == req.cookies.accountStatus){
-                      console.log("刪除F陣列")
-                      invite.splice(i, 1, "")
-                    }
+
+                for (var i = 0; i < invite.length; i++) {
+                  console.log(invite[i].user)
+                  if (invite[i].user == req.cookies.accountStatus) {
+                    console.log("刪除F陣列")
+                    invite.splice(i, 1, "")
                   }
-                  for (var i = 0; i < result.length; i++) {
-                    console.log("從新列出邀請清單")
-                    invite[invite.length] = {
-                      user: req.cookies.accountStatus,
-                      item: result[i].inviter,
-                      i_id: result[i].i_id
-                    }
+                }
+                for (var i = 0; i < result.length; i++) {
+                  console.log("從新列出邀請清單")
+                  invite[invite.length] = {
+                    user: req.cookies.accountStatus,
+                    item: result[i].inviter,
+                    i_id: result[i].i_id
                   }
-                
+                }
+
                 console.log("導向addfriend")
                 res.render('pages/addfriend', {
                   message: "歡迎加入我們",
@@ -440,21 +444,21 @@ app.post('/accept_refuse', function (req, res) {
           if (err) {
           }
           else {
-            for(var i=0;i<invite.length;i++){
+            for (var i = 0; i < invite.length; i++) {
               console.log(invite[i].user)
-              if(invite[i].user == req.cookies.accountStatus){
+              if (invite[i].user == req.cookies.accountStatus) {
                 console.log("刪除F陣列")
                 invite.splice(i, 1, "")
               }
             }
-              for (var i = 0; i < result.length; i++) {
-                invite[invite.length] = {
-                  user: req.cookies.accountStatus,
-                  item: result[i].inviter,
-                  i_id: result[i].i_id
-                }
+            for (var i = 0; i < result.length; i++) {
+              invite[invite.length] = {
+                user: req.cookies.accountStatus,
+                item: result[i].inviter,
+                i_id: result[i].i_id
               }
-            
+            }
+
             res.render('pages/addfriend', {
               message: "歡迎加入我們",
               ID: req.cookies.accountStatus,
@@ -466,6 +470,110 @@ app.post('/accept_refuse', function (req, res) {
       }
     });
   }
+});
+app.get('/myaccount', function (req, res) {
+
+  con.query('SELECT * FROM heychatbot.user WHERE id=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {
+    var accountinfo = ''
+    if(err){
+    }
+    else{
+      console.log(result[0].name)
+      accountinfo += '<table border=1><tr><td>帳號</td><td>'+result[0].id+'</td></tr><tr><td>姓名</td><td>'+result[0].name+'</td></tr><tr><td>生日</td><td>'+result[0].birth+'</td></tr><tr><td>性別</td><td>'+result[0].gender+'</td></tr><tr><td>聯絡信箱</td><td>'+result[0].email+'</td></tr></table>'
+      res.render('pages/myaccount', {
+        message: "歡迎加入我們",
+        ip: ip,
+        ID: req.cookies.accountStatus,
+        send: accountinfo
+      });
+    }
+  })
+  
+
+});
+app.get('/modifyaccount', function (req, res) {
+
+  con.query('SELECT * FROM heychatbot.user WHERE id=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {
+    var accountinfo = ''
+    if(err){
+    }
+    else{
+      console.log(result[0].name)
+      accountinfo += '<form action="http://'+ip+'/do_modifyaccount"  method="post"><table border=1><tr><td>帳號</td><td>'+result[0].id+'</td></tr><tr><td>姓名</td><td><input type="text" name="name" value='+result[0].name+' ></td></tr><tr><td>生日</td><td>'+result[0].birth+'</td></tr><tr><td>性別</td><td>'+result[0].gender+'</td></tr><tr><td>聯絡信箱</td><td><input type="text" name="email" value='+result[0].email+' ></td></tr></table><input type="submit" ></form>'
+      res.render('pages/modifyaccount', {
+        message: "歡迎加入我們",
+        ip: ip,
+        ID: req.cookies.accountStatus,
+        send: accountinfo
+      });
+    }
+  })
+
+});
+app.post('/do_modifyaccount', function (req, res) {
+  con.query('UPDATE  heychatbot.user SET email=\'' + req.body.email + '\' , name=\'' + req.body.name + '\' WHERE id=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {
+    if(err){
+      console.log('修改失敗')
+    }
+    else{
+      con.query('SELECT * FROM heychatbot.user WHERE id=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {
+        var accountinfo = ''
+        if(err){
+        }
+        else{
+          console.log(result[0].name)
+          accountinfo += '<table border=1><tr><td>帳號</td><td>'+result[0].id+'</td></tr><tr><td>姓名</td><td>'+result[0].name+'</td></tr><tr><td>生日</td><td>'+result[0].birth+'</td></tr><tr><td>性別</td><td>'+result[0].gender+'</td></tr><tr><td>聯絡信箱</td><td>'+result[0].email+'</td></tr></table>'
+          res.render('pages/myaccount', {
+            message: "歡迎加入我們",
+            ip: ip,
+            ID: req.cookies.accountStatus,
+            send: accountinfo
+          });
+        }
+      })
+    }
+  })
+
+
+});
+app.get('/findpwd', function (req, res) {
+  
+  res.render('pages/findpwd', {
+    message: "歡迎加入我們",
+    ip: ip,
+    ID: req.cookies.accountStatus,
+    send: get_str_mylove()
+  });
+
+});
+app.post('/do_findpwd', function (req, res) {
+
+  con.query('SELECT * FROM heychatbot.user WHERE id=\'' + req.body.id + '\' and email=\'' + req.body.email + '\' ', function (err, result, fields) {
+    if(err){
+    }
+    else{
+      if(result != ''){
+        
+        res.render('pages/seepwd', {
+          message: "歡迎加入我們",
+          ip: ip,
+          ID: req.cookies.accountStatus,
+          send: '您的密碼是：' +result[0].pwd
+        });
+      }
+      else{
+        console.log('找不到此用戶')
+        res.render('pages/seepwd', {
+          message: "歡迎加入我們",
+          ip: ip,
+          ID: req.cookies.accountStatus,
+          send: '找不到此用戶'
+        });
+      }
+    }
+  })
+  
+
 });
 
 //回應後
