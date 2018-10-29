@@ -857,28 +857,19 @@ app.post('/addstr', function (req, res) {
         break;
       default:
         search(req.body.addstr, req.cookies.accountStatus)
-        res.render('pages/main.ejs', {
-          message: "早安",
-          send: get_str(),
-          ID: req.cookies.accountStatus,
-          ip: ip,
-        });
-    }
-  }
 
-});
-
-//判斷使用者要找什麼
-function search(input, user) {
-  var df_xhr = new XMLHttpRequest();
-  df_xhr.open('get', "" + dfURL + encodeURI(input) + "");
-  df_xhr.setRequestHeader("Authorization", dfKey);
-  df_xhr.send('');
-  df_xhr.onload = function () {
+    
+      //////////////////////////////////////////////////******************************************** */  /////
+    console.log(req.body.addstr)
+    var df_xhr = new XMLHttpRequest();
+    df_xhr.open('get', "" + dfURL + encodeURI(req.body.addstr) + "");
+    df_xhr.setRequestHeader("Authorization", dfKey);
+    df_xhr.send('');
+    df_xhr.onload = function () {
     var df_data = JSON.parse(df_xhr.responseText);
     var df_intent = df_data.result.metadata.intentName
-
-    if (input.match("add") || input.match("加入")) {
+    console.log(df_intent)
+    if (req.body.addstr.match("add") || req.body.addstr.match("加入")) {
 
       // Session[5]="add";
       if (bot[(bot.length - 2)].canadd == 1) {
@@ -910,7 +901,7 @@ function search(input, user) {
 
 
     }
-    else if (input.match("-h") || input.match("help") || input.match("HELP") || input.match("幫助") || input.match("如何使用")) {
+    else if (req.body.addstr.match("-h") || req.body.addstr.match("help") || req.body.addstr.match("HELP") || req.body.addstr.match("幫助") || req.body.addstr.match("如何使用")) {
       // Session[5]="add";
 
       bot[bot.length] = {
@@ -920,25 +911,11 @@ function search(input, user) {
       }
     }
     else {
-      if(df_intent == 'hotel'){
-        console.log('開始訂房間')
-      }
-      else if(df_intent == 'location'){
-        console.log('開啟地圖')
-      }
-      else if(df_intent == 'traffic'){
-        console.log('準備找交通')
-      }
-      else if(df_intent == 'weather'){
-        console.log('準備找天氣')
-      }
-      else if(df_intent == 'Fallback'){
-        console.log('比對失敗')
-      }
-      else if (input == "地點") {
+      
+       if (df_intent == 'location') {
         bot[bot.length] = {
-          message: "YOU：" + input + "<br/>",
-          class: "input",
+          message: "YOU：" + req.body.addstr + "<br/>",
+          class: "req.body.addstr",
           canadd: 0
         }
         bot[bot.length] = {
@@ -948,10 +925,10 @@ function search(input, user) {
         }
         session[0] = "place";
       }
-      else if (input == "天氣") {
+      else if (df_intent == 'weather') {
         bot[bot.length] = {
-          message: "YOU：" + input + "<br/>",
-          class: "input",
+          message: "YOU：" + req.body.addstr + "<br/>",
+          class: "req.body.addstr",
           canadd: 0
         }
         bot[bot.length] = {
@@ -961,10 +938,10 @@ function search(input, user) {
         }
         session[0] = "weather";
       }
-      else if (input.match("貓")) {
+      else if (req.body.addstr.match("貓")) {
         bot[bot.length] = {
-          message: "YOU：" + input + "<br/>",
-          class: "input",
+          message: "YOU：" + req.body.addstr + "<br/>",
+          class: "req.body.addstr",
           canadd: 0
         }
         bot[bot.length] = {
@@ -978,10 +955,10 @@ function search(input, user) {
           canadd: 1
         }
       }
-      else if (input == "交通") {
+      else if (df_intent == 'traffic') {
         bot[bot.length] = {
-          message: "YOU：" + input + "<br/>",
-          class: "input",
+          message: "YOU：" + req.body.addstr + "<br/>",
+          class: "req.body.addstr",
           canadd: 0
         }
         bot[bot.length] = {
@@ -991,10 +968,10 @@ function search(input, user) {
         }
         session[0] = "traffic";
       }
-      else if (input.match("台鐵") || input.match("臺鐵") || input.match("火車")) {
+      else if (req.body.addstr.match("台鐵") || req.body.addstr.match("臺鐵") || req.body.addstr.match("火車")) {
         bot[bot.length] = {
-          message: "YOU：" + input + "<br/>",
-          class: "input",
+          message: "YOU：" + req.body.addstr + "<br/>",
+          class: "req.body.addstr",
           canadd: 0
         }
         bot[bot.length] = {
@@ -1004,10 +981,10 @@ function search(input, user) {
         }
         session[0] = "traffic_TRA";
       }
-      else if (input.match("公車") || input.match("巴士") || input.match("客運")) {
+      else if (req.body.addstr.match("公車") || req.body.addstr.match("巴士") || req.body.addstr.match("客運")) {
         bot[bot.length] = {
-          message: "YOU：" + input + "<br/>",
-          class: "input",
+          message: "YOU：" + req.body.addstr + "<br/>",
+          class: "req.body.addstr",
           canadd: 0
         }
         bot[bot.length] = {
@@ -1017,10 +994,10 @@ function search(input, user) {
         }
         session[0] = "traffic_BUSnum";
       }
-      else if (input.match("咕嚕靈波")) {
+      else if (req.body.addstr.match("咕嚕靈波")) {
         bot[bot.length] = {
-          message: "YOU：" + input + "<br/>",
-          class: "input",
+          message: "YOU：" + req.body.addstr + "<br/>",
+          class: "req.body.addstr",
           canadd: 0
         }
         bot[bot.length] = {
@@ -1037,8 +1014,8 @@ function search(input, user) {
       }
       else if (session[0] == "traffic_BUSnum") {
         bot[bot.length] = {
-          message: "YOU：" + input + "<br/>",
-          class: "input",
+          message: "YOU：" + req.body.addstr + "<br/>",
+          class: "req.body.addstr",
           canadd: 0
         }
         bot[bot.length] = {
@@ -1049,10 +1026,10 @@ function search(input, user) {
         session[0] = "traffic_BUS";
 
       }
-      else if (input == "") {
+      else if (req.body.addstr == "") {
         bot[bot.length] = {
-          message: "YOU：" + input + "<br/>",
-          class: "input",
+          message: "YOU：" + req.body.addstr + "<br/>",
+          class: "req.body.addstr",
           canadd: 0
         }
         bot[bot.length] = {
@@ -1063,8 +1040,8 @@ function search(input, user) {
       }
       else {
         bot[bot.length] = {
-          message: "YOU：" + input + "<br/>",
-          class: "input",
+          message: "YOU：" + req.body.addstr + "<br/>",
+          class: "req.body.addstr",
           canadd: 0
         }
         bot[bot.length] = {
@@ -1072,7 +1049,7 @@ function search(input, user) {
           class: "notif",
           canadd: 0
         }
-        con.query('INSERT INTO searchword.word (`content`,`user`) VALUES (\'' + input + '\',\'' + user + '\')', function (err, result, fields) {
+        con.query('INSERT INTO searchword.word (`content`,`req.cookies.accountStatus`) VALUES (\'' + req.body.addstr + '\',\'' + req.cookies.accountStatus + '\')', function (err, result, fields) {
           if (err) {
           }
           else {
@@ -1082,7 +1059,23 @@ function search(input, user) {
         })
       }
     }
+    res.render('pages/main.ejs', {
+      message: "早安",
+      send: get_str(),
+      ID: req.cookies.accountStatus,
+      ip: ip,
+    });
   }
+      ///  ///////////////////////////////////////////////********************************************/////////// */
+      
+    }
+  }
+
+});
+
+//判斷使用者要找什麼
+function search(input, user) {
+  
 };
 
 
