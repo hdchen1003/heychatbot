@@ -14,6 +14,8 @@
   var axios = require('axios');
   var jsSHA = require('jssha');
   var cookieParser = require('cookie-parser');
+  var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+
 
 }
 //一些路徑設置
@@ -30,7 +32,8 @@
 }
 //宣告一些會用到的變數
 {
-
+  var dfURL = 'https://api.dialogflow.com/v1/query?v=20150910&lang=en&sessionId=0&query='
+  var dfKey = 'Bearer 2395d9e4a1704625a41c8f57e86398c1'
   var ip = "127.0.0.1:3000"
   var when_login_select_num = 8 //當登入時讀取幾則訊息
   var ID = ""
@@ -75,7 +78,7 @@
 //初始畫面
 app.get('/', function (req, res) {
 
-
+  dailogflow('aaa');
   res.render('pages/index', {
     message: "歡迎使用本產品",
     send: get_str(),
@@ -83,7 +86,6 @@ app.get('/', function (req, res) {
     ip: ip,
   });
 });
-
 app.get('/loginin', function (req, res) {
 
   if (req.cookies.accountStatus) {
@@ -103,7 +105,6 @@ app.get('/loginin', function (req, res) {
     });
   }
 });
-
 app.post('/login', function (req, res) {
   con.query('SELECT * FROM heychatbot.user WHERE id=\'' + req.body.ID + '\' and pwd=\'' + req.body.pwd + '\'', function (err, result, fields) {
     if (result != "") {
@@ -156,9 +157,9 @@ app.get('/trytrylook', function (req, res) {
 
 });
 app.get('/logout', function (req, res) {
-  if (ID != "") {
+  if (req.cookies.accountStatus != "") {
     bot.forEach(input => {
-      con.query('INSERT INTO heychatbot.message (`u_id`, `message`, `time`,`class`,`canadd`) VALUES (\'' + ID + '\',\'' + input.message + '\', \'' + now + '\',\'' + input.class + '\',\'' + input.canadd + '\')', function (err, result, fields) {
+      con.query('INSERT INTO heychatbot.message (`u_id`, `message`, `time`,`class`,`canadd`) VALUES (\'' + req.cookies.accountStatus + '\',\'' + input.message + '\', \'' + now + '\',\'' + input.class + '\',\'' + input.canadd + '\')', function (err, result, fields) {
       });
     });
   }
@@ -475,11 +476,11 @@ app.get('/myaccount', function (req, res) {
 
   con.query('SELECT * FROM heychatbot.user WHERE id=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {
     var accountinfo = ''
-    if(err){
+    if (err) {
     }
-    else{
+    else {
       console.log(result[0].name)
-      accountinfo += '<table border=1><tr><td>帳號</td><td>'+result[0].id+'</td></tr><tr><td>姓名</td><td>'+result[0].name+'</td></tr><tr><td>生日</td><td>'+result[0].birth+'</td></tr><tr><td>性別</td><td>'+result[0].gender+'</td></tr><tr><td>聯絡信箱</td><td>'+result[0].email+'</td></tr></table>'
+      accountinfo += '<table border=1><tr><td>帳號</td><td>' + result[0].id + '</td></tr><tr><td>姓名</td><td>' + result[0].name + '</td></tr><tr><td>生日</td><td>' + result[0].birth + '</td></tr><tr><td>性別</td><td>' + result[0].gender + '</td></tr><tr><td>聯絡信箱</td><td>' + result[0].email + '</td></tr></table>'
       res.render('pages/myaccount', {
         message: "歡迎加入我們",
         ip: ip,
@@ -488,18 +489,18 @@ app.get('/myaccount', function (req, res) {
       });
     }
   })
-  
+
 
 });
 app.get('/modifyaccount', function (req, res) {
 
   con.query('SELECT * FROM heychatbot.user WHERE id=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {
     var accountinfo = ''
-    if(err){
+    if (err) {
     }
-    else{
+    else {
       console.log(result[0].name)
-      accountinfo += '<form action="http://'+ip+'/do_modifyaccount"  method="post"><table border=1><tr><td>帳號</td><td>'+result[0].id+'</td></tr><tr><td>姓名</td><td><input type="text" name="name" value='+result[0].name+' ></td></tr><tr><td>生日</td><td>'+result[0].birth+'</td></tr><tr><td>性別</td><td>'+result[0].gender+'</td></tr><tr><td>聯絡信箱</td><td><input type="text" name="email" value='+result[0].email+' ></td></tr></table><input type="submit" ></form>'
+      accountinfo += '<form action="http://' + ip + '/do_modifyaccount"  method="post"><table border=1><tr><td>帳號</td><td>' + result[0].id + '</td></tr><tr><td>姓名</td><td><input type="text" name="name" value=' + result[0].name + ' ></td></tr><tr><td>生日</td><td>' + result[0].birth + '</td></tr><tr><td>性別</td><td>' + result[0].gender + '</td></tr><tr><td>聯絡信箱</td><td><input type="text" name="email" value=' + result[0].email + ' ></td></tr></table><input type="submit" ></form>'
       res.render('pages/modifyaccount', {
         message: "歡迎加入我們",
         ip: ip,
@@ -512,17 +513,17 @@ app.get('/modifyaccount', function (req, res) {
 });
 app.post('/do_modifyaccount', function (req, res) {
   con.query('UPDATE  heychatbot.user SET email=\'' + req.body.email + '\' , name=\'' + req.body.name + '\' WHERE id=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {
-    if(err){
+    if (err) {
       console.log('修改失敗')
     }
-    else{
+    else {
       con.query('SELECT * FROM heychatbot.user WHERE id=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {
         var accountinfo = ''
-        if(err){
+        if (err) {
         }
-        else{
+        else {
           console.log(result[0].name)
-          accountinfo += '<table border=1><tr><td>帳號</td><td>'+result[0].id+'</td></tr><tr><td>姓名</td><td>'+result[0].name+'</td></tr><tr><td>生日</td><td>'+result[0].birth+'</td></tr><tr><td>性別</td><td>'+result[0].gender+'</td></tr><tr><td>聯絡信箱</td><td>'+result[0].email+'</td></tr></table>'
+          accountinfo += '<table border=1><tr><td>帳號</td><td>' + result[0].id + '</td></tr><tr><td>姓名</td><td>' + result[0].name + '</td></tr><tr><td>生日</td><td>' + result[0].birth + '</td></tr><tr><td>性別</td><td>' + result[0].gender + '</td></tr><tr><td>聯絡信箱</td><td>' + result[0].email + '</td></tr></table>'
           res.render('pages/myaccount', {
             message: "歡迎加入我們",
             ip: ip,
@@ -537,7 +538,7 @@ app.post('/do_modifyaccount', function (req, res) {
 
 });
 app.get('/findpwd', function (req, res) {
-  
+
   res.render('pages/findpwd', {
     message: "歡迎加入我們",
     ip: ip,
@@ -549,19 +550,19 @@ app.get('/findpwd', function (req, res) {
 app.post('/do_findpwd', function (req, res) {
 
   con.query('SELECT * FROM heychatbot.user WHERE id=\'' + req.body.id + '\' and email=\'' + req.body.email + '\' ', function (err, result, fields) {
-    if(err){
+    if (err) {
     }
-    else{
-      if(result != ''){
-        
+    else {
+      if (result != '') {
+
         res.render('pages/seepwd', {
           message: "歡迎加入我們",
           ip: ip,
           ID: req.cookies.accountStatus,
-          send: '您的密碼是：' +result[0].pwd
+          send: '您的密碼是：' + result[0].pwd
         });
       }
-      else{
+      else {
         console.log('找不到此用戶')
         res.render('pages/seepwd', {
           message: "歡迎加入我們",
@@ -572,7 +573,7 @@ app.post('/do_findpwd', function (req, res) {
       }
     }
   })
-  
+
 
 });
 
@@ -855,7 +856,7 @@ app.post('/addstr', function (req, res) {
         session[0] = ""
         break;
       default:
-        search(req.body.addstr)
+        search(req.body.addstr, req.cookies.accountStatus)
         res.render('pages/main.ejs', {
           message: "早安",
           send: get_str(),
@@ -868,185 +869,217 @@ app.post('/addstr', function (req, res) {
 });
 
 //判斷使用者要找什麼
-function search(input) {
-  if (input.match("add") || input.match("加入")) {
+function search(input, user) {
+  var df_xhr = new XMLHttpRequest();
+  df_xhr.open('get', "" + dfURL + encodeURI(input) + "");
+  df_xhr.setRequestHeader("Authorization", dfKey);
+  df_xhr.send('');
+  df_xhr.onload = function () {
+    var df_data = JSON.parse(df_xhr.responseText);
+    var df_intent = df_data.result.metadata.intentName
 
-    // Session[5]="add";
-    if (bot[(bot.length - 2)].canadd == 1) {
-      console.log(bot[(bot.length - 2)].message + "-")
-      console.log(bot[(bot.length - 2)].canadd + "-")
-      mylove[mylove.length] = bot[(bot.length - 1)]
-      con.query('INSERT INTO heychatbot.favorite (`u_id`, `message`, `class`) VALUES (\'' + ID + '\',\'' + mylove[mylove.length - 1].message + '\',\'' + mylove[mylove.length - 1].class + '\')', function (err, result, fields) {
-        if (err) {
-        }
-        else {
-          console.log("成功")
-        }
+    if (input.match("add") || input.match("加入")) {
+
+      // Session[5]="add";
+      if (bot[(bot.length - 2)].canadd == 1) {
+        console.log(bot[(bot.length - 2)].message + "-")
+        console.log(bot[(bot.length - 2)].canadd + "-")
+        mylove[mylove.length] = bot[(bot.length - 1)]
+        con.query('INSERT INTO heychatbot.favorite (`u_id`, `message`, `class`) VALUES (\'' + ID + '\',\'' + mylove[mylove.length - 1].message + '\',\'' + mylove[mylove.length - 1].class + '\')', function (err, result, fields) {
+          if (err) {
+          }
+          else {
+            console.log("成功")
+          }
+          bot[bot.length] = {
+            message: "BOT：我的最愛加入成功<br/>",
+            class: "notif",
+            canadd: 0
+          }
+        });
+      }
+      else {
+        console.log(bot[(bot.length - 2)].message + "+")
+        console.log(bot[(bot.length - 2)].canadd + "+")
         bot[bot.length] = {
-          message: "BOT：我的最愛加入成功<br/>",
+          message: "BOT：此項目不能加入最愛<br/>",
           class: "notif",
           canadd: 0
         }
-      });
-    }
-    else {
-      console.log(bot[(bot.length - 2)].message + "+")
-      console.log(bot[(bot.length - 2)].canadd + "+")
-      bot[bot.length] = {
-        message: "BOT：此項目不能加入最愛<br/>",
-        class: "notif",
-        canadd: 0
       }
-    }
 
 
-  }
-  else if (input.match("-h") || input.match("help") || input.match("HELP") || input.match("幫助") || input.match("如何使用")) {
-    // Session[5]="add";
+    }
+    else if (input.match("-h") || input.match("help") || input.match("HELP") || input.match("幫助") || input.match("如何使用")) {
+      // Session[5]="add";
 
-    bot[bot.length] = {
-      message: "BOT：本系統目前提供幾種服務1.交通 2.地點 3.天氣 4.貓咪 5.初始化 6.add 7.有其他建議請聯絡我",
-      class: "help",
-      canadd: 0
-    }
-  }
-  else {
-    if (input == "地點") {
       bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
-        class: "input",
-        canadd: 0
-      }
-      bot[bot.length] = {
-        message: "BOT：要查詢哪個地方？<br/>",
-        class: "notif",
-        canadd: 0
-      }
-      session[0] = "place";
-    }
-    else if (input == "天氣") {
-      bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
-        class: "input",
-        canadd: 0
-      }
-      bot[bot.length] = {
-        message: "BOT：要查詢哪裡的天氣？<br/>",
-        class: "notif",
-        canadd: 0
-      }
-      session[0] = "weather";
-    }
-    else if (input.match("貓")) {
-      bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
-        class: "input",
-        canadd: 0
-      }
-      bot[bot.length] = {
-        message: "BOT：好，我就給你貓咪<br/>",
-        class: "notif",
-        canadd: 0
-      }
-      bot[bot.length] = {
-        message: "BOT：" + ' <img src="http://p1.pstatp.com/large/pgc-image/15243937805643c35ac4877" alt="cat" height="150" width="150"> ' + "<br/>",
-        class: "img",
-        canadd: 1
-      }
-    }
-    else if (input == "交通") {
-      bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
-        class: "input",
-        canadd: 0
-      }
-      bot[bot.length] = {
-        message: "BOT：要搭乘什麼？<br/>",
-        class: "notif",
-        canadd: 0
-      }
-      session[0] = "traffic";
-    }
-    else if (input.match("台鐵") || input.match("臺鐵") || input.match("火車")) {
-      bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
-        class: "input",
-        canadd: 0
-      }
-      bot[bot.length] = {
-        message: "BOT：起點站和終點站？<br/>",
-        class: "notif",
-        canadd: 0
-      }
-      session[0] = "traffic_TRA";
-    }
-    else if (input.match("公車") || input.match("巴士") || input.match("客運")) {
-      bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
-        class: "input",
-        canadd: 0
-      }
-      bot[bot.length] = {
-        message: "BOT：哪個縣市？<br/>",
-        class: "notif",
-        canadd: 0
-      }
-      session[0] = "traffic_BUSnum";
-    }
-    else if (input.match("咕嚕靈波")) {
-      bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
-        class: "input",
-        canadd: 0
-      }
-      bot[bot.length] = {
-        message: "BOT：歡迎來到真步真步王國 咕嚕靈波 （●′∀‵）ノ♡ <br/>",
-        class: "notif",
-        canadd: 0
-      }
-      bot[bot.length] = {
-        message: '<video width="320" height="240" controls><source src="linpo.mp4" type="video/mp4"></video>',
-        class: "video",
-        canadd: 1
-      }
-      session[0] = "traffic_BUSnum";
-    }
-    else if (session[0] == "traffic_BUSnum") {
-      bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
-        class: "input",
-        canadd: 0
-      }
-      bot[bot.length] = {
-        message: "BOT：幾號<br/>",
-        class: "notif",
-        canadd: 0
-      }
-      session[0] = "traffic_BUS";
-
-    }
-    else if (input == "") {
-      bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
-        class: "input",
-        canadd: 0
-      }
-      bot[bot.length] = {
-        message: "BOT：不會打字哦，廢物？<br/>",
-        class: "notif",
+        message: "BOT：本系統目前提供幾種服務1.交通 2.地點 3.天氣 4.貓咪 5.初始化 6.add 7.有其他建議請聯絡我",
+        class: "help",
         canadd: 0
       }
     }
     else {
-      bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
-        class: "input",
-        canadd: 0
+      if(df_intent == 'hotel'){
+        console.log('開始訂房間')
       }
-      bot[bot.length] = {
-        message: "BOT：抱歉，我聽不懂<br/>",
-        class: "notif",
-        canadd: 0
+      else if(df_intent == 'location'){
+        console.log('開啟地圖')
+      }
+      else if(df_intent == 'traffic'){
+        console.log('準備找交通')
+      }
+      else if(df_intent == 'weather'){
+        console.log('準備找天氣')
+      }
+      else if(df_intent == 'Fallback'){
+        console.log('比對失敗')
+      }
+      else if (input == "地點") {
+        bot[bot.length] = {
+          message: "YOU：" + input + "<br/>",
+          class: "input",
+          canadd: 0
+        }
+        bot[bot.length] = {
+          message: "BOT：要查詢哪個地方？<br/>",
+          class: "notif",
+          canadd: 0
+        }
+        session[0] = "place";
+      }
+      else if (input == "天氣") {
+        bot[bot.length] = {
+          message: "YOU：" + input + "<br/>",
+          class: "input",
+          canadd: 0
+        }
+        bot[bot.length] = {
+          message: "BOT：要查詢哪裡的天氣？<br/>",
+          class: "notif",
+          canadd: 0
+        }
+        session[0] = "weather";
+      }
+      else if (input.match("貓")) {
+        bot[bot.length] = {
+          message: "YOU：" + input + "<br/>",
+          class: "input",
+          canadd: 0
+        }
+        bot[bot.length] = {
+          message: "BOT：好，我就給你貓咪<br/>",
+          class: "notif",
+          canadd: 0
+        }
+        bot[bot.length] = {
+          message: "BOT：" + ' <img src="http://p1.pstatp.com/large/pgc-image/15243937805643c35ac4877" alt="cat" height="150" width="150"> ' + "<br/>",
+          class: "img",
+          canadd: 1
+        }
+      }
+      else if (input == "交通") {
+        bot[bot.length] = {
+          message: "YOU：" + input + "<br/>",
+          class: "input",
+          canadd: 0
+        }
+        bot[bot.length] = {
+          message: "BOT：要搭乘什麼？<br/>",
+          class: "notif",
+          canadd: 0
+        }
+        session[0] = "traffic";
+      }
+      else if (input.match("台鐵") || input.match("臺鐵") || input.match("火車")) {
+        bot[bot.length] = {
+          message: "YOU：" + input + "<br/>",
+          class: "input",
+          canadd: 0
+        }
+        bot[bot.length] = {
+          message: "BOT：起點站和終點站？<br/>",
+          class: "notif",
+          canadd: 0
+        }
+        session[0] = "traffic_TRA";
+      }
+      else if (input.match("公車") || input.match("巴士") || input.match("客運")) {
+        bot[bot.length] = {
+          message: "YOU：" + input + "<br/>",
+          class: "input",
+          canadd: 0
+        }
+        bot[bot.length] = {
+          message: "BOT：哪個縣市？<br/>",
+          class: "notif",
+          canadd: 0
+        }
+        session[0] = "traffic_BUSnum";
+      }
+      else if (input.match("咕嚕靈波")) {
+        bot[bot.length] = {
+          message: "YOU：" + input + "<br/>",
+          class: "input",
+          canadd: 0
+        }
+        bot[bot.length] = {
+          message: "BOT：歡迎來到真步真步王國 咕嚕靈波 （●′∀‵）ノ♡ <br/>",
+          class: "notif",
+          canadd: 0
+        }
+        bot[bot.length] = {
+          message: '<video width="320" height="240" controls><source src="linpo.mp4" type="video/mp4"></video>',
+          class: "video",
+          canadd: 1
+        }
+        session[0] = "traffic_BUSnum";
+      }
+      else if (session[0] == "traffic_BUSnum") {
+        bot[bot.length] = {
+          message: "YOU：" + input + "<br/>",
+          class: "input",
+          canadd: 0
+        }
+        bot[bot.length] = {
+          message: "BOT：幾號<br/>",
+          class: "notif",
+          canadd: 0
+        }
+        session[0] = "traffic_BUS";
+
+      }
+      else if (input == "") {
+        bot[bot.length] = {
+          message: "YOU：" + input + "<br/>",
+          class: "input",
+          canadd: 0
+        }
+        bot[bot.length] = {
+          message: "BOT：不會打字哦，廢物？<br/>",
+          class: "notif",
+          canadd: 0
+        }
+      }
+      else {
+        bot[bot.length] = {
+          message: "YOU：" + input + "<br/>",
+          class: "input",
+          canadd: 0
+        }
+        bot[bot.length] = {
+          message: "BOT：抱歉，我聽不懂<br/>",
+          class: "notif",
+          canadd: 0
+        }
+        con.query('INSERT INTO searchword.word (`content`,`user`) VALUES (\'' + input + '\',\'' + user + '\')', function (err, result, fields) {
+          if (err) {
+          }
+          else {
+            console.log('有新的未知文字')
+          }
+
+        })
       }
     }
   }
@@ -1269,6 +1302,20 @@ function showIntFromString(text) {
     return "找不到數字";
   }
 }
+//機器人
+function dailogflow(input) {
+
+  var df_xhr = new XMLHttpRequest();
+  df_xhr.open('get', "" + dfURL + encodeURI('訂房間') + "");
+  df_xhr.setRequestHeader("Authorization", dfKey);
+  df_xhr.send('');
+  df_xhr.onload = function () {
+    var df_data = JSON.parse(df_xhr.responseText);
+  }
+
+}
+
+
 //port
 app.listen(3000, function () {
   console.log('Listening on port 3000!');

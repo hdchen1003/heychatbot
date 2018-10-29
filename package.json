@@ -24,6 +24,7 @@
     "jssha": "^2.3.1",
     "mysql": "^2.16.0",
     "tether": "^1.4.4",
-    "xhr-request": "^1.1.0"
+    "xhr-request": "^1.1.0",
+    "xmlhttprequest": "^1.8.0"
   }
 }
