@@ -33,7 +33,7 @@
 //宣告一些會用到的變數
 {
   var dfURL = 'https://api.dialogflow.com/v1/query?v=20150910&lang=en&sessionId=0&query='
-  var dfKey = 'Bearer 2395d9e4a1704625a41c8f57e86398c1'
+  var dfKey = 'Bearer 95ff53816d7b4b419c23b31907038aaa'
   var ip = "127.0.0.1:3000"
   var when_login_select_num = 8 //當登入時讀取幾則訊息
   var ID = ""
@@ -78,7 +78,7 @@
 //初始畫面
 app.get('/', function (req, res) {
 
-  dailogflow('aaa');
+
   res.render('pages/index', {
     message: "歡迎使用本產品",
     send: get_str(),
@@ -360,24 +360,24 @@ app.get('/invite', function (req, res) {
   })
 });
 app.post('/do_invite', function (req, res) {
-  con.query('SELECT * FROM heychatbot.myfriend WHERE invitee=\'' + req.cookies.accountStatus + '\'', function (err, result, fields) {
+  // con.query('SELECT * FROM heychatbot.myfriend WHERE invitee=\'' + req.cookies.accountStatus + '\'', function (err, result, fields) {
+  //   if (err) {
+  //   }
+  //   else {
+  con.query('INSERT INTO `heychatbot`.`inviting` (`inviter`, `invitee`) VALUES (\'' + req.cookies.accountStatus + '\', \'' + req.body.f_id + '\')', function (err, result, fields) {
     if (err) {
     }
     else {
-      con.query('INSERT INTO `heychatbot`.`inviting` (`inviter`, `invitee`) VALUES (\'' + req.cookies.accountStatus + '\', \'' + req.body.f_id + '\')', function (err, result, fields) {
-        if (err) {
-        }
-        else {
-          res.render('pages/addfriend', {
-            message: "歡迎加入我們",
-            ID: req.cookies.accountStatus,
-            ip: ip,
-            invite: get_istr(req.cookies.accountStatus)
-          });
-        }
+      res.render('pages/addfriend', {
+        message: "歡迎加入我們",
+        ID: req.cookies.accountStatus,
+        ip: ip,
+        invite: get_istr(req.cookies.accountStatus)
       });
     }
   });
+  // }
+  // });
 });
 app.post('/accept_refuse', function (req, res) {
   if (req.body.yn == 'accept') {
@@ -579,52 +579,64 @@ app.post('/do_findpwd', function (req, res) {
 
 //回應後
 app.post('/addstr', function (req, res) {
+  //丟dailogflow
+  var df_xhr = new XMLHttpRequest();
+  df_xhr.open('get', "" + dfURL + encodeURI(req.body.addstr) + "");
+  df_xhr.setRequestHeader("Authorization", dfKey);
+  df_xhr.send('');
+  df_xhr.onload = function () {
 
-  if (req.body.addstr == "初始化") {
-    console.log(ID + "初始化")
+    var df_data = JSON.parse(df_xhr.responseText);
+   
+    if(df_data.status.code == '200'){
+    var df_intent = df_data.result.metadata.intentName
+    }//確認是有傳回dailogflow資料
 
-    for (var i = 0; i < session.length; i++) {
-      session[i] = ""
+    if (req.body.addstr == "初始化") {
+      console.log(ID + "初始化")
+
+      for (var i = 0; i < session.length; i++) {
+        session[i] = ""
+      }
+
+      bot.length = 0;
+
+      bot[bot.length] = {
+        message: "YOU：" + req.body.addstr + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：初始化完畢<br/>",
+        class: "notif",
+        canadd: 0
+      }
+
+      res.render('pages/main.ejs', {
+        message: "早安",
+        ID: req.cookies.accountStatus,
+        send: get_str(),
+        ip: ip,
+      });
     }
-
-    bot.length = 0;
-
-    bot[bot.length] = {
-      message: "YOU：" + req.body.addstr + "<br/>",
-      class: "input",
-      canadd: 0
+    else if (req.body.addstr == "我的最愛") {
+      bot[bot.length] = {
+        message: "YOU：" + req.body.addstr + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      opMylove();
+      res.render('pages/main.ejs', {
+        message: "早安",
+        send: get_str(),
+        ID: req.cookies.accountStatus,
+        ip: ip,
+      });
     }
-    bot[bot.length] = {
-      message: "BOT：初始化完畢<br/>",
-      class: "notif",
-      canadd: 0
-    }
+    else {
 
-    res.render('pages/main.ejs', {
-      message: "早安",
-      ID: req.cookies.accountStatus,
-      send: get_str(),
-      ip: ip,
-    });
-  }
-  else if (req.body.addstr == "我的最愛") {
-    bot[bot.length] = {
-      message: "YOU：" + req.body.addstr + "<br/>",
-      class: "input",
-      canadd: 0
-    }
-    opMylove();
-    res.render('pages/main.ejs', {
-      message: "早安",
-      send: get_str(),
-      ID: req.cookies.accountStatus,
-      ip: ip,
-    });
-  }
-  else {
 
-    switch (session[0]) {
-      case "place":
+      if (session[0] == 'place') {
         request('https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=' + req.body.addstr + '&inputtype=textquery&fields=photos,formatted_address,name,rating,opening_hours,geometry&key=AIzaSyCt3g5gLr475dheyZYlJFXBlSgKa6YMqXk', {
           json: true
         }, function (err, data) {
@@ -648,9 +660,9 @@ app.post('/addstr', function (req, res) {
           });
         });
         session[0] = ""
-        break;
-      case "weather":
+      }
 
+      else if (session[0] == 'weather') {
         var placecode = placeTocode(req.body.addstr);
         request('http://opendata.cwb.gov.tw/opendataapi?dataid=' + placecode + '&authorizationkey=CWB-357C384E-33A3-4DFA-BBE8-AFF232297CF5&format=json', {
           json: true
@@ -688,9 +700,10 @@ app.post('/addstr', function (req, res) {
           });
         });
         session[0] = ""
-        break;
-      case "traffic":
-        search(req.body.addstr)
+      }
+
+      else if (session[0] == 'traffic') {
+        search(req.body.addstr,req.cookies.accountStatus,df_intent)
         res.render('pages/main.ejs', {
           message: "早安",
           ID: req.cookies.accountStatus,
@@ -698,18 +711,22 @@ app.post('/addstr', function (req, res) {
           ip: ip,
         });
 
-        break;
-      case "traffic_BUSnum":
+      }
+
+
+      else if (session[0] == 'traffic_BUSnum') {
         session[1] = findPlace(req.body.addstr)
-        search(req.body.addstr)
+        search(req.body.addstr,req.cookies.accountStatus,df_intent)
         res.render('pages/main.ejs', {
           message: "早安",
           send: get_str(),
           ip: ip,
           ID: req.cookies.accountStatus,
         });
-        break;
-      case "traffic_BUS":
+      }
+
+
+      else if (session[0] == 'traffic_BUS') {
         session[2] = showIntFromString(req.body.addstr);
         axios.get('http://ptx.transportdata.tw/MOTC/v2/Bus/StopOfRoute/City/' + session[1] + '?$format=json', { // 參考(抄襲XD)noobTW
           headers: getAuthorizationHeader(),
@@ -723,13 +740,11 @@ app.post('/addstr', function (req, res) {
                   canadd: 0
                 }
                 for (var j = 0; j < response.data[i].Stops.length; j++) {
-
                   bot[bot.length] = {
                     message: "<tr><td>" + (j + 1) + "</td><td>" + response.data[i].Stops[j].StopName.Zh_tw + "</td><td>" + response.data[i].Stops[response.data[i].Stops.length - j - 1].StopName.Zh_tw + "</td></tr>",
                     class: "bus",
                     canadd: 1
                   }
-
                 }
                 bot[bot.length] = {
                   message: "</table><br/>",
@@ -748,11 +763,10 @@ app.post('/addstr', function (req, res) {
             });
 
           });
+      }
 
 
-
-        break;
-      case "traffic_TRA":
+      else if (session[0] == 'traffic_TRA') {
         bot[bot.length] = {
           message: "YOU：" + req.body.addstr + "<br/>",
           class: "input",
@@ -814,10 +828,10 @@ app.post('/addstr', function (req, res) {
             });
             session[0] = "need_TRA_time";
           });
+      }
 
 
-        break;
-      case "need_TRA_time":
+      else if (session[0] == 'need_TRA_time') {
         //bot.splice(delTRA, 1, "")
         bot[bot.length] = {
           message: "YOU：" + req.body.time + "<br/>",
@@ -854,222 +868,214 @@ app.post('/addstr', function (req, res) {
           })
 
         session[0] = ""
-        break;
+      }
+      /////////////////////////////////////////////////////////////////////////////////////////////// 
       //////////////////////////////////////////////////******************************************** */  /////
-      default://////////////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////////      
-        //////////////////////////////////////////////////******************************************** */  /////
-        console.log(req.body.addstr)
-        var df_xhr = new XMLHttpRequest();
-        df_xhr.open('get', "" + dfURL + encodeURI(req.body.addstr) + "");
-        df_xhr.setRequestHeader("Authorization", dfKey);
-        df_xhr.send('');
-        df_xhr.onload = function () {
-          var df_data = JSON.parse(df_xhr.responseText);
-          var df_intent = df_data.result.metadata.intentName
-          console.log(df_intent)
-          if (req.body.addstr.match("add") || req.body.addstr.match("加入")) {
-
-            // Session[5]="add";
-            if (bot[(bot.length - 2)].canadd == 1) {
-              console.log(bot[(bot.length - 2)].message + "-")
-              console.log(bot[(bot.length - 2)].canadd + "-")
-              mylove[mylove.length] = bot[(bot.length - 1)]
-              con.query('INSERT INTO heychatbot.favorite (`u_id`, `message`, `class`) VALUES (\'' + ID + '\',\'' + mylove[mylove.length - 1].message + '\',\'' + mylove[mylove.length - 1].class + '\')', function (err, result, fields) {
-                if (err) {
-                }
-                else {
-                  console.log("成功")
-                }
-                bot[bot.length] = {
-                  message: "BOT：我的最愛加入成功<br/>",
-                  class: "notif",
-                  canadd: 0
-                }
-              });
-            }
-            else {
-              console.log(bot[(bot.length - 2)].message + "+")
-              console.log(bot[(bot.length - 2)].canadd + "+")
-              bot[bot.length] = {
-                message: "BOT：此項目不能加入最愛<br/>",
-                class: "notif",
-                canadd: 0
-              }
-            }
-
-
-          }
-          else if (req.body.addstr.match("-h") || req.body.addstr.match("help") || req.body.addstr.match("HELP") || req.body.addstr.match("幫助") || req.body.addstr.match("如何使用")) {
-            // Session[5]="add";
-
-            bot[bot.length] = {
-              message: "BOT：本系統目前提供幾種服務1.交通 2.地點 3.天氣 4.貓咪 5.初始化 6.add 7.有其他建議請聯絡我",
-              class: "help",
-              canadd: 0
-            }
-          }
-          else {
-
-            if (df_intent == 'location') {
-              bot[bot.length] = {
-                message: "YOU：" + req.body.addstr + "<br/>",
-                class: "req.body.addstr",
-                canadd: 0
-              }
-              bot[bot.length] = {
-                message: "BOT：要查詢哪個地方？<br/>",
-                class: "notif",
-                canadd: 0
-              }
-              session[0] = "place";
-            }
-            else if (df_intent == 'weather') {
-              bot[bot.length] = {
-                message: "YOU：" + req.body.addstr + "<br/>",
-                class: "req.body.addstr",
-                canadd: 0
-              }
-              bot[bot.length] = {
-                message: "BOT：要查詢哪裡的天氣？<br/>",
-                class: "notif",
-                canadd: 0
-              }
-              session[0] = "weather";
-            }
-            else if (req.body.addstr.match("貓")) {
-              bot[bot.length] = {
-                message: "YOU：" + req.body.addstr + "<br/>",
-                class: "req.body.addstr",
-                canadd: 0
-              }
-              bot[bot.length] = {
-                message: "BOT：好，我就給你貓咪<br/>",
-                class: "notif",
-                canadd: 0
-              }
-              bot[bot.length] = {
-                message: "BOT：" + ' <img src="http://p1.pstatp.com/large/pgc-image/15243937805643c35ac4877" alt="cat" height="150" width="150"> ' + "<br/>",
-                class: "img",
-                canadd: 1
-              }
-            }
-            else if (df_intent == 'traffic') {
-              bot[bot.length] = {
-                message: "YOU：" + req.body.addstr + "<br/>",
-                class: "req.body.addstr",
-                canadd: 0
-              }
-              bot[bot.length] = {
-                message: "BOT：要搭乘什麼？<br/>",
-                class: "notif",
-                canadd: 0
-              }
-              session[0] = "traffic";
-            }
-            else if (req.body.addstr.match("台鐵") || req.body.addstr.match("臺鐵") || req.body.addstr.match("火車")) {
-              bot[bot.length] = {
-                message: "YOU：" + req.body.addstr + "<br/>",
-                class: "req.body.addstr",
-                canadd: 0
-              }
-              bot[bot.length] = {
-                message: "BOT：起點站和終點站？<br/>",
-                class: "notif",
-                canadd: 0
-              }
-              session[0] = "traffic_TRA";
-            }
-            else if (req.body.addstr.match("公車") || req.body.addstr.match("巴士") || req.body.addstr.match("客運")) {
-              bot[bot.length] = {
-                message: "YOU：" + req.body.addstr + "<br/>",
-                class: "req.body.addstr",
-                canadd: 0
-              }
-              bot[bot.length] = {
-                message: "BOT：哪個縣市？<br/>",
-                class: "notif",
-                canadd: 0
-              }
-              session[0] = "traffic_BUSnum";
-            }
-            else if (req.body.addstr.match("咕嚕靈波")) {
-              bot[bot.length] = {
-                message: "YOU：" + req.body.addstr + "<br/>",
-                class: "req.body.addstr",
-                canadd: 0
-              }
-              bot[bot.length] = {
-                message: "BOT：歡迎來到真步真步王國 咕嚕靈波 （●′∀‵）ノ♡ <br/>",
-                class: "notif",
-                canadd: 0
-              }
-              bot[bot.length] = {
-                message: '<video width="320" height="240" controls><source src="linpo.mp4" type="video/mp4"></video>',
-                class: "video",
-                canadd: 1
-              }
-              session[0] = "traffic_BUSnum";
-            }
-            else if (session[0] == "traffic_BUSnum") {
-              bot[bot.length] = {
-                message: "YOU：" + req.body.addstr + "<br/>",
-                class: "req.body.addstr",
-                canadd: 0
-              }
-              bot[bot.length] = {
-                message: "BOT：幾號<br/>",
-                class: "notif",
-                canadd: 0
-              }
-              session[0] = "traffic_BUS";
-
-            }
-            else if (req.body.addstr == "") {
-              bot[bot.length] = {
-                message: "YOU：" + req.body.addstr + "<br/>",
-                class: "req.body.addstr",
-                canadd: 0
-              }
-              bot[bot.length] = {
-                message: "BOT：不會打字哦，廢物？<br/>",
-                class: "notif",
-                canadd: 0
-              }
-            }
-            else {
-              bot[bot.length] = {
-                message: "YOU：" + req.body.addstr + "<br/>",
-                class: "req.body.addstr",
-                canadd: 0
-              }
-              bot[bot.length] = {
-                message: "BOT：抱歉，我聽不懂<br/>",
-                class: "notif",
-                canadd: 0
-              }
-              con.query('INSERT INTO searchword.word (`content`,`req.cookies.accountStatus`) VALUES (\'' + req.body.addstr + '\',\'' + req.cookies.accountStatus + '\')', function (err, result, fields) {
-                if (err) {
-                }
-                else {
-                  console.log('有新的未知文字')
-                }
-
-              })
-            }
-          }
-          res.render('pages/main.ejs', {
-            message: "早安",
-            send: get_str(),
-            ID: req.cookies.accountStatus,
-            ip: ip,
-          });
-        }
-//////////////////////////////////////////////////********************************************/////////// */
+      else {//////////////////////////////////////////////////////////////////////////////////////////////////   
+        search(req.body.addstr, req.cookies.accountStatus,df_intent) 
+        res.render('pages/main.ejs', {
+          message: "早安",
+          send: get_str(),
+          ID: req.cookies.accountStatus,
+          ip: ip,
+        });
+      }
+      //////////////////////////////////////////////////********************************************/////////// */
     }
   }
 });
 
+function search(input, user,df_input) {
+  if (input.match("add") || input.match("加入")) {
+    // Session[5]="add";
+    if (bot[(bot.length - 2)].canadd == 1) {
+      console.log(bot[(bot.length - 2)].message + "-")
+      console.log(bot[(bot.length - 2)].canadd + "-")
+      mylove[mylove.length] = bot[(bot.length - 1)]
+      con.query('INSERT INTO heychatbot.favorite (`u_id`, `message`, `class`) VALUES (\'' + ID + '\',\'' + mylove[mylove.length - 1].message + '\',\'' + mylove[mylove.length - 1].class + '\')', function (err, result, fields) {
+        if (err) {
+        }
+        else {
+          console.log("成功")
+        }
+        bot[bot.length] = {
+          message: "BOT：我的最愛加入成功<br/>",
+          class: "notif",
+          canadd: 0
+        }
+      });
+    }
+    else {
+      console.log(bot[(bot.length - 2)].message + "+")
+      console.log(bot[(bot.length - 2)].canadd + "+")
+      bot[bot.length] = {
+        message: "BOT：此項目不能加入最愛<br/>",
+        class: "notif",
+        canadd: 0
+      }
+    }
+  }
+else if (input.match("-h") || input.match("help") || input.match("HELP") || input.match("幫助") || input.match("如何使用")) {
+    // Session[5]="add";
+
+    bot[bot.length] = {
+      message: "BOT：本系統目前提供幾種服務1.交通 2.地點 3.天氣 4.貓咪 5.初始化 6.add 7.有其他建議請聯絡我",
+      class: "help",
+      canadd: 0
+    }
+  }
+else {
+
+    if (df_input == 'location') {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：要查詢哪個地方？<br/>",
+        class: "notif",
+        canadd: 0
+      }
+      session[0] = "place";
+    }
+    else if (df_input == 'weather') {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：要查詢哪裡的天氣？<br/>",
+        class: "notif",
+        canadd: 0
+      }
+      session[0] = "weather";
+    }
+    else if (input.match("台鐵") || input.match("臺鐵") || input.match("火車") || df_input == 'TRA') {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：起點站和終點站？<br/>",
+        class: "notif",
+        canadd: 0
+      }
+      session[0] = "traffic_TRA";
+    }
+    else if (input.match("公車") || input.match("巴士") || input.match("客運") ||  df_input == 'BUS') {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：哪個縣市？<br/>",
+        class: "notif",
+        canadd: 0
+      }
+      session[0] = "traffic_BUSnum";
+    }
+    else if (input.match("咕嚕靈波")) {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：歡迎來到真步真步王國 咕嚕靈波 （●′∀‵）ノ♡ <br/>",
+        class: "notif",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: '<video width="320" height="240" controls><source src="linpo.mp4" type="video/mp4"></video>',
+        class: "video",
+        canadd: 1
+      }
+      session[0] = "traffic_BUSnum";
+    }
+    else if (session[0] == "traffic_BUSnum") {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：幾號<br/>",
+        class: "notif",
+        canadd: 0
+      }
+      session[0] = "traffic_BUS";
+  
+    }
+    else if (input == "") {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：不會打字哦，廢物？<br/>",
+        class: "notif",
+        canadd: 0
+      }
+    }
+    else if (input.match("貓")) {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：好，我就給你貓咪<br/>",
+        class: "notif",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：" + ' <img src="http://p1.pstatp.com/large/pgc-image/15243937805643c35ac4877" alt="cat" height="150" width="150"> ' + "<br/>",
+        class: "img",
+        canadd: 1
+      }
+    }
+    else if (df_input == 'traffic') {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：要搭乘什麼？<br/>",
+        class: "notif",
+        canadd: 0
+      }
+      session[0] = "traffic";
+    }
+
+    else {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：抱歉，我聽不懂<br/>",
+        class: "notif",
+        canadd: 0
+      }
+      session[0] = "";
+      con.query('INSERT INTO searchword.word (`content`,`user`) VALUES (\'' + input + '\',\'' + user + '\')', function (err, result, fields) {
+        if (err) {
+        }
+        else {
+          console.log('有新的未知文字')
+        }
+
+      })
+    }
+  }
+}
 
 //把invite[]轉成字串
 function get_istr(user) {

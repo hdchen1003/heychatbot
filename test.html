@@ -1,0 +1,191 @@
+function search(input, user,df_input) {
+  if (input.match("add") || input.match("加入")) {
+    // Session[5]="add";
+    if (bot[(bot.length - 2)].canadd == 1) {
+      console.log(bot[(bot.length - 2)].message + "-")
+      console.log(bot[(bot.length - 2)].canadd + "-")
+      mylove[mylove.length] = bot[(bot.length - 1)]
+      con.query('INSERT INTO heychatbot.favorite (`u_id`, `message`, `class`) VALUES (\'' + ID + '\',\'' + mylove[mylove.length - 1].message + '\',\'' + mylove[mylove.length - 1].class + '\')', function (err, result, fields) {
+        if (err) {
+        }
+        else {
+          console.log("成功")
+        }
+        bot[bot.length] = {
+          message: "BOT：我的最愛加入成功<br/>",
+          class: "notif",
+          canadd: 0
+        }
+      });
+    }
+    else {
+      console.log(bot[(bot.length - 2)].message + "+")
+      console.log(bot[(bot.length - 2)].canadd + "+")
+      bot[bot.length] = {
+        message: "BOT：此項目不能加入最愛<br/>",
+        class: "notif",
+        canadd: 0
+      }
+    }
+  }
+else if (input.match("-h") || input.match("help") || input.match("HELP") || input.match("幫助") || input.match("如何使用")) {
+    // Session[5]="add";
+
+    bot[bot.length] = {
+      message: "BOT：本系統目前提供幾種服務1.交通 2.地點 3.天氣 4.貓咪 5.初始化 6.add 7.有其他建議請聯絡我",
+      class: "help",
+      canadd: 0
+    }
+  }
+else {
+
+    if (df_input == 'location') {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：要查詢哪個地方？<br/>",
+        class: "notif",
+        canadd: 0
+      }
+      session[0] = "place";
+    }
+    else if (df_input == 'weather') {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：要查詢哪裡的天氣？<br/>",
+        class: "notif",
+        canadd: 0
+      }
+      session[0] = "weather";
+    }
+    else if (input.match("台鐵") || input.match("臺鐵") || input.match("火車") || df_input == 'TRA') {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：起點站和終點站？<br/>",
+        class: "notif",
+        canadd: 0
+      }
+      session[0] = "traffic_TRA";
+    }
+    else if (input.match("公車") || input.match("巴士") || input.match("客運") ||  df_input == 'BUS') {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：哪個縣市？<br/>",
+        class: "notif",
+        canadd: 0
+      }
+      session[0] = "traffic_BUSnum";
+    }
+    else if (input.match("咕嚕靈波")) {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：歡迎來到真步真步王國 咕嚕靈波 （●′∀‵）ノ♡ <br/>",
+        class: "notif",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: '<video width="320" height="240" controls><source src="linpo.mp4" type="video/mp4"></video>',
+        class: "video",
+        canadd: 1
+      }
+      session[0] = "traffic_BUSnum";
+    }
+    else if (session[0] == "traffic_BUSnum") {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：幾號<br/>",
+        class: "notif",
+        canadd: 0
+      }
+      session[0] = "traffic_BUS";
+  
+    }
+    else if (input == "") {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：不會打字哦，廢物？<br/>",
+        class: "notif",
+        canadd: 0
+      }
+    }
+    else if (input.match("貓")) {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：好，我就給你貓咪<br/>",
+        class: "notif",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：" + ' <img src="http://p1.pstatp.com/large/pgc-image/15243937805643c35ac4877" alt="cat" height="150" width="150"> ' + "<br/>",
+        class: "img",
+        canadd: 1
+      }
+    }
+    else if (df_input == 'traffic') {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：要搭乘什麼？<br/>",
+        class: "notif",
+        canadd: 0
+      }
+      session[0] = "traffic";
+    }
+
+    else {
+      bot[bot.length] = {
+        message: "YOU：" + input + "<br/>",
+        class: "input",
+        canadd: 0
+      }
+      bot[bot.length] = {
+        message: "BOT：抱歉，我聽不懂<br/>",
+        class: "notif",
+        canadd: 0
+      }
+      session[0] = "";
+      con.query('INSERT INTO searchword.word (`content`,`user`) VALUES (\'' + input + '\',\'' + user + '\')', function (err, result, fields) {
+        if (err) {
+        }
+        else {
+          console.log('有新的未知文字')
+        }
+
+      })
+    }
+  }
+}
