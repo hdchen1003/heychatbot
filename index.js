@@ -35,6 +35,7 @@
   var dfURL = 'https://api.dialogflow.com/v1/query?v=20150910&lang=en&sessionId=0&query='
   var dfKey = 'Bearer 95ff53816d7b4b419c23b31907038aaa'
   var ip = "127.0.0.1:3000"
+  var port = '3000'
   var when_login_select_num = 8 //當登入時讀取幾則訊息
   var ID = ""
   var Train = []; //紀錄起站到迄站
@@ -592,7 +593,7 @@ app.post('/addstr', function (req, res) {
     var df_intent = df_data.result.metadata.intentName
     }//確認是有傳回dailogflow資料
 
-    if (req.body.addstr == "初始化") {
+    if (req.body.addstr == "初始化" || req.body.addstr == "clear") {
       console.log(ID + "初始化")
 
       for (var i = 0; i < session.length; i++) {
@@ -703,7 +704,7 @@ app.post('/addstr', function (req, res) {
       }
 
       else if (session[0] == 'traffic') {
-        search(req.body.addstr,req.cookies.accountStatus,df_intent)
+        search(req.body.addstr,req.cookies.accountStatus,df_intent,df_data)
         res.render('pages/main.ejs', {
           message: "早安",
           ID: req.cookies.accountStatus,
@@ -716,7 +717,7 @@ app.post('/addstr', function (req, res) {
 
       else if (session[0] == 'traffic_BUSnum') {
         session[1] = findPlace(req.body.addstr)
-        search(req.body.addstr,req.cookies.accountStatus,df_intent)
+        search(req.body.addstr,req.cookies.accountStatus,df_intent,df_data)
         res.render('pages/main.ejs', {
           message: "早安",
           send: get_str(),
@@ -872,7 +873,7 @@ app.post('/addstr', function (req, res) {
       /////////////////////////////////////////////////////////////////////////////////////////////// 
       //////////////////////////////////////////////////******************************************** */  /////
       else {//////////////////////////////////////////////////////////////////////////////////////////////////   
-        search(req.body.addstr, req.cookies.accountStatus,df_intent) 
+        search(req.body.addstr, req.cookies.accountStatus,df_intent,df_data) 
         res.render('pages/main.ejs', {
           message: "早安",
           send: get_str(),
@@ -885,7 +886,8 @@ app.post('/addstr', function (req, res) {
   }
 });
 
-function search(input, user,df_input) {
+//搜尋語意
+function search(input, user,df_input,data) {
   if (input.match("add") || input.match("加入")) {
     // Session[5]="add";
     if (bot[(bot.length - 2)].canadd == 1) {
@@ -1059,11 +1061,21 @@ else {
         class: "input",
         canadd: 0
       }
-      bot[bot.length] = {
-        message: "BOT：抱歉，我聽不懂<br/>",
-        class: "notif",
-        canadd: 0
+      if(data.status.code !=400 && data.result.fulfillment.speech != ''){
+        bot[bot.length] = {
+          message: "BOT："+data.result.fulfillment.speech+"<br/>",
+          class: "notif",
+          canadd: 0
+        }
       }
+      else{
+        bot[bot.length] = {
+          message: "BOT：抱歉，我聽不懂<br/>",
+          class: "notif",
+          canadd: 0
+        }
+      }
+     
       session[0] = "";
       con.query('INSERT INTO searchword.word (`content`,`user`) VALUES (\'' + input + '\',\'' + user + '\')', function (err, result, fields) {
         if (err) {
@@ -1294,7 +1306,7 @@ function showIntFromString(text) {
   }
 }
 //port
-app.listen(3000, function () {
+app.listen(port, function () {
   console.log('Listening on port 3000!');
 });
 
