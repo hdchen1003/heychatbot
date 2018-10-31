@@ -46,7 +46,7 @@
   var session = [];
   var mylove = [];
   var invite = [];
-
+  var google_map = [];
   var getAuthorizationHeader = function () {
     var AppID = 'FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF';
     var AppKey = 'FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF';
@@ -591,7 +591,11 @@ app.post('/addstr', function (req, res) {
 
     if (df_data.status.code == '200') {
       var df_intent = df_data.result.metadata.intentName
+      
     }//確認是有傳回dailogflow資料
+    if(df_data.result.parameters.location){
+      google_map[0] = { value : df_data.result.parameters.location , user : req.cookies.accountStatus }
+    }
 
     if (req.body.addstr == "初始化" || req.body.addstr == "clear") {
       console.log(ID + "初始化")
@@ -645,8 +649,10 @@ app.post('/addstr', function (req, res) {
             throw err
           }
           else {
-            
-               request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location='+data.results[0].geometry.location.lat+','+data.results[0].geometry.location.lng+'&radius=1500&type=store&keyword='+encodeURI(req.body.addstr)+'&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
+            if(google_map[0].user !=  req.cookies.accountStatus){
+              google_map[0] = ""
+            }//如果google map api非現在使用者就不給使用
+               request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location='+data.results[0].geometry.location.lat+','+data.results[0].geometry.location.lng+'&radius=1500&type='+google_map[0].value+'&keyword='+encodeURI(req.body.addstr)+'&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
                 json: true
               }, function (err, data2) {
                 if (err) {
@@ -668,6 +674,7 @@ app.post('/addstr', function (req, res) {
                          }
                     }
                   }
+                  google_map[0] = ""
                   res.render('pages/main.ejs', {
                     message: "早安",
                     ID: req.cookies.accountStatus,
