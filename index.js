@@ -588,9 +588,9 @@ app.post('/addstr', function (req, res) {
   df_xhr.onload = function () {
 
     var df_data = JSON.parse(df_xhr.responseText);
-   
-    if(df_data.status.code == '200'){
-    var df_intent = df_data.result.metadata.intentName
+
+    if (df_data.status.code == '200') {
+      var df_intent = df_data.result.metadata.intentName
     }//確認是有傳回dailogflow資料
 
     if (req.body.addstr == "初始化" || req.body.addstr == "clear") {
@@ -638,27 +638,62 @@ app.post('/addstr', function (req, res) {
 
 
       if (session[0] == 'place') {
-        request('https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=' + req.body.addstr + '&inputtype=textquery&fields=photos,formatted_address,name,rating,opening_hours,geometry&key=AIzaSyCt3g5gLr475dheyZYlJFXBlSgKa6YMqXk', {
+        request('https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURI(req.body.addstr) + '&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
           json: true
         }, function (err, data) {
-          if (err) throw err
+          if (err) {
+            throw err
+          }
+          else {
+            
+               request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location='+data.results[0].geometry.location.lat+','+data.results[0].geometry.location.lng+'&radius=1500&type=store&keyword='+encodeURI(req.body.addstr)+'&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
+                json: true
+              }, function (err, data2) {
+                if (err) {
+                  throw err
+                }
+                else {
+                  bot[bot.length] = {
+                    message: "YOU：" + req.body.addstr + "<br/>",
+                    class: "input",
+                    canadd: 0
+                  }
+                  if(data2.status != 'ZERO_RESULTS'){
+                    for(var i=0 ; i < data2.results.length ; i++){
+
+                      bot[bot.length] = {
+                       message: "BOT：附近的景點有 - " + data2.results[i].name + "<br/>",
+                       class: "notif",
+                       canadd: 0
+                         }
+                    }
+                  }
+                  res.render('pages/main.ejs', {
+                    message: "早安",
+                    ID: req.cookies.accountStatus,
+                    send: get_str(),
+                    ip: ip,
+                  });
+                }
+              });
+          }
+
+
+
+
+
           bot[bot.length] = {
             message: "YOU：" + req.body.addstr + "<br/>",
             class: "input",
             canadd: 0
           }
-          bot[bot.length] = {
-            message: "BOT：地區 - " + data.candidates[0].formatted_address + "<br/>",
-            class: "notif",
-            canadd: 0
-          }
+          // bot[bot.length] = {
+          //   message: "BOT：地區 - " + data.candidates[0].formatted_address + "<br/>",
+          //   class: "notif",
+          //   canadd: 0
+          // }
 
-          res.render('pages/main.ejs', {
-            message: "早安",
-            ID: req.cookies.accountStatus,
-            send: get_str(),
-            ip: ip,
-          });
+        
         });
         session[0] = ""
       }
@@ -704,7 +739,7 @@ app.post('/addstr', function (req, res) {
       }
 
       else if (session[0] == 'traffic') {
-        search(req.body.addstr,req.cookies.accountStatus,df_intent,df_data)
+        search(req.body.addstr, req.cookies.accountStatus, df_intent, df_data)
         res.render('pages/main.ejs', {
           message: "早安",
           ID: req.cookies.accountStatus,
@@ -717,7 +752,7 @@ app.post('/addstr', function (req, res) {
 
       else if (session[0] == 'traffic_BUSnum') {
         session[1] = findPlace(req.body.addstr)
-        search(req.body.addstr,req.cookies.accountStatus,df_intent,df_data)
+        search(req.body.addstr, req.cookies.accountStatus, df_intent, df_data)
         res.render('pages/main.ejs', {
           message: "早安",
           send: get_str(),
@@ -873,7 +908,7 @@ app.post('/addstr', function (req, res) {
       /////////////////////////////////////////////////////////////////////////////////////////////// 
       //////////////////////////////////////////////////******************************************** */  /////
       else {//////////////////////////////////////////////////////////////////////////////////////////////////   
-        search(req.body.addstr, req.cookies.accountStatus,df_intent,df_data) 
+        search(req.body.addstr, req.cookies.accountStatus, df_intent, df_data)
         res.render('pages/main.ejs', {
           message: "早安",
           send: get_str(),
@@ -887,7 +922,7 @@ app.post('/addstr', function (req, res) {
 });
 
 //搜尋語意
-function search(input, user,df_input,data) {
+function search(input, user, df_input, data) {
   if (input.match("add") || input.match("加入")) {
     // Session[5]="add";
     if (bot[(bot.length - 2)].canadd == 1) {
@@ -917,7 +952,7 @@ function search(input, user,df_input,data) {
       }
     }
   }
-else if (input.match("-h") || input.match("help") || input.match("HELP") || input.match("幫助") || input.match("如何使用")) {
+  else if (input.match("-h") || input.match("help") || input.match("HELP") || input.match("幫助") || input.match("如何使用")) {
     // Session[5]="add";
 
     bot[bot.length] = {
@@ -926,7 +961,47 @@ else if (input.match("-h") || input.match("help") || input.match("HELP") || inpu
       canadd: 0
     }
   }
-else {
+  else if (input.match("台鐵") || input.match("臺鐵") || input.match("火車") || df_input == 'TRA') {
+    bot[bot.length] = {
+      message: "YOU：" + input + "<br/>",
+      class: "input",
+      canadd: 0
+    }
+    bot[bot.length] = {
+      message: "BOT：起點站和終點站？<br/>",
+      class: "notif",
+      canadd: 0
+    }
+    session[0] = "traffic_TRA";
+  }
+  else if (input.match("公車") || input.match("巴士") || input.match("客運") || df_input == 'BUS') {
+    bot[bot.length] = {
+      message: "YOU：" + input + "<br/>",
+      class: "input",
+      canadd: 0
+    }
+    bot[bot.length] = {
+      message: "BOT：哪個縣市？<br/>",
+      class: "notif",
+      canadd: 0
+    }
+    session[0] = "traffic_BUSnum";
+  }
+  else if (session[0] == "traffic_BUSnum") {
+    bot[bot.length] = {
+      message: "YOU：" + input + "<br/>",
+      class: "input",
+      canadd: 0
+    }
+    bot[bot.length] = {
+      message: "BOT：幾號<br/>",
+      class: "notif",
+      canadd: 0
+    }
+    session[0] = "traffic_BUS";
+
+  }
+  else {
 
     if (df_input == 'location') {
       bot[bot.length] = {
@@ -954,32 +1029,7 @@ else {
       }
       session[0] = "weather";
     }
-    else if (input.match("台鐵") || input.match("臺鐵") || input.match("火車") || df_input == 'TRA') {
-      bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
-        class: "input",
-        canadd: 0
-      }
-      bot[bot.length] = {
-        message: "BOT：起點站和終點站？<br/>",
-        class: "notif",
-        canadd: 0
-      }
-      session[0] = "traffic_TRA";
-    }
-    else if (input.match("公車") || input.match("巴士") || input.match("客運") ||  df_input == 'BUS') {
-      bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
-        class: "input",
-        canadd: 0
-      }
-      bot[bot.length] = {
-        message: "BOT：哪個縣市？<br/>",
-        class: "notif",
-        canadd: 0
-      }
-      session[0] = "traffic_BUSnum";
-    }
+
     else if (input.match("咕嚕靈波")) {
       bot[bot.length] = {
         message: "YOU：" + input + "<br/>",
@@ -996,22 +1046,9 @@ else {
         class: "video",
         canadd: 1
       }
-      session[0] = "traffic_BUSnum";
+      session[0] = "";
     }
-    else if (session[0] == "traffic_BUSnum") {
-      bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
-        class: "input",
-        canadd: 0
-      }
-      bot[bot.length] = {
-        message: "BOT：幾號<br/>",
-        class: "notif",
-        canadd: 0
-      }
-      session[0] = "traffic_BUS";
-  
-    }
+
     else if (input == "") {
       bot[bot.length] = {
         message: "YOU：" + input + "<br/>",
@@ -1061,21 +1098,21 @@ else {
         class: "input",
         canadd: 0
       }
-      if(data.status.code !=400 && data.result.fulfillment.speech != ''){
+      if (data.status.code != 400 && data.result.fulfillment.speech != '') {
         bot[bot.length] = {
-          message: "BOT："+data.result.fulfillment.speech+"<br/>",
+          message: "BOT：" + data.result.fulfillment.speech + "<br/>",
           class: "notif",
           canadd: 0
         }
       }
-      else{
+      else {
         bot[bot.length] = {
           message: "BOT：抱歉，我聽不懂<br/>",
           class: "notif",
           canadd: 0
         }
       }
-     
+
       session[0] = "";
       con.query('INSERT INTO searchword.word (`content`,`user`) VALUES (\'' + input + '\',\'' + user + '\')', function (err, result, fields) {
         if (err) {
