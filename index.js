@@ -32,6 +32,7 @@
 }
 //宣告一些會用到的變數
 {
+  var myLocation 
   var dfURL = 'https://api.dialogflow.com/v1/query?v=20150910&lang=en&sessionId=0&query='
   var dfKey = 'Bearer 95ff53816d7b4b419c23b31907038aaa'
   var ip = "127.0.0.1:3000"
@@ -79,6 +80,19 @@
 //初始畫面
 app.get('/', function (req, res) {
 
+
+  res.render('pages/index', {
+    message: "歡迎使用本產品",
+    send: get_str(),
+    ID: ID,
+    ip: ip,
+  });
+});
+app.post('/', function (req, res) {
+  console.log(req.body.latitude)
+ myLocation = {
+  latitude : req.body.latitude , longitude : req.body.longitude
+ }
 
   res.render('pages/index', {
     message: "歡迎使用本產品",
@@ -577,6 +591,43 @@ app.post('/do_findpwd', function (req, res) {
 
 
 });
+app.get('/gps', function (req, res) {
+
+  res.render('pages/gps', {
+    message: "歡迎加入我們",
+  //  ID: req.cookies.accountStatus,
+    ip: ip,
+  //  send: get_str_mylove()
+  });
+
+});
+app.get('/nearby', function (req, res) {
+  request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location='+myLocation.latitude+','+myLocation.longitude+'&radius=1500&type=food,school&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
+    json: true
+  }, function (err, data) {
+    if (err) {
+      throw err
+    }
+    else {
+      console.log(myLocation.latitude)
+      console.log(myLocation.longitude)
+      console.log(data.results[0])
+      var str =''
+      data.results.forEach(element => {
+        str += element.name +'<br>'
+      });
+      console.log(str)
+      res.render('pages/nearby', {
+        message: "歡迎加入我們",
+        ID: req.cookies.accountStatus,
+        ip: ip,
+        context: str
+      });
+    }
+  });
+ 
+
+});
 
 //回應後
 app.post('/addstr', function (req, res) {
@@ -593,10 +644,12 @@ app.post('/addstr', function (req, res) {
       var df_intent = df_data.result.metadata.intentName
       
     }//確認是有傳回dailogflow資料
-    if(df_data.result.parameters.location){
-      google_map[0] = { value : df_data.result.parameters.location , user : req.cookies.accountStatus }
+    google_map[0] = { value : '' , user : '' }
+    if(df_data.result.parameters.type){
+      google_map[0] = { value : df_data.result.parameters.type , user : req.cookies.accountStatus }
     }
-
+    
+    //start <3 ~~
     if (req.body.addstr == "初始化" || req.body.addstr == "clear") {
       console.log(ID + "初始化")
 
@@ -638,6 +691,53 @@ app.post('/addstr', function (req, res) {
         ip: ip,
       });
     }
+    else if (df_data.result.parameters.type && df_data.result.parameters.geocity) {
+      request('https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURI(df_data.result.parameters.geocity) + '&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
+          json: true
+        }, function (err, data) {
+          if (err) {
+            throw err
+          }
+          else {
+            
+            if(google_map[0].user !=  req.cookies.accountStatus){
+              google_map[0] = ""
+            }//如果google map api非現在使用者就不給使用
+               request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location='+data.results[0].geometry.location.lat+','+data.results[0].geometry.location.lng+'&radius=1500&type='+df_data.result.parameters.type+'&keyword='+encodeURI(req.body.addstr)+'&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
+                json: true
+              }, function (err, data2) {
+                if (err) {
+                  throw err
+                }
+                else {
+                  bot[bot.length] = {
+                    message: "YOU：" + req.body.addstr + "<br/>",
+                    class: "input",
+                    canadd: 0
+                  }
+                  if(data2.status != 'ZERO_RESULTS'){
+                    for(var i=0 ; i < data2.results.length ; i++){
+
+                      bot[bot.length] = {
+                       message: "BOT：附近的景點有 - " + data2.results[i].name + "<br/>",
+                       class: "notif",
+                       canadd: 0
+                         }
+                    }
+                  }
+                  google_map[0] = ""
+                  res.render('pages/main.ejs', {
+                    message: "早安",
+                    ID: req.cookies.accountStatus,
+                    send: get_str(),
+                    ip: ip,
+                  });
+                }
+              });
+          }  
+        });
+        session[0] = ""
+    }
     else {
 
 
@@ -649,6 +749,7 @@ app.post('/addstr', function (req, res) {
             throw err
           }
           else {
+            
             if(google_map[0].user !=  req.cookies.accountStatus){
               google_map[0] = ""
             }//如果google map api非現在使用者就不給使用
@@ -683,24 +784,7 @@ app.post('/addstr', function (req, res) {
                   });
                 }
               });
-          }
-
-
-
-
-
-          bot[bot.length] = {
-            message: "YOU：" + req.body.addstr + "<br/>",
-            class: "input",
-            canadd: 0
-          }
-          // bot[bot.length] = {
-          //   message: "BOT：地區 - " + data.candidates[0].formatted_address + "<br/>",
-          //   class: "notif",
-          //   canadd: 0
-          // }
-
-        
+          }  
         });
         session[0] = ""
       }
