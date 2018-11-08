@@ -721,8 +721,11 @@ app.post('/addstr', function (req, res) {
                       bot[bot.length] = {
                        message: "BOT：附近的景點有 - " + data2.results[i].name + "<br/>",
                        class: "notif",
-                       canadd: 0
+                       canadd: 0,
+                       value:data2.results[i].name,
+                       arraynum: bot.length
                          }
+             
                     }
                   }
                   google_map[0] = ""
@@ -771,8 +774,11 @@ app.post('/addstr', function (req, res) {
                       bot[bot.length] = {
                        message: "BOT：附近的景點有 - " + data2.results[i].name + "<br/>",
                        class: "notif",
-                       canadd: 0
+                       canadd: 0,
+                       value:data2.results[i].name,
+                       arraynum: bot.length 
                          }
+                     
                     }
                   }
                   google_map[0] = ""
@@ -810,7 +816,9 @@ app.post('/addstr', function (req, res) {
             bot[bot.length] = {
               message: "<tr><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[0].time[i].elementValue.value + "°C</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[8].time[i].elementValue.value + "°C</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[9].time[i].elementValue[0].value + "</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[3].time[i].elementValue.value + "%</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[7].time[i].elementValue[1].value + "</td></tr>",
               class: "weather",
-              canadd: 1
+              canadd: 1,
+              value:req.body.addstr+'的氣溫是'+ data2.results[i].name+'°C 降雨機率為'+data.cwbopendata.dataset.locations.location[1].weatherElement[3].time[i].elementValue.value+'%',
+              arraynum: bot.length 
             }
           }
           bot[bot.length] = {
@@ -870,7 +878,9 @@ app.post('/addstr', function (req, res) {
                   bot[bot.length] = {
                     message: "<tr><td>" + (j + 1) + "</td><td>" + response.data[i].Stops[j].StopName.Zh_tw + "</td><td>" + response.data[i].Stops[response.data[i].Stops.length - j - 1].StopName.Zh_tw + "</td></tr>",
                     class: "bus",
-                    canadd: 1
+                    canadd: 1,
+                    value:'搭乘的公車為'+response.data[i].Stops[j].StopName.Zh_tw+'號',
+                    arraynum: bot.length 
                   }
                 }
                 bot[bot.length] = {
@@ -978,7 +988,9 @@ app.post('/addstr', function (req, res) {
               bot[bot.length] = {
                 message: "<tr><td>" + response.data[i].DailyTrainInfo.TrainTypeName.Zh_tw + "</td><td>" + response.data[i].DailyTrainInfo.TrainNo + "</td><td>" + response.data[i].OriginStopTime.ArrivalTime + "</td><td>" + response.data[i].DailyTrainInfo.Note.Zh_tw + "</td></tr>",
                 class: "notif",
-                canadd: 1
+                canadd: 1,
+                value:'搭乘車種為'+ response.data[i].DailyTrainInfo.TrainTypeName.Zh_tw+'號 第'+response.data[i].DailyTrainInfo.TrainNo+'車次 於'+response.data[i].OriginStopTime.ArrivalTime+'抵達',
+                arraynum: bot.length 
               }
             }
             bot[bot.length] = {
@@ -1241,10 +1253,18 @@ function get_fstr(user) {
 }
 //把bot[]轉成字串
 function get_str() {
-  var str = ""
+  var str = ''
   bot.forEach(input => {
-    str += input.message
-  });
+    if(input.cabadd == 0){
+      str += input.message
+      }
+    else{
+      str += input.message 
+    }
+    })
+    
+    
+  
   return str
 }
 //把mylove[]轉成字串
