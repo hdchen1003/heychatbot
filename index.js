@@ -32,7 +32,7 @@
 }
 //宣告一些會用到的變數
 {
-  var myLocation 
+  var myLocation
   var dfURL = 'https://api.dialogflow.com/v1/query?v=20150910&lang=en&sessionId=0&query='
   var dfKey = 'Bearer 95ff53816d7b4b419c23b31907038aaa'
   var ip = "127.0.0.1:3000"
@@ -90,9 +90,9 @@ app.get('/', function (req, res) {
 });
 app.post('/', function (req, res) {
   console.log(req.body.latitude)
- myLocation = {
-  latitude : req.body.latitude , longitude : req.body.longitude
- }
+  myLocation = {
+    latitude: req.body.latitude, longitude: req.body.longitude
+  }
 
   res.render('pages/index', {
     message: "歡迎使用本產品",
@@ -595,28 +595,26 @@ app.get('/gps', function (req, res) {
 
   res.render('pages/gps', {
     message: "歡迎加入我們",
-  //  ID: req.cookies.accountStatus,
+    //  ID: req.cookies.accountStatus,
     ip: ip,
-  //  send: get_str_mylove()
+    //  send: get_str_mylove()
   });
 
 });
 app.get('/nearby', function (req, res) {
-  request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location='+myLocation.latitude+','+myLocation.longitude+'&radius=1500&type=food,school&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
+  request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + myLocation.latitude + ',' + myLocation.longitude + '&radius=1500&type=food,school&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
     json: true
   }, function (err, data) {
     if (err) {
       throw err
     }
     else {
-      console.log(myLocation.latitude)
-      console.log(myLocation.longitude)
-      console.log(data.results[0])
-      var str =''
+
+      var str = ''
       data.results.forEach(element => {
-        str += element.name +'<br>'
+        str += element.name + '<br>'
       });
-      console.log(str)
+
       res.render('pages/nearby', {
         message: "歡迎加入我們",
         ID: req.cookies.accountStatus,
@@ -625,7 +623,18 @@ app.get('/nearby', function (req, res) {
       });
     }
   });
- 
+
+
+});
+app.post('/addTOfavorite', function (req, res) {
+  console.log(req.body.value)
+  console.log(req.body.arrnum)
+  res.render('pages/main', {
+    message: "歡迎加入我們",
+    ID: req.cookies.accountStatus,
+    ip: ip,
+    send: get_str()
+  });
 
 });
 
@@ -642,13 +651,13 @@ app.post('/addstr', function (req, res) {
 
     if (df_data.status.code == '200') {
       var df_intent = df_data.result.metadata.intentName
-      
+
     }//確認是有傳回dailogflow資料
-    google_map[0] = { value : '' , user : '' }
-    if(df_data.result.parameters.type){
-      google_map[0] = { value : df_data.result.parameters.type , user : req.cookies.accountStatus }
+    google_map[0] = { value: '', user: '' }
+    if (df_data.result.parameters.type) {
+      google_map[0] = { value: df_data.result.parameters.type, user: req.cookies.accountStatus }
     }
-    
+
     //start <3 ~~
     if (req.body.addstr == "初始化" || req.body.addstr == "clear") {
       console.log(ID + "初始化")
@@ -660,14 +669,16 @@ app.post('/addstr', function (req, res) {
       bot.length = 0;
 
       bot[bot.length] = {
-        message: "YOU：" + req.body.addstr + "<br/>",
+        message: "YOU：" + req.body.addstr,
         class: "input",
-        canadd: 0
+        canadd: 0,
+        type: 'str'
       }
       bot[bot.length] = {
-        message: "BOT：初始化完畢<br/>",
+        message: "BOT：初始化完畢",
         class: "notif",
-        canadd: 0
+        canadd: 0,
+        type: 'str'
       }
 
       res.render('pages/main.ejs', {
@@ -679,9 +690,10 @@ app.post('/addstr', function (req, res) {
     }
     else if (req.body.addstr == "我的最愛") {
       bot[bot.length] = {
-        message: "YOU：" + req.body.addstr + "<br/>",
+        message: "YOU：" + req.body.addstr,
         class: "input",
-        canadd: 0
+        canadd: 0,
+        type: 'str'
       }
       opMylove();
       res.render('pages/main.ejs', {
@@ -693,53 +705,55 @@ app.post('/addstr', function (req, res) {
     }
     else if (df_data.result.parameters.type && df_data.result.parameters.geocity) {
       request('https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURI(df_data.result.parameters.geocity) + '&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
-          json: true
-        }, function (err, data) {
-          if (err) {
-            throw err
-          }
-          else {
-            
-            if(google_map[0].user !=  req.cookies.accountStatus){
-              google_map[0] = ""
-            }//如果google map api非現在使用者就不給使用
-               request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location='+data.results[0].geometry.location.lat+','+data.results[0].geometry.location.lng+'&radius=1500&type='+df_data.result.parameters.type+'&keyword='+encodeURI(req.body.addstr)+'&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
-                json: true
-              }, function (err, data2) {
-                if (err) {
-                  throw err
-                }
-                else {
-                  bot[bot.length] = {
-                    message: "YOU：" + req.body.addstr + "<br/>",
-                    class: "input",
-                    canadd: 0
-                  }
-                  if(data2.status != 'ZERO_RESULTS'){
-                    for(var i=0 ; i < data2.results.length ; i++){
+        json: true
+      }, function (err, data) {
+        if (err) {
+          throw err
+        }
+        else {
 
-                      bot[bot.length] = {
-                       message: "BOT：附近的景點有 - " + data2.results[i].name + "<br/>",
-                       class: "notif",
-                       canadd: 0,
-                       value:data2.results[i].name,
-                       arraynum: bot.length
-                         }
-             
-                    }
+          if (google_map[0].user != req.cookies.accountStatus) {
+            google_map[0] = ""
+          }//如果google map api非現在使用者就不給使用
+          request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + data.results[0].geometry.location.lat + ',' + data.results[0].geometry.location.lng + '&radius=1500&type=' + df_data.result.parameters.type + '&keyword=' + encodeURI(req.body.addstr) + '&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
+            json: true
+          }, function (err, data2) {
+            if (err) {
+              throw err
+            }
+            else {
+              bot[bot.length] = {
+                message: "YOU：" + req.body.addstr,
+                class: "input",
+                canadd: 0,
+                type: 'str'
+              }
+              if (data2.status != 'ZERO_RESULTS') {
+                for (var i = 0; i < data2.results.length; i++) {
+
+                  bot[bot.length] = {
+                    message: "BOT：附近的景點有 - " + data2.results[i].name,
+                    class: "notif",
+                    canadd: 1,
+                    value: data2.results[i].name,
+                    arraynum: bot.length,
+                    type: 'str'
                   }
-                  google_map[0] = ""
-                  res.render('pages/main.ejs', {
-                    message: "早安",
-                    ID: req.cookies.accountStatus,
-                    send: get_str(),
-                    ip: ip,
-                  });
+
                 }
+              }
+              google_map[0] = ""
+              res.render('pages/main.ejs', {
+                message: "早安",
+                ID: req.cookies.accountStatus,
+                send: get_str(),
+                ip: ip,
               });
-          }  
-        });
-        session[0] = ""
+            }
+          });
+        }
+      });
+      session[0] = ""
     }
     else {
 
@@ -752,45 +766,47 @@ app.post('/addstr', function (req, res) {
             throw err
           }
           else {
-            
-            if(google_map[0].user !=  req.cookies.accountStatus){
+
+            if (google_map[0].user != req.cookies.accountStatus) {
               google_map[0] = ""
             }//如果google map api非現在使用者就不給使用
-               request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location='+data.results[0].geometry.location.lat+','+data.results[0].geometry.location.lng+'&radius=1500&type='+google_map[0].value+'&keyword='+encodeURI(req.body.addstr)+'&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
-                json: true
-              }, function (err, data2) {
-                if (err) {
-                  throw err
+            request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + data.results[0].geometry.location.lat + ',' + data.results[0].geometry.location.lng + '&radius=1500&type=' + google_map[0].value + '&keyword=' + encodeURI(req.body.addstr) + '&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
+              json: true
+            }, function (err, data2) {
+              if (err) {
+                throw err
+              }
+              else {
+                bot[bot.length] = {
+                  message: "YOU：" + req.body.addstr,
+                  class: "input",
+                  canadd: 0,
+                  type: 'str'
                 }
-                else {
-                  bot[bot.length] = {
-                    message: "YOU：" + req.body.addstr + "<br/>",
-                    class: "input",
-                    canadd: 0
-                  }
-                  if(data2.status != 'ZERO_RESULTS'){
-                    for(var i=0 ; i < data2.results.length ; i++){
+                if (data2.status != 'ZERO_RESULTS') {
+                  for (var i = 0; i < data2.results.length; i++) {
 
-                      bot[bot.length] = {
-                       message: "BOT：附近的景點有 - " + data2.results[i].name + "<br/>",
-                       class: "notif",
-                       canadd: 0,
-                       value:data2.results[i].name,
-                       arraynum: bot.length 
-                         }
-                     
+                    bot[bot.length] = {
+                      message: "BOT：附近的景點有 - " + data2.results[i].name,
+                      class: "notif",
+                      canadd: 1,
+                      value: data2.results[i].name,
+                      arraynum: bot.length,
+                      type: 'str'
                     }
+
                   }
-                  google_map[0] = ""
-                  res.render('pages/main.ejs', {
-                    message: "早安",
-                    ID: req.cookies.accountStatus,
-                    send: get_str(),
-                    ip: ip,
-                  });
                 }
-              });
-          }  
+                google_map[0] = ""
+                res.render('pages/main.ejs', {
+                  message: "早安",
+                  ID: req.cookies.accountStatus,
+                  send: get_str(),
+                  ip: ip,
+                });
+              }
+            });
+          }
         });
         session[0] = ""
       }
@@ -802,29 +818,32 @@ app.post('/addstr', function (req, res) {
         }, function (err, data) {
           if (err) throw err
           bot[bot.length] = {
-            message: "YOU：" + req.body.addstr + "<br/>",
+            message: "YOU：" + req.body.addstr,
             class: "input",
-
+            type: 'str',
             canadd: 0
           }
           bot[bot.length] = {
-            message: "BOT：<br/><table class='sss' border=1><tr><td>溫度</td><td>體感溫度</td><td>天氣現象</td><td>降雨機率</td><td>舒適度</td></tr>",
+            message: "BOT：<br/><table class='sss' border=1><tr><td>溫度</td><td>體感溫度</td><td>天氣現象</td><td>降雨機率</td><td>舒適度</td> <td>我的最愛</td></tr>",
             class: "notif",
-            canadd: 0
+            canadd: 0,
+            type: 'table_title'
           }
           for (var i = 0; i < 3; i++) {
             bot[bot.length] = {
-              message: "<tr><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[0].time[i].elementValue.value + "°C</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[8].time[i].elementValue.value + "°C</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[9].time[i].elementValue[0].value + "</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[3].time[i].elementValue.value + "%</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[7].time[i].elementValue[1].value + "</td></tr>",
+              message: "<tr><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[0].time[i].elementValue.value + "°C</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[8].time[i].elementValue.value + "°C</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[9].time[i].elementValue[0].value + "</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[3].time[i].elementValue.value + "%</td><td>" + data.cwbopendata.dataset.locations.location[1].weatherElement[7].time[i].elementValue[1].value + "</td>",
               class: "weather",
               canadd: 1,
-              value:req.body.addstr+'的氣溫是'+ data2.results[i].name+'°C 降雨機率為'+data.cwbopendata.dataset.locations.location[1].weatherElement[3].time[i].elementValue.value+'%',
-              arraynum: bot.length 
+              value: req.body.addstr + '的氣溫是' + data.cwbopendata.dataset.locations.location[1].weatherElement[0].time[i].elementValue.value + '°C 降雨機率為' + data.cwbopendata.dataset.locations.location[1].weatherElement[3].time[i].elementValue.value + '%',
+              arraynum: bot.length,
+              type: 'table'
             }
           }
           bot[bot.length] = {
-            message: "</table><br/>",
+            message: "</table>",
             class: "notif",
-            canadd: 0
+            canadd: 0,
+            type: 'str'
           }
 
           res.render('pages/main.ejs', {
@@ -870,23 +889,26 @@ app.post('/addstr', function (req, res) {
             for (var i = 0; i < response.data.length; i++) {
               if (response.data[i].RouteName.Zh_tw.match(session[2])) {
                 bot[bot.length] = {
-                  message: "<table border=1> <tr><td>編號</td> <td>去程</td> <td>回程</td></tr>",
+                  message: "<table border=1> <tr><td>編號</td> <td>去程</td> <td>回程</td> <td>我的最愛</td></tr>",
                   class: "notif",
-                  canadd: 0
+                  canadd: 0,
+                  type: 'table_title'
                 }
                 for (var j = 0; j < response.data[i].Stops.length; j++) {
                   bot[bot.length] = {
-                    message: "<tr><td>" + (j + 1) + "</td><td>" + response.data[i].Stops[j].StopName.Zh_tw + "</td><td>" + response.data[i].Stops[response.data[i].Stops.length - j - 1].StopName.Zh_tw + "</td></tr>",
+                    message: "<tr><td>" + (j + 1) + "</td><td>" + response.data[i].Stops[j].StopName.Zh_tw + "</td><td>" + response.data[i].Stops[response.data[i].Stops.length - j - 1].StopName.Zh_tw + "</td>",
                     class: "bus",
                     canadd: 1,
-                    value:'搭乘的公車為'+response.data[i].Stops[j].StopName.Zh_tw+'號',
-                    arraynum: bot.length 
+                    value: '搭乘的公車為' + response.data[i].Stops[j].StopName.Zh_tw + '號',
+                    arraynum: bot.length,
+                    type: 'table'
                   }
                 }
                 bot[bot.length] = {
-                  message: "</table><br/>",
+                  message: "</table>",
                   class: "notif",
-                  canadd: 0
+                  canadd: 0,
+                  type: 'str'
                 }
               }
               break;
@@ -905,9 +927,10 @@ app.post('/addstr', function (req, res) {
 
       else if (session[0] == 'traffic_TRA') {
         bot[bot.length] = {
-          message: "YOU：" + req.body.addstr + "<br/>",
+          message: "YOU：" + req.body.addstr,
           class: "input",
           canadd: 0
+          , type: 'str'
         }
         var originName, destinationName, originID, destinationID
         axios.get('https://ptx.transportdata.tw/MOTC/v2/Rail/TRA/Station?$select=StationName%2CStationID&$format=JSON', { // 參考(抄襲XD)noobTW
@@ -941,21 +964,24 @@ app.post('/addstr', function (req, res) {
               originID = a
             }//比對字串，如果先列出終點就把他們交換
             bot[bot.length] = {
-              message: "BOT：起站 - " + originName + " ，迄站 -  " + destinationName + "<br/>",
+              message: "BOT：起站 - " + originName + " ，迄站 -  " + destinationName,
               class: "notif",
-              canadd: 0
+              canadd: 0,
+              type: 'str'
             }
             bot[bot.length] = {
-              message: "BOT：要搭幾月幾號的車？<br/>",
+              message: "BOT：要搭幾月幾號的車？",
               class: "notif",
-              canadd: 0
+              canadd: 0,
+              type: 'str'
             }
             Train = [originName, originID, destinationName, destinationID]
             delTRA = bot.length
             bot[bot.length] = {
               message: "<input type=\"date\" class=\"input\" name=\"time\">",
               class: "notif",
-              canadd: 0
+              canadd: 0,
+              type: 'talbe'
             }
             res.render('pages/main.ejs', {
               message: "早安",
@@ -971,32 +997,36 @@ app.post('/addstr', function (req, res) {
       else if (session[0] == 'need_TRA_time') {
         //bot.splice(delTRA, 1, "")
         bot[bot.length] = {
-          message: "YOU：" + req.body.time + "<br/>",
+          message: "YOU：" + req.body.time,
           class: "input",
-          canadd: 0
+          canadd: 0,
+          type: 'str'
         }
         axios.get('http://ptx.transportdata.tw/MOTC/v2/Rail/TRA/DailyTimetable/OD/' + Train[1] + '/to/' + Train[3] + '/' + req.body.time + '?&$format=json', { // 參考(抄襲XD)noobTW
           headers: getAuthorizationHeader(),
         })
           .then(function (response) {
             bot[bot.length] = {
-              message: "BOT：<br/><table border=1><tr><td>車種</td><td>車次代碼</td><td>到站時間</td><td>備註</td></tr>",
+              message: "BOT：<br/><table border=1><tr><td>車種</td><td>車次代碼</td><td>到站時間</td><td>備註</td><td>加入最愛</td></tr>",
               class: "notif",
-              cabadd: 0
+              cabadd: 0,
+              type: 'table_title'
             }
             for (var i = 0; i < response.data.length; i++) {
               bot[bot.length] = {
-                message: "<tr><td>" + response.data[i].DailyTrainInfo.TrainTypeName.Zh_tw + "</td><td>" + response.data[i].DailyTrainInfo.TrainNo + "</td><td>" + response.data[i].OriginStopTime.ArrivalTime + "</td><td>" + response.data[i].DailyTrainInfo.Note.Zh_tw + "</td></tr>",
+                message: "<tr><td>" + response.data[i].DailyTrainInfo.TrainTypeName.Zh_tw + "</td><td>" + response.data[i].DailyTrainInfo.TrainNo + "</td><td>" + response.data[i].OriginStopTime.ArrivalTime + "</td><td>" + response.data[i].DailyTrainInfo.Note.Zh_tw + "</td>",
                 class: "notif",
                 canadd: 1,
-                value:'搭乘車種為'+ response.data[i].DailyTrainInfo.TrainTypeName.Zh_tw+'號 第'+response.data[i].DailyTrainInfo.TrainNo+'車次 於'+response.data[i].OriginStopTime.ArrivalTime+'抵達',
-                arraynum: bot.length 
+                value: '搭乘車種為' + response.data[i].DailyTrainInfo.TrainTypeName.Zh_tw + '號 第' + response.data[i].DailyTrainInfo.TrainNo + '車次 於' + response.data[i].OriginStopTime.ArrivalTime + '抵達',
+                arraynum: bot.length,
+                type: 'table'
               }
             }
             bot[bot.length] = {
-              message: "</table><br/>",
+              message: "</table>",
               class: "notif",
-              canadd: 0
+              canadd: 0,
+              type: 'str'
             }
             res.render('pages/main.ejs', {
               message: "早安",
@@ -1039,9 +1069,10 @@ function search(input, user, df_input, data) {
           console.log("成功")
         }
         bot[bot.length] = {
-          message: "BOT：我的最愛加入成功<br/>",
+          message: "BOT：我的最愛加入成功",
           class: "notif",
-          canadd: 0
+          canadd: 0,
+          type: 'str'
         }
       });
     }
@@ -1049,9 +1080,10 @@ function search(input, user, df_input, data) {
       console.log(bot[(bot.length - 2)].message + "+")
       console.log(bot[(bot.length - 2)].canadd + "+")
       bot[bot.length] = {
-        message: "BOT：此項目不能加入最愛<br/>",
+        message: "BOT：此項目不能加入最愛",
         class: "notif",
-        canadd: 0
+        canadd: 0,
+        type: 'str'
       }
     }
   }
@@ -1061,45 +1093,52 @@ function search(input, user, df_input, data) {
     bot[bot.length] = {
       message: "BOT：本系統目前提供幾種服務1.交通 2.地點 3.天氣 4.貓咪 5.初始化 6.add 7.有其他建議請聯絡我",
       class: "help",
-      canadd: 0
+      canadd: 0,
+      type: 'str'
     }
   }
   else if (input.match("台鐵") || input.match("臺鐵") || input.match("火車") || df_input == 'TRA') {
     bot[bot.length] = {
-      message: "YOU：" + input + "<br/>",
+      message: "YOU：" + input,
       class: "input",
-      canadd: 0
+      canadd: 0,
+      type: 'str'
     }
     bot[bot.length] = {
-      message: "BOT：起點站和終點站？<br/>",
+      message: "BOT：起點站和終點站？",
       class: "notif",
-      canadd: 0
+      canadd: 0,
+      type: 'str'
     }
     session[0] = "traffic_TRA";
   }
   else if (input.match("公車") || input.match("巴士") || input.match("客運") || df_input == 'BUS') {
     bot[bot.length] = {
-      message: "YOU：" + input + "<br/>",
+      message: "YOU：" + input,
       class: "input",
-      canadd: 0
+      canadd: 0,
+      type: 'str'
     }
     bot[bot.length] = {
-      message: "BOT：哪個縣市？<br/>",
+      message: "BOT：哪個縣市？",
       class: "notif",
-      canadd: 0
+      canadd: 0,
+      type: 'str'
     }
     session[0] = "traffic_BUSnum";
   }
   else if (session[0] == "traffic_BUSnum") {
     bot[bot.length] = {
-      message: "YOU：" + input + "<br/>",
+      message: "YOU：" + input,
       class: "input",
-      canadd: 0
+      canadd: 0,
+      type: 'str'
     }
     bot[bot.length] = {
-      message: "BOT：幾號<br/>",
+      message: "BOT：幾號？",
       class: "notif",
-      canadd: 0
+      canadd: 0,
+      type: 'str'
     }
     session[0] = "traffic_BUS";
 
@@ -1108,111 +1147,128 @@ function search(input, user, df_input, data) {
 
     if (df_input == 'location') {
       bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
+        message: "YOU：" + input,
         class: "input",
-        canadd: 0
+        canadd: 0,
+        type: 'str'
       }
       bot[bot.length] = {
-        message: "BOT：要查詢哪個地方？<br/>",
+        message: "BOT：要查詢哪個地方？",
         class: "notif",
-        canadd: 0
+        canadd: 0,
+        type: 'str'
       }
       session[0] = "place";
     }
     else if (df_input == 'weather') {
       bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
+        message: "YOU：" + input,
         class: "input",
-        canadd: 0
+        canadd: 0,
+        type: 'str'
       }
       bot[bot.length] = {
-        message: "BOT：要查詢哪裡的天氣？<br/>",
+        message: "BOT：要查詢哪裡的天氣？",
         class: "notif",
-        canadd: 0
+        canadd: 0,
+        type: 'str'
       }
       session[0] = "weather";
     }
 
     else if (input.match("咕嚕靈波")) {
       bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
+        message: "YOU：" + input,
         class: "input",
-        canadd: 0
+        canadd: 0,
+        type: 'str'
       }
       bot[bot.length] = {
-        message: "BOT：歡迎來到真步真步王國 咕嚕靈波 （●′∀‵）ノ♡ <br/>",
+        message: "BOT：歡迎來到真步真步王國 咕嚕靈波 （●′∀‵）ノ♡",
         class: "notif",
-        canadd: 0
+        canadd: 0,
+        type: 'str'
       }
       bot[bot.length] = {
         message: '<video width="320" height="240" controls><source src="linpo.mp4" type="video/mp4"></video>',
         class: "video",
-        canadd: 1
+        canadd: 1,
+        type: 'str'
       }
       session[0] = "";
     }
 
     else if (input == "") {
       bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
+        message: "YOU：" + input,
         class: "input",
-        canadd: 0
+        canadd: 0,
+        type: 'str'
       }
       bot[bot.length] = {
-        message: "BOT：不會打字哦，廢物？<br/>",
+        message: "BOT：不會打字哦，廢物？",
         class: "notif",
-        canadd: 0
+        canadd: 0,
+        type: 'str'
       }
     }
     else if (input.match("貓")) {
       bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
+        message: "YOU：" + input,
         class: "input",
-        canadd: 0
+        canadd: 0,
+        type: 'str'
       }
       bot[bot.length] = {
-        message: "BOT：好，我就給你貓咪<br/>",
+        message: "BOT：好，我就給你貓咪",
         class: "notif",
-        canadd: 0
+        canadd: 0,
+        type: 'str'
       }
       bot[bot.length] = {
-        message: "BOT：" + ' <img src="http://p1.pstatp.com/large/pgc-image/15243937805643c35ac4877" alt="cat" height="150" width="150"> ' + "<br/>",
+        message: "BOT：" + ' <img src="http://p1.pstatp.com/large/pgc-image/15243937805643c35ac4877" alt="cat" height="150" width="150"> ',
         class: "img",
-        canadd: 1
+        canadd: 1,
+        type: 'str'
       }
     }
     else if (df_input == 'traffic') {
       bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
+        message: "YOU：" + input,
         class: "input",
-        canadd: 0
+        canadd: 0,
+        type: 'str'
       }
       bot[bot.length] = {
-        message: "BOT：要搭乘什麼？<br/>",
+        message: "BOT：要搭乘什麼？",
         class: "notif",
-        canadd: 0
+        canadd: 0,
+        type: 'str'
       }
       session[0] = "traffic";
     }
 
     else {
       bot[bot.length] = {
-        message: "YOU：" + input + "<br/>",
+        message: "YOU：" + input,
         class: "input",
-        canadd: 0
+        canadd: 0,
+        type: 'str'
       }
       if (data.status.code != 400 && data.result.fulfillment.speech != '') {
         bot[bot.length] = {
-          message: "BOT：" + data.result.fulfillment.speech + "<br/>",
+          message: "BOT：" + data.result.fulfillment.speech,
           class: "notif",
-          canadd: 0
+          canadd: 0,
+          type: 'str'
         }
       }
       else {
         bot[bot.length] = {
-          message: "BOT：抱歉，我聽不懂<br/>",
+          message: "BOT：抱歉，我聽不懂",
           class: "notif",
-          canadd: 0
+          canadd: 0,
+          type: 'str'
         }
       }
 
@@ -1221,7 +1277,7 @@ function search(input, user, df_input, data) {
         if (err) {
         }
         else {
-          console.log('有新的未知文字')
+
         }
 
       })
@@ -1255,16 +1311,36 @@ function get_fstr(user) {
 function get_str() {
   var str = ''
   bot.forEach(input => {
-    if(input.cabadd == 0){
-      str += input.message
+    if (input.canadd == 1) {
+      if (input.type == 'str') {
+      //  console.log(input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="https://i.imgur.com/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' + '<br/>')
+        str += input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="https://i.imgur.com/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' + '<br/>'
       }
-    else{
-      str += input.message 
+      else if(input.type == 'table'){
+     //   console.log('canadd 1 type table')
+        str += input.message + '<td><form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="https://i.imgur.com/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> </td></tr>'
+      }
+      else {
+      //  console.log('canadd 1 type other')
+        str += input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="https://i.imgur.com/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> '
+      }
     }
-    })
-    
-    
-  
+    else {
+      if (input.type == 'str') {
+    //    console.log('canadd 0 type str')
+        str += input.message + '<br/>'
+      }
+      else {
+     //   console.log('canadd 0 type other')
+        str += input.message
+      }
+
+    }
+
+  })
+
+
+
   return str
 }
 //把mylove[]轉成字串
@@ -1453,6 +1529,11 @@ function showIntFromString(text) {
     return "找不到數字";
   }
 }
+//讀取景點列表
+function schedule(){
+  
+}
+
 //port
 app.listen(port, function () {
   console.log('Listening on port 3000!');
