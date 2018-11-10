@@ -88,19 +88,6 @@ app.get('/', function (req, res) {
     ip: ip,
   });
 });
-// app.post('/', function (req, res) {
-//   console.log(req.body.latitude)
-//   myLocation = {
-//     latitude: req.body.latitude, longitude: req.body.longitude
-//   }
-
-//   res.render('pages/index', {
-//     message: "歡迎使用本產品",
-//     send: get_str(),
-//     ID: ID,
-//     ip: ip,
-//   });
-// });
 app.get('/loginin', function (req, res) {
 
   if (req.cookies.accountStatus) {
@@ -130,13 +117,13 @@ app.post('/login', function (req, res) {
         res.cookie('accountStatus', result[0].id) //當作session使用 
         res.cookie('schedule_now', result[0].schedule_now) //當作session使用 
         con.query('SELECT * FROM heychatbot.message WHERE u_id=\'' + req.body.ID + '\' order by m_id desc limit ' + when_login_select_num + ' ', function (err, result, fields) {
-          for (var i = (result.length) - 1; i >= 0; i--) {
-            bot[bot.length] = {
-              message: result[i].message,
-              class: result[i].class,
-              canadd: result[i].canadd
-            }
-          }
+          // for (var i = (result.length) - 1; i >= 0; i--) {
+          //   bot[bot.length] = {
+          //     message: result[i].message,
+          //     class: result[i].class,
+          //     canadd: result[i].canadd
+          //   }
+          // }
 
           // result.forEach(input => {
           //   bot[bot.length] = input.message;
@@ -205,15 +192,10 @@ app.get('/signup', function (req, res) {
 
 });
 app.post('/doSignup', function (req, res) {
-
-  if (req.body.ID != "" && req.body.pwd != "" && req.body.pwd2 != "" && req.body.name != "" && req.body.birth != "" && req.body.email != "" && req.body.gender != "") {
-    console.log("不為空")
-    //console.log(req.body.ID,req.body.pwd,req.body.pwd2,req.body.email,req.body.gender,req.body.birth,req.body.name)
-    con.query('SELECT id FROM heychatbot.user WHERE id=\'' + req.body.ID + '\'', function (err, result, fields) {
-      console.log(result)
+  if (req.body.ID != "" && req.body.pwd != "" && req.body.pwd2 != "" && req.body.name != "" && req.body.birth != "" && req.body.email != "" && req.body.gender != "") { 
+    con.query('SELECT id FROM heychatbot.user WHERE id=\'' + req.body.ID + '\'', function (err, result, fields) {    
       if (result == "") {
         if (req.body.pwd != req.body.pwd2) {
-          console.log("密碼不一致")
           res.render('pages/index', {
             message: "密碼不一致",
             ID: req.cookies.accountStatus,
@@ -221,7 +203,6 @@ app.post('/doSignup', function (req, res) {
           });
         }
         else {
-          console.log("註冊成功")
           con.query('INSERT INTO `heychatbot`.`user` (`id`, `pwd`, `name`, `email`, `birth`, `gender`) VALUES (\'' + req.body.ID + '\', \'' + req.body.pwd + '\', \'' + req.body.name + '\', \'' + req.body.email + '\', \'' + req.body.birth + '\', \'' + req.body.gender + '\')', function (err, result, fields) {
             res.render('pages/index', {
               message: "註冊成功",
@@ -233,27 +214,21 @@ app.post('/doSignup', function (req, res) {
         }
       }
       else {
-        console.log("帳號已經被註冊")
         res.render('pages/index', {
           message: "帳號已經被註冊了",
           ID: req.cookies.accountStatus,
           ip: ip,
         });
-
       }
     });
-
   }
   else {
-    console.log("有欄位漏填")
     res.render('pages/index', {
       message: "有欄位漏填",
       ID: req.cookies.accountStatus,
       ip: ip,
     });
   }
-
-
 });
 app.get('/info', function (req, res) {
 
@@ -315,7 +290,8 @@ app.get('/private', function (req, res) {
 
 });
 app.get('/friend', function (req, res) {
-  con.query('SELECT * FROM heychatbot.myfriend WHERE u_id1= \'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {
+  friendList.length = 0
+  con.query('SELECT * FROM heychatbot.myfriend WHERE u_id1= \'' + req.cookies.accountStatus + '\' OR  u_id2= \'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {
     if (err) {
     }
     else {
@@ -355,9 +331,7 @@ app.get('/invite', function (req, res) {
     else {
       if (result) {
         for (var i = 0; i < invite.length; i++) {
-          console.log(invite[i].user)
           if (invite[i].user == req.cookies.accountStatus) {
-            console.log("刪除F陣列")
             invite.splice(i, 1, "")
           }
         }
@@ -379,60 +353,107 @@ app.get('/invite', function (req, res) {
   })
 });
 app.post('/do_invite', function (req, res) {
-  // con.query('SELECT * FROM heychatbot.myfriend WHERE invitee=\'' + req.cookies.accountStatus + '\'', function (err, result, fields) {
-  //   if (err) {
-  //   }
-  //   else {
-  con.query('INSERT INTO `heychatbot`.`inviting` (`inviter`, `invitee`) VALUES (\'' + req.cookies.accountStatus + '\', \'' + req.body.f_id + '\')', function (err, result, fields) {
-    if (err) {
+  con.query('SELECT * FROM heychatbot.user WHERE  id=\'' + req.body.f_id + '\'', function (err, result, fields) { //檢查受邀者是否存在
+    if(err){
+      throw err
     }
-    else {
-      res.render('pages/addfriend', {
-        message: "歡迎加入我們",
-        ID: req.cookies.accountStatus,
-        ip: ip,
-        invite: get_istr(req.cookies.accountStatus)
-      });
+    else{
+      if(result == ''){
+        res.render('pages/addfriend', {
+          message: "查無此ID",
+          ID: req.cookies.accountStatus,
+          ip: ip,
+          invite: get_istr(req.cookies.accountStatus)
+        });
+      }
+      else{
+        if (req.body.f_id == req.cookies.accountStatus) {
+          res.render('pages/addfriend', {
+            message: "不能邀請自己哦~",
+            ID: req.cookies.accountStatus,
+            ip: ip,
+            invite: get_istr(req.cookies.accountStatus)
+          });
+        }
+        else {
+          con.query('SELECT * FROM heychatbot.inviting WHERE (inviter=\'' + req.cookies.accountStatus + '\' and invitee=\'' + req.body.f_id + '\') OR (invitee=\'' + req.cookies.accountStatus + '\' and inviter=\'' + req.body.f_id + '\')', function (err, result, fields) {
+            if (err) {//檢查是否正在邀請中
+              throw err
+            }
+            else {
+              if (result == '') {
+                con.query('SELECT * FROM heychatbot.myfriend WHERE (u_id1=\'' + req.cookies.accountStatus + '\' and u_id2=\'' + req.body.f_id + '\') OR (u_id2=\'' + req.cookies.accountStatus + '\' and u_id1=\'' + req.body.f_id + '\')', function (err, result, fields) {
+                  if (err) {//檢查是否已經是好友
+                    throw err
+                  }
+                  else {
+                    if (result == '') {
+                      con.query('INSERT INTO `heychatbot`.`inviting` (`inviter`, `invitee`) VALUES (\'' + req.cookies.accountStatus + '\', \'' + req.body.f_id + '\')', function (err, result, fields) {
+                        if (err) {
+                        }
+                        else {
+                          res.render('pages/addfriend', {
+                            message: "邀請成功",
+                            ID: req.cookies.accountStatus,
+                            ip: ip,
+                            invite: get_istr(req.cookies.accountStatus)
+                          });
+                        }
+                      });
+                    }
+                    else {
+                      res.render('pages/addfriend', {
+                        message: "我們已經是好友了",
+                        ID: req.cookies.accountStatus,
+                        ip: ip,
+                        invite: get_istr(req.cookies.accountStatus)
+                      });
+                    }
+                  }
+                })
+              }
+              else {
+                res.render('pages/addfriend', {
+                  message: "正在邀請中",
+                  ID: req.cookies.accountStatus,
+                  ip: ip,
+                  invite: get_istr(req.cookies.accountStatus)
+                });
+              }
+            }
+          })
+        }
+      }
     }
-  });
-  // }
-  // });
+  })
+  
 });
 app.post('/accept_refuse', function (req, res) {
   if (req.body.yn == 'accept') {
     con.query('INSERT INTO `heychatbot`.`myfriend` (`u_id1`, `u_id2`) VALUES (\'' + req.cookies.accountStatus + '\', \'' + req.body.id + '\')', function (err, result, fields) {
-      if (err) {
-        console.log("新增好友失敗")
+      if (err) {     
       }
       else {
         con.query('DELETE FROM `heychatbot`.`inviting` WHERE i_id = \'' + req.body.i_id + '\'', function (err, result, fields) {
-          if (err) {
-            console.log("刪除i_id失敗")
+          if (err) {     
           }
           else {
-            con.query('SELECT * FROM heychatbot.inviting WHERE invitee=\'' + req.cookies.accountStatus + '\' OR inviter=\'' + req.cookies.accountStatus + '\'', function (err, result, fields) {
-              console.log(result)
+            con.query('SELECT * FROM heychatbot.inviting WHERE invitee=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {          
               if (err) {
               }
               else {
-
-                for (var i = 0; i < invite.length; i++) {
-                  console.log(invite[i].user)
-                  if (invite[i].user == req.cookies.accountStatus) {
-                    console.log("刪除F陣列")
+                for (var i = 0; i < invite.length; i++) {             
+                  if (invite[i].user == req.cookies.accountStatus) {            
                     invite.splice(i, 1, "")
                   }
                 }
-                for (var i = 0; i < result.length; i++) {
-                  console.log("從新列出邀請清單")
+                for (var i = 0; i < result.length; i++) {          
                   invite[invite.length] = {
                     user: req.cookies.accountStatus,
                     item: result[i].inviter,
                     i_id: result[i].i_id
                   }
-                }
-
-                console.log("導向addfriend")
+                }          
                 res.render('pages/addfriend', {
                   message: "歡迎加入我們",
                   ID: req.cookies.accountStatus,
@@ -440,34 +461,23 @@ app.post('/accept_refuse', function (req, res) {
                   invite: get_istr(req.cookies.accountStatus)
                 });
               }
-            })
-            // res.render('pages/addfriend', {
-            //   message: "歡迎加入我們",
-            //   ID: req.cookies.accountStatus,
-            //   ip: ip,
-            //   invite: get_istr(req.cookies.accountStatus)
-            // });
+            })      
           }
         });
       }
-
     });
   }
   else {
-
     con.query('DELETE FROM `heychatbot`.`inviting` WHERE i_id = \'' + req.body.i_id + '\'', function (err, result, fields) {
       if (err) {
-        console.log("刪除i_id失敗")
       }
       else {
-        con.query('SELECT * FROM heychatbot.inviting WHERE invitee=\'' + req.cookies.accountStatus + '\' OR inviter=\'' + req.cookies.accountStatus + '\'', function (err, result, fields) {
+        con.query('SELECT * FROM heychatbot.inviting WHERE invitee=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {
           if (err) {
           }
           else {
-            for (var i = 0; i < invite.length; i++) {
-              console.log(invite[i].user)
-              if (invite[i].user == req.cookies.accountStatus) {
-                console.log("刪除F陣列")
+            for (var i = 0; i < invite.length; i++) {       
+              if (invite[i].user == req.cookies.accountStatus) {      
                 invite.splice(i, 1, "")
               }
             }
@@ -478,7 +488,6 @@ app.post('/accept_refuse', function (req, res) {
                 i_id: result[i].i_id
               }
             }
-
             res.render('pages/addfriend', {
               message: "歡迎加入我們",
               ID: req.cookies.accountStatus,
@@ -498,7 +507,6 @@ app.get('/myaccount', function (req, res) {
     if (err) {
     }
     else {
-      console.log(result[0].name)
       accountinfo += '<table border=1><tr><td>帳號</td><td>' + result[0].id + '</td></tr><tr><td>姓名</td><td>' + result[0].name + '</td></tr><tr><td>生日</td><td>' + result[0].birth + '</td></tr><tr><td>性別</td><td>' + result[0].gender + '</td></tr><tr><td>聯絡信箱</td><td>' + result[0].email + '</td></tr></table>'
       res.render('pages/myaccount', {
         message: "歡迎加入我們",
@@ -518,7 +526,6 @@ app.get('/modifyaccount', function (req, res) {
     if (err) {
     }
     else {
-      console.log(result[0].name)
       accountinfo += '<form action="http://' + ip + '/do_modifyaccount"  method="post"><table border=1><tr><td>帳號</td><td>' + result[0].id + '</td></tr><tr><td>姓名</td><td><input type="text" name="name" value=' + result[0].name + ' ></td></tr><tr><td>生日</td><td>' + result[0].birth + '</td></tr><tr><td>性別</td><td>' + result[0].gender + '</td></tr><tr><td>聯絡信箱</td><td><input type="text" name="email" value=' + result[0].email + ' ></td></tr></table><input type="submit" ></form>'
       res.render('pages/modifyaccount', {
         message: "歡迎加入我們",
@@ -533,7 +540,7 @@ app.get('/modifyaccount', function (req, res) {
 app.post('/do_modifyaccount', function (req, res) {
   con.query('UPDATE  heychatbot.user SET email=\'' + req.body.email + '\' , name=\'' + req.body.name + '\' WHERE id=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {
     if (err) {
-      console.log('修改失敗')
+
     }
     else {
       con.query('SELECT * FROM heychatbot.user WHERE id=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {
@@ -541,10 +548,9 @@ app.post('/do_modifyaccount', function (req, res) {
         if (err) {
         }
         else {
-          console.log(result[0].name)
           accountinfo += '<table border=1><tr><td>帳號</td><td>' + result[0].id + '</td></tr><tr><td>姓名</td><td>' + result[0].name + '</td></tr><tr><td>生日</td><td>' + result[0].birth + '</td></tr><tr><td>性別</td><td>' + result[0].gender + '</td></tr><tr><td>聯絡信箱</td><td>' + result[0].email + '</td></tr></table>'
           res.render('pages/myaccount', {
-            message: "歡迎加入我們",
+            message: "修改成功",
             ip: ip,
             ID: req.cookies.accountStatus,
             send: accountinfo
@@ -582,7 +588,6 @@ app.post('/do_findpwd', function (req, res) {
         });
       }
       else {
-        console.log('找不到此用戶')
         res.render('pages/seepwd', {
           message: "歡迎加入我們",
           ip: ip,
@@ -634,7 +639,7 @@ app.get('/nearby', function (req, res) {
         throw err
       }
       else {
-       
+
         var str = ''
         data.results.forEach(element => {
           str += element.name + '<form action="http://' + ip + '/addTOfavorite_nearby" method="POST"><input type="hidden" name="value" value="' + element.name + '"><input type="hidden" name="arrnum" value="' + element.name + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' + '<br>'
@@ -675,8 +680,6 @@ app.post('/addTOfavorite_nearby', function (req, res) {
 
 });
 app.post('/addTOfavorite', function (req, res) {
-
-  // console.log(req.body.value)
   con.query('INSERT INTO heychatbot.schedule_content (`sch_id`, `c_name`, `c_class`, `c_content`) VALUES (\'' + req.cookies.schedule_now + '\', \'' + req.body.value + '\', \'' + req.body.value + '\', \'' + req.body.value + '\')', function (err, result, fields) { })
   res.render('pages/main', {
     message: "歡迎加入我們",
@@ -688,18 +691,18 @@ app.post('/addTOfavorite', function (req, res) {
 });
 app.post('/nearby_search', function (req, res) {
   request('https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURI(req.body.location_search) + '&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
-        json: true
-      }, function (err, data) {
-        res.cookie('latitude',  data.results[0].geometry.location.lat )
-        res.cookie('longitude', data.results[0].geometry.location.lng)
-        res.render('pages/nearby', {
-          message: "歡迎加入我們",
-          ID: req.cookies.accountStatus,
-          ip: ip,
-          context: '<meta http-equiv="refresh" content="0;url=http://' + ip + '/nearby" />',
-          search: '<form action="http://' + ip + '/nearby_search" method="POST">手動輸入地點 <input type="text" name="location_search" ><button type="submit"> 搜尋 </button></form> ' + '<br>'
-          
-        });
+    json: true
+  }, function (err, data) {
+    res.cookie('latitude', data.results[0].geometry.location.lat)
+    res.cookie('longitude', data.results[0].geometry.location.lng)
+    res.render('pages/nearby', {
+      message: "歡迎加入我們",
+      ID: req.cookies.accountStatus,
+      ip: ip,
+      context: '<meta http-equiv="refresh" content="0;url=http://' + ip + '/nearby" />',
+      search: '<form action="http://' + ip + '/nearby_search" method="POST">手動輸入地點 <input type="text" name="location_search" ><button type="submit"> 搜尋 </button></form> ' + '<br>'
+
+    });
   })
 })
 app.get('/schedule', function (req, res) {
@@ -916,8 +919,6 @@ app.post('/addstr', function (req, res) {
 
     //start <3 ~~
     if (req.body.addstr == "初始化" || req.body.addstr == "clear") {
-      console.log(ID + "初始化")
-
       for (var i = 0; i < session.length; i++) {
         session[i] = ""
       }
@@ -1315,14 +1316,11 @@ function search(input, user, df_input, data) {
   if (input.match("add") || input.match("加入")) {
     // Session[5]="add";
     if (bot[(bot.length - 2)].canadd == 1) {
-      console.log(bot[(bot.length - 2)].message + "-")
-      console.log(bot[(bot.length - 2)].canadd + "-")
       mylove[mylove.length] = bot[(bot.length - 1)]
       con.query('INSERT INTO heychatbot.favorite (`u_id`, `message`, `class`) VALUES (\'' + ID + '\',\'' + mylove[mylove.length - 1].message + '\',\'' + mylove[mylove.length - 1].class + '\')', function (err, result, fields) {
         if (err) {
         }
         else {
-          console.log("成功")
         }
         bot[bot.length] = {
           message: "BOT：我的最愛加入成功",
@@ -1333,8 +1331,6 @@ function search(input, user, df_input, data) {
       });
     }
     else {
-      console.log(bot[(bot.length - 2)].message + "+")
-      console.log(bot[(bot.length - 2)].canadd + "+")
       bot[bot.length] = {
         message: "BOT：此項目不能加入最愛",
         class: "notif",
@@ -1569,7 +1565,7 @@ function get_str() {
   bot.forEach(input => {
     if (input.canadd == 1) {
       if (input.type == 'str') {
-        //  console.log(input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="https://i.imgur.com/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' + '<br/>')
+
         str += input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' + '<br/>'
       }
       else if (input.type == 'table') {
@@ -1608,10 +1604,10 @@ function get_str_mylove() {
     str += "<tr><td>" + input.message + "</td></tr>"
   });
 
-  console.log(str);
+
   var re = /BOT：/g;
   var result = str.replace(re, "");
-  console.log(str)
+
   return result
 }
 //把我的最愛放入bot[]
