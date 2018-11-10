@@ -127,7 +127,7 @@ app.post('/login', function (req, res) {
         var username = result[0].name
 
         res.cookie('accountStatus', result[0].id) //當作session使用 
-
+        res.cookie('schedule_now', result[0].schedule_now) //當作session使用 
         con.query('SELECT * FROM heychatbot.message WHERE u_id=\'' + req.body.ID + '\' order by m_id desc limit ' + when_login_select_num + ' ', function (err, result, fields) {
           for (var i = (result.length) - 1; i >= 0; i--) {
             bot[bot.length] = {
@@ -140,7 +140,7 @@ app.post('/login', function (req, res) {
           // result.forEach(input => {
           //   bot[bot.length] = input.message;
           // });
-
+          
           res.render('pages/loginSuccess', {
             message: "早安" + username,
             send: get_str(),
@@ -179,6 +179,7 @@ app.get('/logout', function (req, res) {
     });
   }
   res.cookie('accountStatus', "")
+  res.cookie('schedule_now', "")
   bot.length = 0;
   setTimeout(function () {
     res.render('pages/logoutSuccess', {
@@ -627,8 +628,9 @@ app.get('/nearby', function (req, res) {
 
 });
 app.post('/addTOfavorite', function (req, res) {
-  console.log(req.body.value)
-  console.log(req.body.arrnum)
+
+// console.log(req.body.value)
+  con.query('INSERT INTO heychatbot.schedule_content (`sch_id`, `c_name`, `c_class`, `c_content`) VALUES (\'' + req.cookies.schedule_now + '\', \'' + req.body.value + '\', \'' + req.body.value + '\', \'' + req.body.value + '\')', function (err, result, fields) {})
   res.render('pages/main', {
     message: "歡迎加入我們",
     ID: req.cookies.accountStatus,
@@ -637,7 +639,162 @@ app.post('/addTOfavorite', function (req, res) {
   });
 
 });
+app.get('/schedule', function (req, res) {
+  con.query('SELECT * FROM heychatbot.schedule WHERE id=\'' + req.cookies.accountStatus + '\'  ', function (err, result, fields) {
+    if(err){
+    }
+    else{
+      if(result != ''){
+        var str = ''
+        for(var i=0 ; i < result.length ; i++){
+          str += '<p>' + result[i].sName + result[i].sDate + '</p>'
+          str += '<form method="post" action="http://'+ip+'/schedule_content"> <input type="hidden" name="sch_id" value='+result[i].sch_id+'> <button type="submit">'+ result[i].sName+'</button></form>'
+          str += '<form method="post" action="http://'+ip+'/delete_schedule"> <input type="hidden" name="sch_id" value='+result[i].sch_id+'> <button type="submit">刪除此行程</button></form>'
+        }
+        res.render('pages/schedule', {
+          message: "歡迎加入我們",
+          ID: req.cookies.accountStatus,
+          ip: ip,
+          send: str
+        });
+      }
+      else{
+        res.render('pages/schedule', {
+          message: "歡迎加入我們",
+          ID: req.cookies.accountStatus,
+          ip: ip,
+          send: '您尚未登入或未建立行程'
+        });
+      }
+    }
+  })
 
+
+});
+app.post('/schedule_content', function (req, res) {
+  con.query('UPDATE  heychatbot.user SET schedule_now = \''+req.body.sch_id+'\' WHERE id = \'' + req.cookies.accountStatus + '\'', function (err, result, fields) {})
+  con.query('SELECT * FROM heychatbot.schedule_content WHERE sch_id=\'' + req.body.sch_id + '\'  ', function (err, result, fields) {
+    if(err){
+    }
+    else{
+      if(result != ''){
+        var str = ''
+        for(var i=0 ; i < result.length ; i++){
+          str += '<p>' + result[i].c_name + '</p>'
+          str += '<p>' + result[i].c_content + '</p><br/>'
+        //  str += '<form method="post" action="http://'+ip+'/shcedule"> <input type="hidden" value='+result[i].sch_id+'> <button type="submit">'+ result[i].sName+'</button></form>'
+         
+        }
+        res.render('pages/schedule_content', {
+          message: "歡迎加入我們",
+          ID: req.cookies.accountStatus,
+          ip: ip,
+          send: str
+        });
+      }
+      else{
+        res.render('pages/schedule_content', {
+          message: "歡迎加入我們",
+          ID: req.cookies.accountStatus,
+          ip: ip,
+          send: '您尚未登入或未建立行程'
+        });
+      }
+    }
+  })
+
+
+});
+app.get('/add_schedule', function (req, res) {
+ 
+  var str = '<form action="http://'+ip+'/do_add_schedule" method="post"> 行程名稱 <input type="text" name="sName" ><br/> 起始日期 <input type="date" name="sDate" ><br/>結束日期 <input type="date" name="sDate2" > <input type="hidden" name="id" value='+req.cookies.accountStatus+' ><input type="submit" value="創立行程"></form>'
+     
+        res.render('pages/schedule', {
+          message: "歡迎加入我們",
+          ID: req.cookies.accountStatus,
+          ip: ip,
+          send: str
+        });
+});
+app.post('/do_add_schedule', function (req, res) {
+  req.body.sDate += '至' +  req.body.sDate2
+  con.query('INSERT INTO heychatbot.schedule (`id`, `sName`, `sDate`) VALUES (\'' + req.body.id + '\', \'' + req.body.sName + '\', \'' + req.body.sDate + '\')', function (err, result, fields) {
+    if(err){
+    }
+    else{
+      con.query('SELECT * FROM heychatbot.schedule WHERE id=\'' + req.cookies.accountStatus + '\'  ', function (err, result, fields) {
+        if(err){
+        }
+        else{
+          if(result != ''){
+            var str = ''
+            for(var i=0 ; i < result.length ; i++){
+              str += '<p>' + result[i].sName + result[i].sDate + '</p>'
+              str += '<form method="post" action="http://'+ip+'/schedule_content"> <input type="hidden" name="sch_id" value='+result[i].sch_id+'> <button type="submit">'+ result[i].sName+'</button></form>'
+              str += '<form method="post" action="http://'+ip+'/delete_schedule"> <input type="hidden" name="sch_id" value='+result[i].sch_id+'> <button type="submit">刪除此行程</button></form>'
+            }
+            res.render('pages/schedule', {
+              message: "歡迎加入我們",
+              ID: req.cookies.accountStatus,
+              ip: ip,
+              send: str
+            });
+          }
+          else{
+            res.render('pages/schedule', {
+              message: "歡迎加入我們",
+              ID: req.cookies.accountStatus,
+              ip: ip,
+              send: '您尚未登入或未建立行程'
+            });
+          }
+        }
+      })
+    }
+  })
+  
+     
+      
+      
+    
+  
+
+
+});
+app.post('/delete_schedule', function (req, res) {
+  
+  con.query('DELETE  FROM heychatbot.schedule WHERE sch_id=\'' + req.body.sch_id + '\'  ', function (err, result, fields) {
+    con.query('SELECT * FROM heychatbot.schedule WHERE id=\'' + req.cookies.accountStatus + '\'  ', function (err, result, fields) {
+      if(err){
+      }
+      else{
+        if(result != ''){
+          var str = ''
+          for(var i=0 ; i < result.length ; i++){
+            str += '<p>' + result[i].sName + result[i].sDate + '</p>'
+            str += '<form method="post" action="http://'+ip+'/schedule_content"> <input type="hidden" name="sch_id" value='+result[i].sch_id+'> <button type="submit">'+ result[i].sName+'</button></form>'
+            str += '<form method="post" action="http://'+ip+'/delete_schedule"> <input type="hidden" name="sch_id" value='+result[i].sch_id+'> <button type="submit">刪除此行程</button></form>'
+          }
+          res.render('pages/schedule', {
+            message: "歡迎加入我們",
+            ID: req.cookies.accountStatus,
+            ip: ip,
+            send: str
+          });
+        }
+        else{
+          res.render('pages/schedule', {
+            message: "歡迎加入我們",
+            ID: req.cookies.accountStatus,
+            ip: ip,
+            send: '您尚未登入或未建立行程'
+          });
+        }
+      }
+    })
+  })
+
+});
 //回應後
 app.post('/addstr', function (req, res) {
   //丟dailogflow
