@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    <p id="startGPS"><button onclick="geoFindMe()">Show my location</button></p>
+    <p id="startGPS"><button onclick="geoFindMe()">偵測我的位置</button></p>
     <div id="out"></div>
     <script>
 
@@ -27,7 +27,7 @@
                 var longitude = position.coords.longitude;
 
                 //  output.innerHTML = '<p>Latitude is ' + latitude + '° <br>Longitude is ' + longitude + '°</p>';
-                output.innerHTML = '<form action="http://<%=ip %>" name="form1" method="post"> <input type="hidden" name="latitude" value=' + latitude + '><input type="hidden" name="longitude" value=' + longitude + '> <input type="submit" name="name" value="定位完成"  ></form>'
+                output.innerHTML = '<form action="http://<%=ip %>/nearby" name="form1" method="post"> <input type="hidden" name="latitude" value=' + latitude + '><input type="hidden" name="longitude" value=' + longitude + '> <input type="submit" name="name" value="定位完成"  ></form>'
 
 
 

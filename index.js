@@ -32,7 +32,7 @@
 }
 //宣告一些會用到的變數
 {
-  var myLocation
+  var myLocation = ''
   var dfURL = 'https://api.dialogflow.com/v1/query?v=20150910&lang=en&sessionId=0&query='
   var dfKey = 'Bearer 95ff53816d7b4b419c23b31907038aaa'
   var ip = "127.0.0.1:3000"
@@ -88,19 +88,19 @@ app.get('/', function (req, res) {
     ip: ip,
   });
 });
-app.post('/', function (req, res) {
-  console.log(req.body.latitude)
-  myLocation = {
-    latitude: req.body.latitude, longitude: req.body.longitude
-  }
+// app.post('/', function (req, res) {
+//   console.log(req.body.latitude)
+//   myLocation = {
+//     latitude: req.body.latitude, longitude: req.body.longitude
+//   }
 
-  res.render('pages/index', {
-    message: "歡迎使用本產品",
-    send: get_str(),
-    ID: ID,
-    ip: ip,
-  });
-});
+//   res.render('pages/index', {
+//     message: "歡迎使用本產品",
+//     send: get_str(),
+//     ID: ID,
+//     ip: ip,
+//   });
+// });
 app.get('/loginin', function (req, res) {
 
   if (req.cookies.accountStatus) {
@@ -121,6 +121,7 @@ app.get('/loginin', function (req, res) {
   }
 });
 app.post('/login', function (req, res) {
+
   con.query('SELECT * FROM heychatbot.user WHERE id=\'' + req.body.ID + '\' and pwd=\'' + req.body.pwd + '\'', function (err, result, fields) {
     if (result != "") {
       if (result[0].id == req.body.ID && result[0].pwd == req.body.pwd) {
@@ -140,7 +141,7 @@ app.post('/login', function (req, res) {
           // result.forEach(input => {
           //   bot[bot.length] = input.message;
           // });
-          
+
           res.render('pages/loginSuccess', {
             message: "早安" + username,
             send: get_str(),
@@ -180,6 +181,8 @@ app.get('/logout', function (req, res) {
   }
   res.cookie('accountStatus', "")
   res.cookie('schedule_now', "")
+  res.cookie('latitude', "")
+  res.cookie('longitude', "")
   bot.length = 0;
   setTimeout(function () {
     res.render('pages/logoutSuccess', {
@@ -602,20 +605,64 @@ app.get('/gps', function (req, res) {
   });
 
 });
+app.post('/nearby', function (req, res) {
+  res.cookie('latitude', req.body.latitude)
+  res.cookie('longitude', req.body.longitude)
+  res.render('pages/nearby', {
+    message: "歡迎加入我們",
+    ID: req.cookies.accountStatus,
+    ip: ip,
+    context: '<meta http-equiv="refresh" content="0;url=http://' + ip + '/nearby" />',
+    search: '<form action="http://' + ip + '/nearby_search" method="POST">手動輸入地點<input type="text" name="location_search" ><button type="submit"> 搜尋 </button></form> ' + '<br>'
+  });
+});
 app.get('/nearby', function (req, res) {
-  request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + myLocation.latitude + ',' + myLocation.longitude + '&radius=1500&type=food,school&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
+  if (req.cookies.latitude == '') {
+    res.render('pages/nearby', {
+      message: "歡迎加入我們",
+      ID: req.cookies.accountStatus,
+      ip: ip,
+      context: '<meta http-equiv="refresh" content="0;url=http://' + ip + '/gps" />',
+      search: '<form action="http://' + ip + '/nearby_search" method="POST">手動輸入地點<input type="text" name="location_search" ><button type="submit"> 搜尋 </button></form> ' + '<br>'
+    });
+  }
+  else {
+    request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + req.cookies.latitude + ',' + req.cookies.longitude + '&radius=1500&type=food,school&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
+      json: true
+    }, function (err, data) {
+      if (err) {
+        throw err
+      }
+      else {
+       
+        var str = ''
+        data.results.forEach(element => {
+          str += element.name + '<form action="http://' + ip + '/addTOfavorite_nearby" method="POST"><input type="hidden" name="value" value="' + element.name + '"><input type="hidden" name="arrnum" value="' + element.name + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' + '<br>'
+        });
+        res.render('pages/nearby', {
+          message: "歡迎加入我們",
+          ID: req.cookies.accountStatus,
+          ip: ip,
+          context: str,
+          search: '<form action="http://' + ip + '/nearby_search" method="POST">手動輸入地點<input type="text" name="location_search" ><button type="submit"> 搜尋 </button></form> ' + '<br>'
+        });
+      }
+    });
+  }
+});
+app.post('/addTOfavorite_nearby', function (req, res) {
+  con.query('INSERT INTO heychatbot.schedule_content (`sch_id`, `c_name`, `c_class`, `c_content`) VALUES (\'' + req.cookies.schedule_now + '\', \'' + req.body.value + '\', \'' + req.body.value + '\', \'' + req.body.value + '\')', function (err, result, fields) { })
+  request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + req.cookies.latitude + ',' + req.cookies.longitude + '&radius=1500&type=food,school&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
     json: true
   }, function (err, data) {
     if (err) {
       throw err
     }
     else {
-
       var str = ''
       data.results.forEach(element => {
-        str += element.name + '<br>'
+        str += element.name + '<form action="http://' + ip + '/addTOfavorite_nearby" method="POST"><input type="hidden" name="value" value="' + element.name + '"><input type="hidden" name="arrnum" value="' + element.name + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' + '<br>'
       });
-
       res.render('pages/nearby', {
         message: "歡迎加入我們",
         ID: req.cookies.accountStatus,
@@ -629,8 +676,8 @@ app.get('/nearby', function (req, res) {
 });
 app.post('/addTOfavorite', function (req, res) {
 
-// console.log(req.body.value)
-  con.query('INSERT INTO heychatbot.schedule_content (`sch_id`, `c_name`, `c_class`, `c_content`) VALUES (\'' + req.cookies.schedule_now + '\', \'' + req.body.value + '\', \'' + req.body.value + '\', \'' + req.body.value + '\')', function (err, result, fields) {})
+  // console.log(req.body.value)
+  con.query('INSERT INTO heychatbot.schedule_content (`sch_id`, `c_name`, `c_class`, `c_content`) VALUES (\'' + req.cookies.schedule_now + '\', \'' + req.body.value + '\', \'' + req.body.value + '\', \'' + req.body.value + '\')', function (err, result, fields) { })
   res.render('pages/main', {
     message: "歡迎加入我們",
     ID: req.cookies.accountStatus,
@@ -639,17 +686,33 @@ app.post('/addTOfavorite', function (req, res) {
   });
 
 });
+app.post('/nearby_search', function (req, res) {
+  request('https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURI(req.body.location_search) + '&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
+        json: true
+      }, function (err, data) {
+        res.cookie('latitude',  data.results[0].geometry.location.lat )
+        res.cookie('longitude', data.results[0].geometry.location.lng)
+        res.render('pages/nearby', {
+          message: "歡迎加入我們",
+          ID: req.cookies.accountStatus,
+          ip: ip,
+          context: '<meta http-equiv="refresh" content="0;url=http://' + ip + '/nearby" />',
+          search: '<form action="http://' + ip + '/nearby_search" method="POST">手動輸入地點 <input type="text" name="location_search" ><button type="submit"> 搜尋 </button></form> ' + '<br>'
+          
+        });
+  })
+})
 app.get('/schedule', function (req, res) {
   con.query('SELECT * FROM heychatbot.schedule WHERE id=\'' + req.cookies.accountStatus + '\'  ', function (err, result, fields) {
-    if(err){
+    if (err) {
     }
-    else{
-      if(result != ''){
+    else {
+      if (result != '') {
         var str = ''
-        for(var i=0 ; i < result.length ; i++){
+        for (var i = 0; i < result.length; i++) {
           str += '<p>' + result[i].sName + result[i].sDate + '</p>'
-          str += '<form method="post" action="http://'+ip+'/schedule_content"> <input type="hidden" name="sch_id" value='+result[i].sch_id+'> <button type="submit">'+ result[i].sName+'</button></form>'
-          str += '<form method="post" action="http://'+ip+'/delete_schedule"> <input type="hidden" name="sch_id" value='+result[i].sch_id+'> <button type="submit">刪除此行程</button></form>'
+          str += '<form method="post" action="http://' + ip + '/schedule_content"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">' + result[i].sName + '</button></form>'
+          str += '<form method="post" action="http://' + ip + '/delete_schedule"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">刪除此行程</button></form>'
         }
         res.render('pages/schedule', {
           message: "歡迎加入我們",
@@ -658,7 +721,7 @@ app.get('/schedule', function (req, res) {
           send: str
         });
       }
-      else{
+      else {
         res.render('pages/schedule', {
           message: "歡迎加入我們",
           ID: req.cookies.accountStatus,
@@ -672,18 +735,18 @@ app.get('/schedule', function (req, res) {
 
 });
 app.post('/schedule_content', function (req, res) {
-  con.query('UPDATE  heychatbot.user SET schedule_now = \''+req.body.sch_id+'\' WHERE id = \'' + req.cookies.accountStatus + '\'', function (err, result, fields) {})
+  con.query('UPDATE  heychatbot.user SET schedule_now = \'' + req.body.sch_id + '\' WHERE id = \'' + req.cookies.accountStatus + '\'', function (err, result, fields) { })
   con.query('SELECT * FROM heychatbot.schedule_content WHERE sch_id=\'' + req.body.sch_id + '\'  ', function (err, result, fields) {
-    if(err){
+    if (err) {
     }
-    else{
-      if(result != ''){
+    else {
+      if (result != '') {
         var str = ''
-        for(var i=0 ; i < result.length ; i++){
+        for (var i = 0; i < result.length; i++) {
           str += '<p>' + result[i].c_name + '</p>'
           str += '<p>' + result[i].c_content + '</p><br/>'
-        //  str += '<form method="post" action="http://'+ip+'/shcedule"> <input type="hidden" value='+result[i].sch_id+'> <button type="submit">'+ result[i].sName+'</button></form>'
-         
+          str += '<form method="post" action="http://' + ip + '/delete_schedule_content"> <input type="hidden" value=' + result[i].content_id + ' name="content_id"><input type="hidden" value=' + result[i].sch_id + ' name="sch_id"> <button type="submit">刪除此活動</button></form>'
+
         }
         res.render('pages/schedule_content', {
           message: "歡迎加入我們",
@@ -692,7 +755,7 @@ app.post('/schedule_content', function (req, res) {
           send: str
         });
       }
-      else{
+      else {
         res.render('pages/schedule_content', {
           message: "歡迎加入我們",
           ID: req.cookies.accountStatus,
@@ -706,32 +769,32 @@ app.post('/schedule_content', function (req, res) {
 
 });
 app.get('/add_schedule', function (req, res) {
- 
-  var str = '<form action="http://'+ip+'/do_add_schedule" method="post"> 行程名稱 <input type="text" name="sName" ><br/> 起始日期 <input type="date" name="sDate" ><br/>結束日期 <input type="date" name="sDate2" > <input type="hidden" name="id" value='+req.cookies.accountStatus+' ><input type="submit" value="創立行程"></form>'
-     
-        res.render('pages/schedule', {
-          message: "歡迎加入我們",
-          ID: req.cookies.accountStatus,
-          ip: ip,
-          send: str
-        });
+
+  var str = '<form action="http://' + ip + '/do_add_schedule" method="post"> 行程名稱 <input type="text" name="sName" ><br/> 起始日期 <input type="date" name="sDate" ><br/>結束日期 <input type="date" name="sDate2" > <input type="hidden" name="id" value=' + req.cookies.accountStatus + ' ><input type="submit" value="創立行程"></form>'
+
+  res.render('pages/schedule', {
+    message: "歡迎加入我們",
+    ID: req.cookies.accountStatus,
+    ip: ip,
+    send: str
+  });
 });
 app.post('/do_add_schedule', function (req, res) {
-  req.body.sDate += '至' +  req.body.sDate2
+  req.body.sDate += '至' + req.body.sDate2
   con.query('INSERT INTO heychatbot.schedule (`id`, `sName`, `sDate`) VALUES (\'' + req.body.id + '\', \'' + req.body.sName + '\', \'' + req.body.sDate + '\')', function (err, result, fields) {
-    if(err){
+    if (err) {
     }
-    else{
+    else {
       con.query('SELECT * FROM heychatbot.schedule WHERE id=\'' + req.cookies.accountStatus + '\'  ', function (err, result, fields) {
-        if(err){
+        if (err) {
         }
-        else{
-          if(result != ''){
+        else {
+          if (result != '') {
             var str = ''
-            for(var i=0 ; i < result.length ; i++){
+            for (var i = 0; i < result.length; i++) {
               str += '<p>' + result[i].sName + result[i].sDate + '</p>'
-              str += '<form method="post" action="http://'+ip+'/schedule_content"> <input type="hidden" name="sch_id" value='+result[i].sch_id+'> <button type="submit">'+ result[i].sName+'</button></form>'
-              str += '<form method="post" action="http://'+ip+'/delete_schedule"> <input type="hidden" name="sch_id" value='+result[i].sch_id+'> <button type="submit">刪除此行程</button></form>'
+              str += '<form method="post" action="http://' + ip + '/schedule_content"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">' + result[i].sName + '</button></form>'
+              str += '<form method="post" action="http://' + ip + '/delete_schedule"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">刪除此行程</button></form>'
             }
             res.render('pages/schedule', {
               message: "歡迎加入我們",
@@ -740,7 +803,7 @@ app.post('/do_add_schedule', function (req, res) {
               send: str
             });
           }
-          else{
+          else {
             res.render('pages/schedule', {
               message: "歡迎加入我們",
               ID: req.cookies.accountStatus,
@@ -752,28 +815,28 @@ app.post('/do_add_schedule', function (req, res) {
       })
     }
   })
-  
-     
-      
-      
-    
-  
+
+
+
+
+
+
 
 
 });
 app.post('/delete_schedule', function (req, res) {
-  
+
   con.query('DELETE  FROM heychatbot.schedule WHERE sch_id=\'' + req.body.sch_id + '\'  ', function (err, result, fields) {
     con.query('SELECT * FROM heychatbot.schedule WHERE id=\'' + req.cookies.accountStatus + '\'  ', function (err, result, fields) {
-      if(err){
+      if (err) {
       }
-      else{
-        if(result != ''){
+      else {
+        if (result != '') {
           var str = ''
-          for(var i=0 ; i < result.length ; i++){
+          for (var i = 0; i < result.length; i++) {
             str += '<p>' + result[i].sName + result[i].sDate + '</p>'
-            str += '<form method="post" action="http://'+ip+'/schedule_content"> <input type="hidden" name="sch_id" value='+result[i].sch_id+'> <button type="submit">'+ result[i].sName+'</button></form>'
-            str += '<form method="post" action="http://'+ip+'/delete_schedule"> <input type="hidden" name="sch_id" value='+result[i].sch_id+'> <button type="submit">刪除此行程</button></form>'
+            str += '<form method="post" action="http://' + ip + '/schedule_content"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">' + result[i].sName + '</button></form>'
+            str += '<form method="post" action="http://' + ip + '/delete_schedule"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">刪除此行程</button></form>'
           }
           res.render('pages/schedule', {
             message: "歡迎加入我們",
@@ -782,7 +845,7 @@ app.post('/delete_schedule', function (req, res) {
             send: str
           });
         }
-        else{
+        else {
           res.render('pages/schedule', {
             message: "歡迎加入我們",
             ID: req.cookies.accountStatus,
@@ -792,6 +855,42 @@ app.post('/delete_schedule', function (req, res) {
         }
       }
     })
+  })
+
+});
+app.post('/delete_schedule_content', function (req, res) {
+
+  con.query('DELETE  FROM heychatbot.schedule_content WHERE content_id=\'' + req.body.content_id + '\'  ', function (err, result, fields) {
+    con.query('SELECT * FROM heychatbot.schedule_content WHERE sch_id=\'' + req.body.sch_id + '\'  ', function (err, result, fields) {
+      if (err) {
+      }
+      else {
+        if (result != '') {
+          var str = ''
+          for (var i = 0; i < result.length; i++) {
+            str += '<p>' + result[i].c_name + '</p>'
+            str += '<p>' + result[i].c_content + '</p><br/>'
+            str += '<form method="post" action="http://' + ip + '/delete_shcedule_content"> <input type="hidden" value=' + result[i].content_id + '> <button type="submit">刪除此活動</button></form>'
+
+          }
+          res.render('pages/schedule_content', {
+            message: "歡迎加入我們",
+            ID: req.cookies.accountStatus,
+            ip: ip,
+            send: str
+          });
+        }
+        else {
+          res.render('pages/schedule_content', {
+            message: "歡迎加入我們",
+            ID: req.cookies.accountStatus,
+            ip: ip,
+            send: '您尚未登入或未建立行程'
+          });
+        }
+      }
+    })
+
   })
 
 });
@@ -1470,25 +1569,25 @@ function get_str() {
   bot.forEach(input => {
     if (input.canadd == 1) {
       if (input.type == 'str') {
-      //  console.log(input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="https://i.imgur.com/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' + '<br/>')
-        str += input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="https://i.imgur.com/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' + '<br/>'
+        //  console.log(input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="https://i.imgur.com/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' + '<br/>')
+        str += input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' + '<br/>'
       }
-      else if(input.type == 'table'){
-     //   console.log('canadd 1 type table')
-        str += input.message + '<td><form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="https://i.imgur.com/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> </td></tr>'
+      else if (input.type == 'table') {
+        //   console.log('canadd 1 type table')
+        str += input.message + '<td><form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> </td></tr>'
       }
       else {
-      //  console.log('canadd 1 type other')
-        str += input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="https://i.imgur.com/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> '
+        //  console.log('canadd 1 type other')
+        str += input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> '
       }
     }
     else {
       if (input.type == 'str') {
-    //    console.log('canadd 0 type str')
+        //    console.log('canadd 0 type str')
         str += input.message + '<br/>'
       }
       else {
-     //   console.log('canadd 0 type other')
+        //   console.log('canadd 0 type other')
         str += input.message
       }
 
@@ -1687,8 +1786,8 @@ function showIntFromString(text) {
   }
 }
 //讀取景點列表
-function schedule(){
-  
+function schedule() {
+
 }
 
 //port
