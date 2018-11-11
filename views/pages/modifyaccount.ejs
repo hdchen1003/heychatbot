@@ -1,13 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+   <meta name="viewport" content="width=device-width, minimun-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <link href="https://bootstrap.hexschool.com/dist/css/bootstrap.min.css" type="text/css" rel="stylesheet">
+
+   <link rel="stylesheet" type="text/css" href="css/index.css" />
+
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css" />
+ 
+   <link rel="import" href="components/bower_components/core-toolbar/core-toolbar.html">
+   <link rel="import" href="components/bower_components/paper-elements/paper-elements.html">
+  
+   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+   <link rel="stylesheet" type="text/css" href="css/main.css" />
+
+  
+
+    <title>Modifyaccount</title>
 </head>
 <body>
-    <div class="myaccount"><%-send %></div>
-    <div class="modify"><button onclick="window.location.href='http://<%=ip %>/myaccount'">回上頁</button></div>
+<!-- 這一頁會顯示可以修改的個人資料，目前給修改的資料有姓名和信箱，密碼要另外寫，其他目前(帳號、生日、性別)不給修改
+下面的send 大概長這樣 -->
+
+  <nav id="pri_bar" class="navbar navbar-expand-lg fixed-top navbar navbar-light" style="background-color:  #FF7744 ;">
+    <span><img src="img/previous.png"></a></span>
+    <a class="navbar-brand  mr-lg-0" href="http://<%-ip%>">HeyChatbot</a>
+     <!-- <button class="navbar-toggler p-0 border-0" type="button" data-toggle="offcanvas">
+      <span ><img class="bar_menu" src="img/menu.png"></span>
+    </button> -->
+
+	<div class="box animated slideInRight">
+	   <div class="main_tooltitle">我的最愛
+        </div>
+        <div class="main_tooltitle">設定
+        </div>
+        <div class="main_tooltitle">隱私條款
+        </div>
+        <div class="main_tooltitle">登出
+        </div>
+    </div>
+	
+
+<div class="app_inside">
+    <%-send %>
+<!-- 
+	<form class="modacc_form" action="http://'+ip+'/do_modifyaccount"  method="post">
+
+		<table border=2>
+			<tr>
+				<td class="modacc_title">帳號</td>
+				<td class="modacc_context">Account</td>
+			</tr>
+			<tr>
+				<td class="modacc_title">姓名</td>
+				<td><input class="modacc_input" type="text" name="name" value='+result[0].name+' ></td>
+			</tr>
+			<tr>
+				<td class="modacc_title">生日</td>
+				<td class="modacc_context">Birthday</td>
+			</tr>
+			<tr>
+				<td class="modacc_title">性別</td>
+				<td class="modacc_context">Gender</td>
+			</tr>
+			<tr>
+				<td class="modacc_title">聯絡信箱</td>
+				<td><input class="modacc_input" type="text" name="email" value='+result[0].email+' ></td>
+			</tr>
+		</table>
+	</form> -->
+    
+    <input class="modacc_submit" type="submit">
+
+	<br/>
+	<br/>
+
+    <div class="myaccount"></div>
+    <div class="modify"><button class="modacc_back" onclick="window.location.href='http://<%=ip %>/myaccount'">回上頁</button>
+    </div>
+
+  </div>
+
+ 	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="js/bar.js" charset="UTF-8"></script>
+
 </body>
 </html>

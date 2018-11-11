@@ -507,7 +507,7 @@ app.get('/myaccount', function (req, res) {
     if (err) {
     }
     else {
-      accountinfo += '<table border=1><tr><td>帳號</td><td>' + result[0].id + '</td></tr><tr><td>姓名</td><td>' + result[0].name + '</td></tr><tr><td>生日</td><td>' + result[0].birth + '</td></tr><tr><td>性別</td><td>' + result[0].gender + '</td></tr><tr><td>聯絡信箱</td><td>' + result[0].email + '</td></tr></table>'
+      accountinfo += '<table class="myacc_form" border=2><tr><td class="myacc_sectitle">帳號</td><td class="myacc_sectitle">' + result[0].id + '</td></tr><tr><td class="myacc_sectitle">姓名</td><td class="myacc_sectitle">' + result[0].name + '</td></tr><tr><td class="myacc_sectitle">生日</td><td class="myacc_sectitle">' + result[0].birth + '</td></tr><tr><td class="myacc_sectitle">性別</td><td class="myacc_sectitle">' + result[0].gender + '</td></tr><tr><td class="myacc_sectitle">聯絡信箱</td><td class="myacc_sectitle">' + result[0].email + '</td></tr></table>'
       res.render('pages/myaccount', {
         message: "歡迎加入我們",
         ip: ip,
@@ -526,7 +526,7 @@ app.get('/modifyaccount', function (req, res) {
     if (err) {
     }
     else {
-      accountinfo += '<form action="http://' + ip + '/do_modifyaccount"  method="post"><table border=1><tr><td>帳號</td><td>' + result[0].id + '</td></tr><tr><td>姓名</td><td><input type="text" name="name" value=' + result[0].name + ' ></td></tr><tr><td>生日</td><td>' + result[0].birth + '</td></tr><tr><td>性別</td><td>' + result[0].gender + '</td></tr><tr><td>聯絡信箱</td><td><input type="text" name="email" value=' + result[0].email + ' ></td></tr></table><input type="submit" ></form>'
+      accountinfo += '<form  class="modacc_form" action="http://' + ip + '/do_modifyaccount"  method="post"><table border=1><tr><td class="modacc_title">帳號</td><td class="modacc_context">' + result[0].id + '</td></tr><tr><td class="modacc_title">姓名</td><td ><input class="modacc_input" type="text" name="name" value=' + result[0].name + ' ></td></tr><tr><td class="modacc_title">生日</td><td class="modacc_context">' + result[0].birth + '</td></tr><tr><td class="modacc_title">性別</td><td class="modacc_context">' + result[0].gender + '</td></tr><tr><td class="modacc_title">聯絡信箱</td><td><input class="modacc_input" type="text" name="email" value=' + result[0].email + ' ></td></tr></table><input type="submit" ></form>'
       res.render('pages/modifyaccount', {
         message: "歡迎加入我們",
         ip: ip,
