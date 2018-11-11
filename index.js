@@ -192,8 +192,8 @@ app.get('/signup', function (req, res) {
 
 });
 app.post('/doSignup', function (req, res) {
-  if (req.body.ID != "" && req.body.pwd != "" && req.body.pwd2 != "" && req.body.name != "" && req.body.birth != "" && req.body.email != "" && req.body.gender != "") { 
-    con.query('SELECT id FROM heychatbot.user WHERE id=\'' + req.body.ID + '\'', function (err, result, fields) {    
+  if (req.body.ID != "" && req.body.pwd != "" && req.body.pwd2 != "" && req.body.name != "" && req.body.birth != "" && req.body.email != "" && req.body.gender != "") {
+    con.query('SELECT id FROM heychatbot.user WHERE id=\'' + req.body.ID + '\'', function (err, result, fields) {
       if (result == "") {
         if (req.body.pwd != req.body.pwd2) {
           res.render('pages/index', {
@@ -354,11 +354,11 @@ app.get('/invite', function (req, res) {
 });
 app.post('/do_invite', function (req, res) {
   con.query('SELECT * FROM heychatbot.user WHERE  id=\'' + req.body.f_id + '\'', function (err, result, fields) { //檢查受邀者是否存在
-    if(err){
+    if (err) {
       throw err
     }
-    else{
-      if(result == ''){
+    else {
+      if (result == '') {
         res.render('pages/addfriend', {
           message: "查無此ID",
           ID: req.cookies.accountStatus,
@@ -366,7 +366,7 @@ app.post('/do_invite', function (req, res) {
           invite: get_istr(req.cookies.accountStatus)
         });
       }
-      else{
+      else {
         if (req.body.f_id == req.cookies.accountStatus) {
           res.render('pages/addfriend', {
             message: "不能邀請自己哦~",
@@ -426,34 +426,34 @@ app.post('/do_invite', function (req, res) {
       }
     }
   })
-  
+
 });
 app.post('/accept_refuse', function (req, res) {
   if (req.body.yn == 'accept') {
     con.query('INSERT INTO `heychatbot`.`myfriend` (`u_id1`, `u_id2`) VALUES (\'' + req.cookies.accountStatus + '\', \'' + req.body.id + '\')', function (err, result, fields) {
-      if (err) {     
+      if (err) {
       }
       else {
         con.query('DELETE FROM `heychatbot`.`inviting` WHERE i_id = \'' + req.body.i_id + '\'', function (err, result, fields) {
-          if (err) {     
+          if (err) {
           }
           else {
-            con.query('SELECT * FROM heychatbot.inviting WHERE invitee=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {          
+            con.query('SELECT * FROM heychatbot.inviting WHERE invitee=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {
               if (err) {
               }
               else {
-                for (var i = 0; i < invite.length; i++) {             
-                  if (invite[i].user == req.cookies.accountStatus) {            
+                for (var i = 0; i < invite.length; i++) {
+                  if (invite[i].user == req.cookies.accountStatus) {
                     invite.splice(i, 1, "")
                   }
                 }
-                for (var i = 0; i < result.length; i++) {          
+                for (var i = 0; i < result.length; i++) {
                   invite[invite.length] = {
                     user: req.cookies.accountStatus,
                     item: result[i].inviter,
                     i_id: result[i].i_id
                   }
-                }          
+                }
                 res.render('pages/addfriend', {
                   message: "歡迎加入我們",
                   ID: req.cookies.accountStatus,
@@ -461,7 +461,7 @@ app.post('/accept_refuse', function (req, res) {
                   invite: get_istr(req.cookies.accountStatus)
                 });
               }
-            })      
+            })
           }
         });
       }
@@ -476,8 +476,8 @@ app.post('/accept_refuse', function (req, res) {
           if (err) {
           }
           else {
-            for (var i = 0; i < invite.length; i++) {       
-              if (invite[i].user == req.cookies.accountStatus) {      
+            for (var i = 0; i < invite.length; i++) {
+              if (invite[i].user == req.cookies.accountStatus) {
                 invite.splice(i, 1, "")
               }
             }
@@ -672,7 +672,8 @@ app.post('/addTOfavorite_nearby', function (req, res) {
         message: "歡迎加入我們",
         ID: req.cookies.accountStatus,
         ip: ip,
-        context: str
+        context: str,
+        search: '<form action="http://' + ip + '/nearby_search" method="POST">手動輸入地點<input type="text" name="location_search" ><button type="submit"> 搜尋 </button></form> ' + '<br>'
       });
     }
   });
