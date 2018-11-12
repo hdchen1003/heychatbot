@@ -526,7 +526,7 @@ app.get('/modifyaccount', function (req, res) {
     if (err) {
     }
     else {
-      accountinfo += '<form  class="modacc_form" action="http://' + ip + '/do_modifyaccount"  method="post"><table border=1><tr><td class="modacc_title">帳號</td><td class="modacc_context">' + result[0].id + '</td></tr><tr><td class="modacc_title">姓名</td><td ><input class="modacc_input" type="text" name="name" value=' + result[0].name + ' ></td></tr><tr><td class="modacc_title">生日</td><td class="modacc_context">' + result[0].birth + '</td></tr><tr><td class="modacc_title">性別</td><td class="modacc_context">' + result[0].gender + '</td></tr><tr><td class="modacc_title">聯絡信箱</td><td><input class="modacc_input" type="text" name="email" value=' + result[0].email + ' ></td></tr></table><input type="submit" ></form>'
+      accountinfo += '<form  class="modacc_form" action="http://' + ip + '/do_modifyaccount"  method="post"><table border=1><tr><td class="modacc_title">帳號</td><td class="modacc_context">' + result[0].id + '</td></tr><tr><td class="modacc_title">姓名</td><td ><input class="modacc_input" type="text" name="name" value=' + result[0].name + ' ></td></tr><tr><td class="modacc_title">生日</td><td class="modacc_context">' + result[0].birth + '</td></tr><tr><td class="modacc_title">性別</td><td class="modacc_context">' + result[0].gender + '</td></tr><tr><td class="modacc_title">聯絡信箱</td><td><input class="modacc_input" type="text" name="email" value=' + result[0].email + ' ></td></tr></table><input  class="modacc_submit" type="submit" ></form>'
       res.render('pages/modifyaccount', {
         message: "歡迎加入我們",
         ip: ip,
@@ -739,7 +739,9 @@ app.get('/schedule', function (req, res) {
 
 });
 app.post('/schedule_content', function (req, res) {
-  con.query('UPDATE  heychatbot.user SET schedule_now = \'' + req.body.sch_id + '\' WHERE id = \'' + req.cookies.accountStatus + '\'', function (err, result, fields) { })
+  con.query('UPDATE  heychatbot.user SET schedule_now = \'' + req.body.sch_id + '\' WHERE id = \'' + req.cookies.accountStatus + '\'', function (err, result, fields) {
+    res.cookie('schedule_now', req.body.sch_id) 
+   })
   con.query('SELECT * FROM heychatbot.schedule_content WHERE sch_id=\'' + req.body.sch_id + '\'  ', function (err, result, fields) {
     if (err) {
     }

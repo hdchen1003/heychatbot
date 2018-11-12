@@ -1,14 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+
+   <meta charset="UTF-8">
+
+	<meta name="viewport" content="width=device-width, minimun-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <link href="https://bootstrap.hexschool.com/dist/css/bootstrap.min.css" type="text/css" rel="stylesheet">
+
+ 	<link rel="stylesheet" type="text/css" href="css/index.css" />
+
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css" />
+ 
+	<link rel="import" href="components/bower_components/core-toolbar/core-toolbar.html">
+	<link rel="import" href="components/bower_components/paper-elements/paper-elements.html">
+	
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+	<link rel="stylesheet" type="text/css" href="css/main.css" />
+
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" rel="stylesheet"  />
+
+    <title>Seepwd</title>
 </head>
 <body>
+<!-- 這一頁是查詢密碼後，我們直接告訴使用者他的密碼，未來會用寄信的方式通知，先暫時這樣
+下面的send只是一行字 大概長這樣
+"您的密碼是 888" -->
+
+
+	<nav id="pri_bar" class="navbar navbar-expand-lg fixed-top navbar navbar-light" style="background-color:  #FF7744 ;">
+    <span><img src="img/previous.png"></a></span>
+    <a class="navbar-brand  mr-lg-0" href="http://<%-ip%>">HeyChatbot</a>
+     <button class="navbar-toggler p-0 border-0" type="button" data-toggle="offcanvas">
+      <span ><img class="bar_menu" src="img/menu.png"></span>
+    </button>
+
+
+	
+	<div class="box animated slideInRight">
+	   <div class="main_tooltitle">我的最愛
+        </div>
+        <div class="main_tooltitle">設定
+        </div>
+        <div class="main_tooltitle">隱私條款
+        </div>
+        <div class="main_tooltitle">登出
+        </div>
+    </div>
+	
+	
+    <div class="app_inside">
+
+	<p class="seepwd_password">您的密碼是</p>
     <div class="seepwd"><%-send %></div>
-    <div class="modify"><button onclick="window.location.href='http://<%=ip %>/loginin'">前往登入</button></div>
-    <div class="modify"><button onclick="window.location.href='http://<%=ip %>'">回首頁</button></div>
+    <div class="modify">
+    	<button class="seepwd_gologin" onclick="window.location.href='http://<%=ip %>/loginin'">前往登入</button>
+    </div>
+    <div class="modify">
+    	<button class="seepwd_back" onclick="window.location.href='http://<%=ip %>'">回首頁</button>
+    </div>
+
+    </div>
+
+
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="js/bar.js" charset="UTF-8"></script>
+
 </body>
 </html>
