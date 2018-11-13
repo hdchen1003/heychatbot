@@ -740,8 +740,8 @@ app.get('/schedule', function (req, res) {
 });
 app.post('/schedule_content', function (req, res) {
   con.query('UPDATE  heychatbot.user SET schedule_now = \'' + req.body.sch_id + '\' WHERE id = \'' + req.cookies.accountStatus + '\'', function (err, result, fields) {
-    res.cookie('schedule_now', req.body.sch_id) 
-   })
+    res.cookie('schedule_now', req.body.sch_id)
+  })
   con.query('SELECT * FROM heychatbot.schedule_content WHERE sch_id=\'' + req.body.sch_id + '\'  ', function (err, result, fields) {
     if (err) {
     }
@@ -1308,6 +1308,10 @@ app.post('/addstr', function (req, res) {
           ID: req.cookies.accountStatus,
           ip: ip,
         });
+        var ifmeta = bot[bot.length - 1].message
+        if (ifmeta.match('meta')) {
+          bot[bot.length - 1] = ''
+        }
       }
       //////////////////////////////////////////////////********************************************/////////// */
     }
@@ -1429,6 +1433,36 @@ function search(input, user, df_input, data) {
         type: 'str'
       }
       session[0] = "weather";
+    }
+    else if (df_input == 'logout') {
+
+      bot[bot.length] = {
+        message: '<meta http-equiv="refresh" content="0;url=http://' + ip + '/logout" />',
+        class: "notif",
+        canadd: 0,
+        type: 'str'
+      }
+
+    }
+    else if (df_input == 'schedule') {
+
+      bot[bot.length] = {
+        message: '<meta http-equiv="refresh" content="0;url=http://' + ip + '/schedule" />',
+        class: "notif",
+        canadd: 0,
+        type: 'str'
+      }
+
+    }
+    else if (df_input == 'search') {
+
+      bot[bot.length] = {
+        message: '<meta http-equiv="refresh" content="0;url=http://' + ip + '/nearby" />',
+        class: "notif",
+        canadd: 0,
+        type: 'str'
+      }
+
     }
 
     else if (input.match("咕嚕靈波")) {
@@ -1565,35 +1599,36 @@ function get_fstr(user) {
 //把bot[]轉成字串
 function get_str() {
   var str = ''
-  bot.forEach(input => {
-    if (input.canadd == 1) {
-      if (input.type == 'str') {
+  if (bot == '') {
 
-        str += input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' + '<br/>'
-      }
-      else if (input.type == 'table') {
-        //   console.log('canadd 1 type table')
-        str += input.message + '<td><form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> </td></tr>'
+  }
+  else {
+    bot.forEach(input => {
+      if (input.canadd == 1) {
+        if (input.type == 'str') {
+          str += input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' + '<br/>'
+        }
+        else if (input.type == 'table') {
+          //   console.log('canadd 1 type table')
+          str += input.message + '<td><form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> </td></tr>'
+        }
+        else {
+          //  console.log('canadd 1 type other')
+          str += input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> '
+        }
       }
       else {
-        //  console.log('canadd 1 type other')
-        str += input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> '
+        if (input.type == 'str') {
+          //    console.log('canadd 0 type str')
+          str += input.message + '<br/>'
+        }
+        else {
+          //   console.log('canadd 0 type other')
+          str += input.message
+        }
       }
-    }
-    else {
-      if (input.type == 'str') {
-        //    console.log('canadd 0 type str')
-        str += input.message + '<br/>'
-      }
-      else {
-        //   console.log('canadd 0 type other')
-        str += input.message
-      }
-
-    }
-
-  })
-
+    })
+  }
 
 
   return str
