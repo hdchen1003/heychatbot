@@ -32,6 +32,7 @@
 }
 //宣告一些會用到的變數
 {
+  var Gplace_str =''
   var myLocation = ''
   var dfURL = 'https://api.dialogflow.com/v1/query?v=20150910&lang=en&sessionId=0&query='
   var dfKey = 'Bearer 95ff53816d7b4b419c23b31907038aaa'
@@ -639,22 +640,64 @@ app.get('/nearby', function (req, res) {
         throw err
       }
       else {
-
-        var str = ''
-        data.results.forEach(element => {
-          str += element.name + '<form action="http://' + ip + '/addTOfavorite_nearby" method="POST"><input type="hidden" name="value" value="' + element.name + '"><input type="hidden" name="arrnum" value="' + element.name + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' + '<br>'
-        });
-        res.render('pages/nearby', {
-          message: "歡迎加入我們",
-          ID: req.cookies.accountStatus,
-          ip: ip,
-          context: str,
-          search: '<form action="http://' + ip + '/nearby_search" method="POST">手動輸入地點<input type="text" name="location_search" ><button type="submit"> 搜尋 </button></form> ' + '<br>'
-        });
+        Gplace_str = ''
+        
+         for(var i=0 ;i < data.results.length ; i ++){
+          var place_id = data.results[i].place_id
+          
+          request('https://maps.googleapis.com/maps/api/place/details/json?placeid='+place_id+'&fields=name,rating,formatted_phone_number,vicinity,type,opening_hours,review&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE&language=zh-TW', {
+            json: true
+          }, function (err, data2) {     
+              var rating = data2.result.rating
+              var phone = data2.result.formatted_phone_number
+              var type = data2.result.types[0]
+              var address = data2.result.vicinity
+              var rating_count = 0
+              var review = '尚無評論'
+            
+                
+            
+              if(data2.result.reviews != undefined){
+                for (var j = 0; j<data2.result.reviews.length ; j++){
+                  
+                  if(data2.result.reviews[j].rating > rating_count){
+                    rating_count = data2.result.reviews[j].rating;
+                    review = data2.result.reviews[j].text
+                  }
+                }
+              }
+            
+              
+              if(rating != undefined){
+              Gplace_str += '<tr><td>'+data2.result.name +  '<br>'
+              Gplace_str += '評分：' +rating +'<br/>電話：' +phone+ '<br/>類型：' +type+'<br/>地址：' +address+ '<br/>評論：'+ review  +'<br/>' 
+              Gplace_str += '<form action="http://' + ip + '/addTOfavorite_nearby" method="POST"><input type="hidden" name="value" value="' + data2.result.name+ '"><input type="hidden" name="arrnum" value="' + data2.result.name + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' 
+              Gplace_str += '</tr></td>'
+            } 
+          })
+        }
+          
+       res.render('pages/nearby', {
+        message: "歡迎加入我們",
+        ID: req.cookies.accountStatus,
+        ip: ip,
+        context: '搜尋中<meta http-equiv="refresh" content="2;url=http://' + ip + '/nearby_buffer" />',
+        search: '<form action="http://' + ip + '/nearby_search" method="POST">手動輸入地點<input type="text" name="location_search" ><button type="submit"> 搜尋 </button></form> ' + '<br>'
+      });
       }
     });
   }
 });
+app.get('/nearby_buffer',function(req,res){
+  
+  res.render('pages/nearby', {
+    message: "歡迎加入我們",
+    ID: req.cookies.accountStatus,
+    ip: ip,
+    context: Gplace_str   ,
+    search: '<form action="http://' + ip + '/nearby_search" method="POST">手動輸入地點<input type="text" name="location_search" ><button type="submit"> 搜尋 </button></form> ' + '<br>'
+  });
+})
 app.post('/addTOfavorite_nearby', function (req, res) {
   con.query('INSERT INTO heychatbot.schedule_content (`sch_id`, `c_name`, `c_class`, `c_content`) VALUES (\'' + req.cookies.schedule_now + '\', \'' + req.body.value + '\', \'' + req.body.value + '\', \'' + req.body.value + '\')', function (err, result, fields) { })
   request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + req.cookies.latitude + ',' + req.cookies.longitude + '&radius=1500&type=food,school&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
