@@ -1,0 +1,97 @@
+html,
+body {
+  overflow-x: hidden; /* Prevent scroll on narrow devices */
+}
+
+body {
+  padding-top: 56px;
+}
+
+@media (max-width: 991.98px) {
+  .offcanvas-collapse {
+    position: fixed;
+    top: 56px; /* Height of navbar */
+    bottom: 0;
+    left: 100%;
+    width: 100%;
+    padding-right: 1rem;
+    padding-left: 1rem;
+    overflow-y: auto;
+    visibility: hidden;
+    background-color: #ededed!important;
+    transition-timing-function: ease-in-out;
+    transition-duration: .3s;
+    transition-property: left, visibility;
+  }
+  .offcanvas-collapse.open {
+    left: 0;
+    visibility: visible;
+  }
+}
+.nav-item {
+  position: relative;
+  display: inline-block;
+  width: 43.33333%;
+  margin: 10px 1.16667%;
+  margin-bottom: 10px;
+  font-family: "微軟正黑體";
+  font-size: 18px;
+}
+.nav-underline .nav-link {
+  padding-top: .75rem;
+  padding-bottom: .75rem;
+  font-size: .875rem;
+  color: #6c757d;
+}
+.nav-underline .nav-link {
+  padding-top: .75rem;
+  padding-bottom: .75rem;
+  font-size: .875rem;
+  color: #6c757d;
+}
+
+.nav-underline .nav-link:hover {
+  color: #007bff;
+}
+
+.nav-underline .active {
+  font-weight: 500;
+  color: #343a40;
+}
+
+input[type="text"],[type="password"]{
+
+font-size:24px;
+height:30px;
+border-radius:4px;
+border:1px solid #c8cccf;
+color:#6a6f77;
+-web-kit-appearance:none;
+-moz-appearance: none;
+display:block;
+outline:0;
+margin:10px 10px 10px 10px;
+text-decoration:none;
+width:80%;
+float: left;
+position: fixed;
+bottom: 0px;
+}
+input[type="submit"]{
+  background-color: #F0E68C;
+  position: fixed;
+  right: 5px;
+  bottom: 10px;
+  border: none;
+  color: #2F4F4F;
+  padding: 3px 3px 3px 3px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin:0px 10px 0px 10px;
+  border-radius: 4px;
+}
+.send{
+  padding: 10px 0px 10px 0px;
+}

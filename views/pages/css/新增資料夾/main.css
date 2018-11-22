@@ -1,0 +1,83 @@
+.main{
+    background-color: #dcf0f1;
+}
+
+.main_message{
+	margin-left: 20px;
+	margin-top: 20px;
+}
+
+
+.main_send{
+	margin-left: 20px;
+	margin-top: 20px;
+}
+
+.main_submit{
+	font-family: "微軟正黑體";
+}
+
+.main_tooltitle{
+  position: relative;
+  display: inline-block;
+  width: 50%;
+  margin: 10px 1.16667%;
+  margin-bottom: 10px;
+  font-family: "微軟正黑體";
+  font-weight: bold;
+  font-size: 20px;
+  margin-top: 20px;
+}
+
+.offcanvas-collapse{
+	 position: fixed;
+    top: 56px; /* Height of navbar */
+    bottom: 0;
+    left: 100%;
+    width: 100%;
+    padding-right: 1rem;
+    padding-left: 1rem;
+    overflow-y: auto;
+    visibility: hidden;
+    background-color: #f3f3f3 !important  ;
+    /*opacity: 50;*/
+    transition-timing-function: ease-in-out;
+    transition-duration: .3s;
+    transition-property: left, visibility;
+}
+
+#pri_bar{
+	position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 1030;
+    height: 50px;
+}
+
+/*.wrap{
+  
+  margin:0 auto;
+}*/
+
+.box{
+  /*border:1px solid black;*/
+   text-align:center;
+   /*background-color: #ededed;*/
+    margin-left: 140px;
+    margin-top: 2px;
+    display: none;
+    height: 100%;
+    width: 100%;
+    /*opacity: 0.8;*/
+    margin-top: 0px;
+    background: rgba(237,237,237, 0.8);
+ }
+
+.form{
+  margin-top:10px;
+  margin-bottom:20px;
+ 
+}
+
+

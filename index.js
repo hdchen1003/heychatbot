@@ -32,7 +32,7 @@
 }
 //宣告一些會用到的變數
 {
-  var Gplace_str =''
+  var Gplace_str = ''
   var myLocation = ''
   var dfURL = 'https://api.dialogflow.com/v1/query?v=20150910&lang=en&sessionId=0&query='
   var dfKey = 'Bearer 95ff53816d7b4b419c23b31907038aaa'
@@ -151,15 +151,35 @@ app.post('/login', function (req, res) {
   });
 });
 app.get('/trytrylook', function (req, res) {
-
-  res.render('pages/main', {
-    message: "早安",
-    send: get_str(),
-    ID: req.cookies.accountStatus,
-    ip: ip,
-  });
+  con.query('SELECT * FROM heychatbot.user WHERE id=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {
+    if(result[0].schedule_num == 0){
+      res.render('pages/main', {
+        message: "早安",
+        send: '<meta http-equiv="refresh" content="0;url=http://' + ip + '/schedule" />',
+        ID: req.cookies.accountStatus,
+        ip: ip,
+      });
+    }
+    else{
+      res.render('pages/main', {
+        message: "早安",
+        send: get_str(),
+        ID: req.cookies.accountStatus,
+        ip: ip,
+      });
+    }
+  })
+ 
 
 });
+app.get('/try',function(req,res){
+  res.render('pages/try_main', {
+    message: "歡迎使用本產品",
+    send: get_str(),
+    ID: ID,
+    ip: ip,
+  });
+})
 app.get('/logout', function (req, res) {
   if (req.cookies.accountStatus != "") {
     bot.forEach(input => {
@@ -641,60 +661,60 @@ app.get('/nearby', function (req, res) {
       }
       else {
         Gplace_str = ''
-        
-         for(var i=0 ;i < data.results.length ; i ++){
+
+        for (var i = 0; i < data.results.length; i++) {
           var place_id = data.results[i].place_id
-          
-          request('https://maps.googleapis.com/maps/api/place/details/json?placeid='+place_id+'&fields=name,rating,formatted_phone_number,vicinity,type,opening_hours,review&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE&language=zh-TW', {
+
+          request('https://maps.googleapis.com/maps/api/place/details/json?placeid=' + place_id + '&fields=name,rating,formatted_phone_number,vicinity,type,opening_hours,review&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE&language=zh-TW', {
             json: true
-          }, function (err, data2) {     
-              var rating = data2.result.rating
-              var phone = data2.result.formatted_phone_number
-              var type = data2.result.types[0]
-              var address = data2.result.vicinity
-              var rating_count = 0
-              var review = '尚無評論'
-            
-                
-            
-              if(data2.result.reviews != undefined){
-                for (var j = 0; j<data2.result.reviews.length ; j++){
-                  
-                  if(data2.result.reviews[j].rating > rating_count){
-                    rating_count = data2.result.reviews[j].rating;
-                    review = data2.result.reviews[j].text
-                  }
+          }, function (err, data2) {
+            var rating = data2.result.rating
+            var phone = data2.result.formatted_phone_number
+            var type = typeTochinese(data2.result.types[0])
+            var address = data2.result.vicinity
+            var rating_count = 0
+            var review = '尚無評論'
+
+
+
+            if (data2.result.reviews != undefined) {
+              for (var j = 0; j < data2.result.reviews.length; j++) {
+
+                if (data2.result.reviews[j].rating > rating_count) {
+                  rating_count = data2.result.reviews[j].rating;
+                  review = data2.result.reviews[j].text
                 }
               }
-            
-              
-              if(rating != undefined){
-              Gplace_str += '<tr><td>'+data2.result.name +  '<br>'
-              Gplace_str += '評分：' +rating +'<br/>電話：' +phone+ '<br/>類型：' +type+'<br/>地址：' +address+ '<br/>評論：'+ review  +'<br/>' 
-              Gplace_str += '<form action="http://' + ip + '/addTOfavorite_nearby" method="POST"><input type="hidden" name="value" value="' + review + '"><input type="hidden" name="address" value="' + address + '"><input type="hidden" name="type" value="' + type + '"><input type="hidden" name="phone" value="' + phone + '"><input type="hidden" name="arrnum" value="' + data2.result.name + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' 
+            }
+
+
+            if (rating != undefined) {
+              Gplace_str += '<tr><td>' + data2.result.name + '<br>'
+              Gplace_str += '評分：' + rating + '<br/>電話：' + phone + '<br/>類型：' + type + '<br/>地址：' + address + '<br/>評論：' + review + '<br/>'
+              Gplace_str += '<form action="http://' + ip + '/addTOfavorite_nearby" method="POST"><input type="hidden" name="value" value="' + review + '"><input type="hidden" name="address" value="' + address + '"><input type="hidden" name="type" value="' + type + '"><input type="hidden" name="phone" value="' + phone + '"><input type="hidden" name="arrnum" value="' + data2.result.name + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> '
               Gplace_str += '</tr></td>'
-            } 
+            }
           })
         }
-          
-       res.render('pages/nearby', {
-        message: "歡迎加入我們",
-        ID: req.cookies.accountStatus,
-        ip: ip,
-        context: '搜尋中<meta http-equiv="refresh" content="2;url=http://' + ip + '/nearby_buffer" />',
-        search: '<form action="http://' + ip + '/nearby_search" method="POST">手動輸入地點<input type="text" name="location_search" ><button type="submit"> 搜尋 </button></form> ' + '<br>'
-      });
+
+        res.render('pages/nearby', {
+          message: "歡迎加入我們",
+          ID: req.cookies.accountStatus,
+          ip: ip,
+          context: '搜尋中<meta http-equiv="refresh" content="2;url=http://' + ip + '/nearby_buffer" />',
+          search: '<form action="http://' + ip + '/nearby_search" method="POST">手動輸入地點<input type="text" name="location_search" ><button type="submit"> 搜尋 </button></form> ' + '<br>'
+        });
       }
     });
   }
 });
-app.get('/nearby_buffer',function(req,res){
-  
+app.get('/nearby_buffer', function (req, res) {
+
   res.render('pages/nearby', {
     message: "歡迎加入我們",
     ID: req.cookies.accountStatus,
     ip: ip,
-    context: Gplace_str   ,
+    context: Gplace_str,
     search: '<form action="http://' + ip + '/nearby_search" method="POST">手動輸入地點<input type="text" name="location_search" ><button type="submit"> 搜尋 </button></form> ' + '<br>'
   });
 })
@@ -755,12 +775,14 @@ app.get('/schedule', function (req, res) {
     }
     else {
       if (result != '') {
-        var str = ''
+        var str = '<div class="schedule">'
         for (var i = 0; i < result.length; i++) {
-          str += '<p>' + result[i].sName + result[i].sDate + '</p>'
-          str += '<form method="post" action="http://' + ip + '/schedule_content"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">' + result[i].sName + '</button></form>'
-          str += '<form method="post" action="http://' + ip + '/delete_schedule"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">刪除此行程</button></form>'
+         
+          str += ' <div class="sch_title"> <h2><form method="post" action="http://' + ip + '/schedule_content"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">' + result[i].sName + '</button></form></h2>'
+          str += '<div class="sch_name"><p>' + result[i].sDate + '</p></div></div>'
+       //   str += '<form method="post" action="http://' + ip + '/delete_schedule"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">刪除此行程</button></form>'
         }
+        str += '</div>'
         res.render('pages/schedule', {
           message: "歡迎加入我們",
           ID: req.cookies.accountStatus,
@@ -834,6 +856,11 @@ app.post('/do_add_schedule', function (req, res) {
     if (err) {
     }
     else {
+      con.query('SELECT * FROM heychatbot.user WHERE id=\'' + req.cookies.accountStatus + '\'  ', function (err, result, fields) {
+        var schedule_num = result[0].schedule_num +1
+        con.query('UPDATE  heychatbot.user SET  schedule_num=\'' + schedule_num + '\' WHERE id=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {})
+      })
+      
       con.query('SELECT * FROM heychatbot.schedule WHERE id=\'' + req.cookies.accountStatus + '\'  ', function (err, result, fields) {
         if (err) {
         }
@@ -880,6 +907,10 @@ app.post('/delete_schedule', function (req, res) {
       if (err) {
       }
       else {
+        con.query('SELECT * FROM heychatbot.user WHERE id=\'' + req.cookies.accountStatus + '\'  ', function (err, result, fields) {
+          var schedule_num = result[0].schedule_num -1
+          con.query('UPDATE  heychatbot.user SET  schedule_num=\'' + schedule_num + '\' WHERE id=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {})
+        })
         if (result != '') {
           var str = ''
           for (var i = 0; i < result.length; i++) {
@@ -1867,6 +1898,30 @@ function schedule() {
 
 }
 
+//google maps 類型轉中文
+function typeTochinese(input) {
+  switch (input) {
+    case 'university':
+      return '大學';
+    case 'lodging':
+      return '住宿';
+    case 'restaurant':
+      return '餐聽';
+    case 'place_of_worship':
+      return '寺廟';
+    case 'electronics_store':
+      return '電器商店';
+    case 'store':
+      return '商店';
+    case 'supermarket':
+      return '超市';
+    case 'real_estate_agency':
+      return '房仲';
+    default:
+      return input;
+  }
+
+}
 //port
 app.listen(port, function () {
   console.log('Listening on port 3000!');
