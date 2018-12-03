@@ -876,7 +876,7 @@ app.post('/do_add_schedule', function (req, res) {
               message: "歡迎加入我們",
               ID: req.cookies.accountStatus,
               ip: ip,
-              send: str
+              send: '<meta http-equiv="refresh" content="0;url=http://' + ip + '/schedule" />'
             });
           }
           else {
