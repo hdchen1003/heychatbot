@@ -976,9 +976,18 @@ app.post('/delete_schedule_content', function (req, res) {
 });
 //回應後
 app.post('/addstr', function (req, res) {
+
   //丟dailogflow
   var df_xhr = new XMLHttpRequest();
-  df_xhr.open('get', "" + dfURL + encodeURI(req.body.addstr) + "");
+  
+  console.log(req.body.addstr)
+  if(req.body.addstr == ''){
+    df_xhr.open('get', "" + dfURL + encodeURI('沒輸入') + "");
+  }
+  else{
+    df_xhr.open('get', "" + dfURL + encodeURI(req.body.addstr) + "");
+  }
+  
   df_xhr.setRequestHeader("Authorization", dfKey);
   df_xhr.send('');
   df_xhr.onload = function () {
@@ -989,10 +998,10 @@ app.post('/addstr', function (req, res) {
       var df_intent = df_data.result.metadata.intentName
 
     }//確認是有傳回dailogflow資料
-    google_map[0] = { value: '', user: '' }
-    if (df_data.result.parameters.type) {
-      google_map[0] = { value: df_data.result.parameters.type, user: req.cookies.accountStatus }
-    }
+    // google_map[0] = { value: '', user: '' }
+    // if (df_data.result.parameters.type) {
+    //   google_map[0] = { value: df_data.result.parameters.type, user: req.cookies.accountStatus }
+    // }
 
     //start <3 ~~
     if (req.body.addstr == "初始化" || req.body.addstr == "clear") {
@@ -1257,7 +1266,23 @@ app.post('/addstr', function (req, res) {
 
           });
       }
-
+      else if (session[0] == 'traffic_THSR') {
+        bot[bot.length] = {
+          message: "YOU：" + req.body.addstr,
+          class: "input",
+          canadd: 0
+          , type: 'str'
+        }
+        var originName, destinationName, originID, destinationID
+        axios.get('https://ptx.transportdata.tw/MOTC/v2/Rail/THSR/Station?$top=30&$format=JSON', { // 參考(抄襲XD)noobTW
+          headers: getAuthorizationHeader(),
+        })
+          .then(function (response) {
+           console.log( THSR_station(req.body.addstr).desStation)
+           
+            
+          })
+      }
 
       else if (session[0] == 'traffic_TRA') {
         bot[bot.length] = {
@@ -1329,6 +1354,7 @@ app.post('/addstr', function (req, res) {
 
 
       else if (session[0] == 'need_TRA_time') {
+        
         //bot.splice(delTRA, 1, "")
         bot[bot.length] = {
           message: "YOU：" + req.body.time,
@@ -1444,6 +1470,21 @@ function search(input, user, df_input, data) {
       type: 'str'
     }
     session[0] = "traffic_TRA";
+  }
+  else if (input.match("高鐵") || input.match("THSR") || input.match("高速鐵路") || df_input == 'THSR') {
+    bot[bot.length] = {
+      message: "YOU：" + input,
+      class: "input",
+      canadd: 0,
+      type: 'str'
+    }
+    bot[bot.length] = {
+      message: "BOT：起點站和終點站？",
+      class: "notif",
+      canadd: 0,
+      type: 'str'
+    }
+    session[0] = "traffic_THSR";
   }
   else if (input.match("公車") || input.match("巴士") || input.match("客運") || df_input == 'BUS') {
     bot[bot.length] = {
@@ -1896,6 +1937,150 @@ function showIntFromString(text) {
 //讀取景點列表
 function schedule() {
 
+}
+//取得高鐵站名
+function THSR_station(input2){
+  var input = input2.toString()
+  var s1 = ''
+  var s2 = ''
+  var s1_ID = ''
+  var s2_ID = ''
+  var s1_indexof = ''
+  var s2_indexof = ''
+  while(s1 == '' || s2 == ''){
+    if((input.match("台北") || input.match("臺北") || input.match("Tapiei"))&&s1_ID !='1000'){
+      var indexof = Math.max()
+      if(s1 == ''){
+        s1 = '臺北'
+        s1_ID ='1000'
+      }
+      else{
+        s2 = '臺北'
+        s2_ID ='1000'
+      }
+    }
+    else  if((input.match("南港") ||  input.match("Nangang"))&& s1_ID !='0990'){
+      if(s1 == ''){
+        s1 = '南港'
+        s1_ID ='0990'
+      }
+      else{
+        s2 = '南港'
+        s2_ID ='0990'
+      }
+    }
+    else  if((input.match('板橋') ||  input.match('Banciao'))&& s1_ID !='1010'){
+      if(s1 == ''){
+        s1 = '板橋'
+        s1_ID ='1010'
+      }
+      else{
+        s2 = '板橋'
+        s2_ID ='1010'
+      }
+    }
+    else  if((input.match('桃園') || input.match('中壢') || input.match('Taoyuan'))&& s1_ID !='1020'){
+      if(s1 == ''){
+        s1 = '桃園'
+        s1_ID ='1020'
+      }
+      else{
+        s2 = '桃園'
+        s2_ID ='1020'
+      }
+    }
+    else  if((input.match('新竹') || input.match('竹北') || input.match('Hsinchu'))&& s1_ID !='1030'){
+      if(s1 == ''){
+        s1 = '新竹'
+        s1_ID ='1030'
+      }
+      else{
+        s2 = '新竹'
+        s2_ID ='1030'
+      }
+    }
+    else  if((input.match('苗栗') || input.match('後龍') || input.match('Miaoli'))&& s1_ID !='1035'){
+      if(s1 == ''){
+        s1 = '苗栗'
+        s1_ID ='1035'
+      }
+      else{
+        s2 = '苗栗'
+        s2_ID ='1035'
+      }
+    }
+    else  if((input.match('台中') || input.match('臺中')|| input.match('烏日') || input.match('Taichung'))&& s1_ID !='1040'){
+      if(s1 == ''){
+        s1 = '臺中(新烏日)'
+        s1_ID ='1040'
+      }
+      else{
+        s2 = '臺中(新烏日)'
+        s2_ID ='1040'
+      }
+    }
+    else  if((input.match('彰化') || input.match('田中') || input.match('Changhua'))&& s1_ID !='1043'){
+      if(s1 == ''){
+        s1 = '彰化'
+        s1_ID ='1043'
+      }
+      else{
+        s2 = '彰化'
+        s2_ID ='1043'
+      }
+    }
+    else  if((input.match('雲林') || input.match('虎尾') || input.match('Yunlin'))&& s1_ID !='1047'){
+      if(s1 == ''){
+        s1 = '雲林'
+        s1_ID ='1047'
+      }
+      else{
+        s2 = '雲林'
+        s2_ID ='1047'
+      }
+    }
+
+    else  if((input.match('嘉義') ||  input.match('Chiay'))&& s1_ID !='1050'){
+      if(s1 == ''){
+        s1 = '嘉義'
+        s1_ID ='1050'
+      }
+      else{
+        s2 = '嘉義'
+        s2_ID ='1050'
+      }
+    }
+
+    else  if((input.match('台南') || input.match('臺南') || input.match('Tainan'))&& s1_ID !='1060'){
+      if(s1 == ''){
+        s1 = '臺南'
+        s1_ID ='1060'
+      }
+      else{
+        s2 = '臺南'
+        s2_ID ='1060'
+      }
+    }
+
+    else  if((input.match('左營') || input.match('高雄') || input.match('Zuoying'))&& s1_ID !='1070'){
+      if(s1 == ''){
+        s1 = '新左營'
+        s1_ID ='1070'
+      }
+      else{
+        s2 = '新左營'
+        s2_ID ='1070'
+      }
+    }
+  }
+  
+  var res = {
+    startStation : s1,
+    startID : s1_ID,
+    desStation : s2,
+    desID : s2_ID
+  }
+  return res;
 }
 
 //google maps 類型轉中文
