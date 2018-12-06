@@ -806,7 +806,9 @@ app.get('/schedule', function (req, res) {
 app.post('/schedule_content', function (req, res) {
   con.query('UPDATE  heychatbot.user SET schedule_now = \'' + req.body.sch_id + '\' WHERE id = \'' + req.cookies.accountStatus + '\'', function (err, result, fields) {
     res.cookie('schedule_now', req.body.sch_id)
+    
   })
+
   con.query('SELECT * FROM heychatbot.schedule_content WHERE sch_id=\'' + req.body.sch_id + '\'  ', function (err, result, fields) {
     if (err) {
     }
@@ -856,6 +858,7 @@ app.post('/do_add_schedule', function (req, res) {
     if (err) {
     }
     else {
+     
       con.query('SELECT * FROM heychatbot.user WHERE id=\'' + req.cookies.accountStatus + '\'  ', function (err, result, fields) {
         var schedule_num = result[0].schedule_num +1
         con.query('UPDATE  heychatbot.user SET  schedule_num=\'' + schedule_num + '\' WHERE id=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {})
@@ -1273,14 +1276,81 @@ app.post('/addstr', function (req, res) {
           canadd: 0
           , type: 'str'
         }
-        var originName, destinationName, originID, destinationID
-        axios.get('https://ptx.transportdata.tw/MOTC/v2/Rail/THSR/Station?$top=30&$format=JSON', { // 參考(抄襲XD)noobTW
+        bot[bot.length] = {
+          message: "BOT：起站 - " + THSR_station(req.body.addstr).startStation + " ，迄站 -  " + THSR_station(req.body.addstr).desStation,
+          class: "notif",
+          canadd: 0,
+          type: 'str'
+        }
+        bot[bot.length] = {
+          message: "BOT：要搭幾月幾號的車？",
+          class: "notif",
+          canadd: 0,
+          type: 'str'
+        }
+        
+        bot[bot.length] = {
+          message: "<input type=\"date\" class=\"input\" name=\"time\">",
+          class: "notif",
+          canadd: 0,
+          type: 'talbe'
+        }
+        res.render('pages/main.ejs', {
+          message: "早安",
+          send: get_str(),
+          ID: req.cookies.accountStatus,
+          ip: ip,
+        });
+        session[0] = "need_THSR_time";
+        session[1] =  THSR_station(req.body.addstr);
+
+       
+      }
+      else if (session[0] == 'need_THSR_time') {
+        bot[bot.length] = {
+          message: "YOU：" + req.body.time,
+          class: "input",
+          canadd: 0
+          , type: 'str'
+        }
+        axios.get('https://ptx.transportdata.tw/MOTC/v2/Rail/THSR/DailyTimetable/OD/'+session[1].startID+'/to/'+session[1].desID+'/'+req.body.time+'?$top=30&$format=JSON', { // 參考(抄襲XD)noobTW
           headers: getAuthorizationHeader(),
         })
           .then(function (response) {
-           console.log( THSR_station(req.body.addstr).desStation)
-           
-            
+          
+            bot[bot.length] = {
+              message: "BOT：<br/><table border=1><tr><td>車次代碼</td><td>出發時間</td><td>抵達目的地時間</td><td>備註</td><td>加入最愛</td></tr>",
+              class: "notif",
+              cabadd: 0,
+              type: 'table_title'
+            }
+            for (var i = 0; i < response.data.length; i++) {
+              if(response.data[i].DailyTrainInfo.Note == '[object Object]'){
+                response.data[i].DailyTrainInfo.Note = '無'
+              }
+              bot[bot.length] = {
+                message: "<tr><td>" + response.data[i].DailyTrainInfo.TrainNo + "</td><td>" + response.data[i].OriginStopTime.ArrivalTime + "</td><td>" + response.data[i].DestinationStopTime.ArrivalTime + "</td><td>" + response.data[i].DailyTrainInfo.Note+ "</td>",
+                class: "notif",
+                canadd: 1,
+                value: '搭乘車次為高鐵' + response.data[i].DailyTrainInfo.TrainNo + '次 於'+ response.data[i].OriginStopTime.ArrivalTime+'發車 ，' + response.data[i].DestinationStopTime.ArrivalTime + '抵達',
+                arraynum: bot.length,
+                type: 'table'
+              }
+            }
+            bot[bot.length] = {
+              message: "</table>",
+              class: "notif",
+              canadd: 0,
+              type: 'str'
+            }
+            res.render('pages/main.ejs', {
+              message: "早安",
+              send: get_str(),
+              ID: req.cookies.accountStatus,
+              ip: ip,
+            });
+            session[0] = "";
+            session[1] = "";
           })
       }
 
@@ -1945,135 +2015,179 @@ function THSR_station(input2){
   var s2 = ''
   var s1_ID = ''
   var s2_ID = ''
-  var s1_indexof = ''
-  var s2_indexof = ''
+  var s1_indexof 
+  var s2_indexof 
   while(s1 == '' || s2 == ''){
     if((input.match("台北") || input.match("臺北") || input.match("Tapiei"))&&s1_ID !='1000'){
-      var indexof = Math.max()
+      var indexof = Math.max(input.indexOf("台北"),input.indexOf("臺北"),input.indexOf("Tapiei"))
       if(s1 == ''){
         s1 = '臺北'
         s1_ID ='1000'
+        s1_indexof = indexof
       }
       else{
         s2 = '臺北'
         s2_ID ='1000'
+        s2_indexof = indexof
       }
     }
     else  if((input.match("南港") ||  input.match("Nangang"))&& s1_ID !='0990'){
+      var indexof = Math.max(input.indexOf("南港"),input.indexOf("Nangang"))
       if(s1 == ''){
         s1 = '南港'
         s1_ID ='0990'
+        s1_indexof = indexof
       }
       else{
         s2 = '南港'
         s2_ID ='0990'
+        s2_indexof = indexof
       }
     }
     else  if((input.match('板橋') ||  input.match('Banciao'))&& s1_ID !='1010'){
+      var indexof = Math.max(input.indexOf("板橋"),input.indexOf("Banciao"))
       if(s1 == ''){
         s1 = '板橋'
         s1_ID ='1010'
+        s1_indexof = indexof
       }
       else{
         s2 = '板橋'
         s2_ID ='1010'
+        s2_indexof = indexof
       }
     }
     else  if((input.match('桃園') || input.match('中壢') || input.match('Taoyuan'))&& s1_ID !='1020'){
+      var indexof = Math.max(input.indexOf("桃園"),input.indexOf("中壢"),input.indexOf("Taoyuan"))
       if(s1 == ''){
         s1 = '桃園'
         s1_ID ='1020'
+        s1_indexof = indexof
       }
       else{
         s2 = '桃園'
         s2_ID ='1020'
+        s2_indexof = indexof
       }
     }
     else  if((input.match('新竹') || input.match('竹北') || input.match('Hsinchu'))&& s1_ID !='1030'){
+      var indexof = Math.max(input.indexOf("新竹"),input.indexOf("竹北"),input.indexOf("Hsinchu"))
       if(s1 == ''){
         s1 = '新竹'
         s1_ID ='1030'
+        s1_indexof = indexof
       }
       else{
         s2 = '新竹'
         s2_ID ='1030'
+        s2_indexof = indexof
       }
     }
     else  if((input.match('苗栗') || input.match('後龍') || input.match('Miaoli'))&& s1_ID !='1035'){
+      var indexof = Math.max(input.indexOf("苗栗"),input.indexOf("後龍"),input.indexOf("Miaoli"))
       if(s1 == ''){
         s1 = '苗栗'
         s1_ID ='1035'
+        s1_indexof = indexof
       }
       else{
         s2 = '苗栗'
         s2_ID ='1035'
+        s2_indexof = indexof
       }
     }
     else  if((input.match('台中') || input.match('臺中')|| input.match('烏日') || input.match('Taichung'))&& s1_ID !='1040'){
+      var indexof = Math.max(input.indexOf("台中"),input.indexOf("臺中"),input.indexOf("烏日"),input.indexOf("Taichung"))
       if(s1 == ''){
         s1 = '臺中(新烏日)'
         s1_ID ='1040'
+        s1_indexof = indexof
       }
       else{
         s2 = '臺中(新烏日)'
         s2_ID ='1040'
+        s2_indexof = indexof
       }
     }
     else  if((input.match('彰化') || input.match('田中') || input.match('Changhua'))&& s1_ID !='1043'){
+      var indexof = Math.max(input.indexOf("彰化"),input.indexOf("田中"),input.indexOf("Changhua"))
       if(s1 == ''){
         s1 = '彰化'
         s1_ID ='1043'
+        s1_indexof = indexof
       }
       else{
         s2 = '彰化'
         s2_ID ='1043'
+        s2_indexof = indexof
       }
     }
     else  if((input.match('雲林') || input.match('虎尾') || input.match('Yunlin'))&& s1_ID !='1047'){
+      var indexof = Math.max(input.indexOf("雲林'"),input.indexOf("虎尾"),input.indexOf("Yunlin"))
       if(s1 == ''){
         s1 = '雲林'
         s1_ID ='1047'
+        s1_indexof = indexof
       }
       else{
         s2 = '雲林'
         s2_ID ='1047'
+        s2_indexof = indexof
       }
     }
 
     else  if((input.match('嘉義') ||  input.match('Chiay'))&& s1_ID !='1050'){
+      var indexof = Math.max(input.indexOf("嘉義"),input.indexOf("Chiay"))
       if(s1 == ''){
         s1 = '嘉義'
         s1_ID ='1050'
+        s1_indexof = indexof
       }
       else{
         s2 = '嘉義'
         s2_ID ='1050'
+        s2_indexof = indexof
       }
     }
 
     else  if((input.match('台南') || input.match('臺南') || input.match('Tainan'))&& s1_ID !='1060'){
+      var indexof = Math.max(input.indexOf("台南"),input.indexOf("臺南"),input.indexOf("Tainan"))
       if(s1 == ''){
         s1 = '臺南'
         s1_ID ='1060'
+        s1_indexof = indexof
       }
       else{
         s2 = '臺南'
         s2_ID ='1060'
+        s2_indexof = indexof
       }
     }
 
     else  if((input.match('左營') || input.match('高雄') || input.match('Zuoying'))&& s1_ID !='1070'){
+      var indexof = Math.max(input.indexOf("左營"),input.indexOf("高雄"),input.indexOf("Zuoying"))
       if(s1 == ''){
         s1 = '新左營'
         s1_ID ='1070'
+        s1_indexof = indexof
       }
       else{
         s2 = '新左營'
         s2_ID ='1070'
+        s2_indexof = indexof
       }
     }
   }
   
+  if (s1_indexof > s2_indexof){
+    var a
+    a = s1
+    s1 = s2
+    s2 =a 
+    a = s1_ID
+    s1_ID = s2_ID
+    s2_ID =a
+  }
   var res = {
     startStation : s1,
     startID : s1_ID,
