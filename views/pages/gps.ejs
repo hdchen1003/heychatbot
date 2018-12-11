@@ -39,7 +39,7 @@
             };
 
             function error() {
-                output.innerHTML = "Unable to retrieve your location";
+                output.innerHTML = "目前無法抓取位置<form action='http://<%=ip %>/nearby' name=form1 method='post'> <input type='submit' name='name' value='手動搜尋'  ></form>"
             };
 
             output.innerHTML = "<p>定位中…</p>";
