@@ -1013,11 +1013,11 @@ app.post('/addstr', function (req, res) {
       var df_intent = df_data.result.metadata.intentName
 
     }//確認是有傳回dailogflow資料
-     google_map[0] = { value: '', user: '' }
+     google_map[0] = { value: '', user: '',address:'' }
      if (df_data.result.parameters.type) {
-       google_map[0] = { value: df_data.result.parameters.type, user: req.cookies.accountStatus }
+       google_map[0] = { value: df_data.result.parameters.type, user: req.cookies.accountStatus ,address:df_data.result.parameters.geocity}
      }
-     
+     console.log(google_map[0])
     //start <3 ~~
     if (req.body.addstr == "初始化" || req.body.addstr == "clear") {
       for (var i = 0; i < session.length; i++) {
@@ -1062,6 +1062,7 @@ app.post('/addstr', function (req, res) {
       });
     }
     else if (df_data.result.parameters.type && df_data.result.parameters.geocity) {
+      console.log( df_data.result.parameters.geocity)
       request('https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURI(df_data.result.parameters.geocity) + '&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
         json: true
       }, function (err, data) {
@@ -1073,7 +1074,10 @@ app.post('/addstr', function (req, res) {
           // if (google_map[0].user != req.cookies.accountStatus) {
           //   google_map[0] = ""
           // }//如果google map api非現在使用者就不給使用
-          request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + data.results[0].geometry.location.lat + ',' + data.results[0].geometry.location.lng + '&radius=1500&type=' + df_data.result.parameters.type + '&keyword=' + encodeURI(req.body.addstr) + '&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
+          console.log(data.results[0].geometry.location.lat,data.results[0].geometry.location.lng)
+          console.log(typeToEN(google_map[0].value) )
+          request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + data.results[0].geometry.location.lat + ',' + data.results[0].geometry.location.lng + '&radius=1500&type=' + typeToEN(df_data.result.parameters.type) + '&keyword=&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
+            //' + encodeURI(req.body.addstr) + '暫時不用keyword
             json: true
           }, function (err, data2) {
             if (err) {
@@ -1128,13 +1132,15 @@ app.post('/addstr', function (req, res) {
             // if (google_map[0].user != req.cookies.accountStatus) {
             //   google_map[0] = ""
             // }//如果google map api非現在使用者就不給使用
-            request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + data.results[0].geometry.location.lat + ',' + data.results[0].geometry.location.lng + '&radius=1500&type=' + google_map[0].value + '&keyword=' + encodeURI(req.body.addstr) + '&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
+          
+            request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + data.results[0].geometry.location.lat + ',' + data.results[0].geometry.location.lng + '&radius=1500&type=' + typeToEN(google_map[0].value) + '&keyword=&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
               json: true
             }, function (err, data2) {
               if (err) {
                 throw err
               }
               else {
+                
                 bot[bot.length] = {
                   message: "YOU：" + req.body.addstr,
                   class: "input",
@@ -2233,6 +2239,32 @@ function typeTochinese(input) {
       return '超市';
     case 'real_estate_agency':
       return '房仲';
+    default:
+      return input;
+  }
+
+}
+//google maps 類型轉英文
+function typeToEN(input) {
+  switch (input) {
+    case '大學':
+      return 'university';
+    case '住宿':
+      return 'lodging';
+    case '餐廳':
+      return 'restaurant';
+    case '寺廟':
+      return 'place_of_worship';
+    case '電器商店':
+      return 'electronics_store';
+      case '書局':
+      return 'bookstore';
+    case '商店':
+      return 'store';
+    case '超市':
+      return 'supermarket';
+    case '房仲':
+      return 'real_estate_agency';
     default:
       return input;
   }
