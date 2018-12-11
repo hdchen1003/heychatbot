@@ -664,8 +664,8 @@ app.get('/nearby', function (req, res) {
 
         for (var i = 0; i < data.results.length; i++) {
           var place_id = data.results[i].place_id
-
-          request('https://maps.googleapis.com/maps/api/place/details/json?placeid=' + place_id + '&fields=name,rating,formatted_phone_number,vicinity,type,opening_hours,review&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE&language=zh-TW', {
+     
+          request('https://maps.googleapis.com/maps/api/place/details/json?placeid=' + place_id + '&fields=geometry,name,rating,formatted_phone_number,vicinity,type,opening_hours,review&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE&language=zh-TW', {
             json: true
           }, function (err, data2) {
             var rating = data2.result.rating
@@ -691,7 +691,7 @@ app.get('/nearby', function (req, res) {
             if (rating != undefined) {
               Gplace_str += '<tr><td>' + data2.result.name + '<br>'
               Gplace_str += '評分：' + rating + '<br/>電話：' + phone + '<br/>類型：' + type + '<br/>地址：' + address + '<br/>評論：' + review + '<br/>'
-              Gplace_str += '<form action="http://' + ip + '/addTOfavorite_nearby" method="POST"><input type="hidden" name="value" value="' + review + '"><input type="hidden" name="address" value="' + address + '"><input type="hidden" name="type" value="' + type + '"><input type="hidden" name="phone" value="' + phone + '"><input type="hidden" name="arrnum" value="' + data2.result.name + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> '
+              Gplace_str += '<form action="http://' + ip + '/addTOfavorite_nearby" method="POST"><input type="hidden" name="other" value="<a href=https://www.google.com/maps/place/'+encodeURI(data2.result.name)+'/@'+data2.result.geometry.location.lat + ',' + data2.result.geometry.location.lng+',17z>查看地圖</a>"><input type="hidden" name="value" value="' + review + '"><input type="hidden" name="address" value="' + address + '"><input type="hidden" name="type" value="' + type + '"><input type="hidden" name="phone" value="' + phone + '"><input type="hidden" name="arrnum" value="' + data2.result.name + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> '
               Gplace_str += '</tr></td>'
             }
           })
@@ -719,32 +719,19 @@ app.get('/nearby_buffer', function (req, res) {
   });
 })
 app.post('/addTOfavorite_nearby', function (req, res) {
-  con.query('INSERT INTO heychatbot.schedule_content (`sch_id`, `c_name`, `c_class`, `c_content`) VALUES (\'' + req.cookies.schedule_now + '\', \'' + req.body.value + '\', \'' + req.body.value + '\', \'' + req.body.value + '\')', function (err, result, fields) { })
-  request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + req.cookies.latitude + ',' + req.cookies.longitude + '&radius=1500&type=food,school&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
-    json: true
-  }, function (err, data) {
-    if (err) {
-      throw err
-    }
-    else {
-      var str = ''
-      data.results.forEach(element => {
-        str += element.name + '<form action="http://' + ip + '/addTOfavorite_nearby" method="POST"><input type="hidden" name="value" value="' + element.name + '"><input type="hidden" name="arrnum" value="' + element.name + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' + '<br>'
-      });
-      res.render('pages/nearby', {
-        message: "歡迎加入我們",
-        ID: req.cookies.accountStatus,
-        ip: ip,
-        context: str,
-        search: '<form action="http://' + ip + '/nearby_search" method="POST">手動輸入地點<input type="text" name="location_search" ><button type="submit"> 搜尋 </button></form> ' + '<br>'
-      });
-    }
+  con.query('INSERT INTO heychatbot.schedule_content (`sch_id`, `c_name`, `c_class`, `c_content`) VALUES (\'' + req.cookies.schedule_now + '\', \'' + req.body.arrnum + '\', \'' + req.body.arrnum + '\', \'' + req.body.other + '\')', function (err, result, fields) { })
+  res.render('pages/nearby', {
+    message: "歡迎加入我們",
+    ID: req.cookies.accountStatus,
+    ip: ip,
+    context: Gplace_str,
+    search: '<form action="http://' + ip + '/nearby_search" method="POST">手動輸入地點<input type="text" name="location_search" ><button type="submit"> 搜尋 </button></form> ' + '<br>'
   });
-
 
 });
 app.post('/addTOfavorite', function (req, res) {
-  con.query('INSERT INTO heychatbot.schedule_content (`sch_id`, `c_name`, `c_class`, `c_content`) VALUES (\'' + req.cookies.schedule_now + '\', \'' + req.body.value + '\', \'' + req.body.value + '\', \'' + req.body.value + '\')', function (err, result, fields) { })
+ 
+  con.query('INSERT INTO heychatbot.schedule_content (`sch_id`, `c_name`, `c_class`, `c_content`) VALUES (\'' + req.cookies.schedule_now + '\', \'' + req.body.value + '\', \'' + req.body.value + '\', \'' + req.body.other + '\')', function (err, result, fields) { })
   res.render('pages/main', {
     message: "歡迎加入我們",
     ID: req.cookies.accountStatus,
@@ -995,7 +982,7 @@ app.post('/addstr', function (req, res) {
   //丟dailogflow
   var df_xhr = new XMLHttpRequest();
   
- // console.log(req.body.addstr)
+ 
   if(req.body.addstr == ''){
     df_xhr.open('get', "" + dfURL + encodeURI('沒輸入') + "");
   }
@@ -1017,7 +1004,7 @@ app.post('/addstr', function (req, res) {
      if (df_data.result.parameters.type) {
        google_map[0] = { value: df_data.result.parameters.type, user: req.cookies.accountStatus ,address:df_data.result.parameters.geocity}
      }
-     console.log(google_map[0])
+   
     //start <3 ~~
     if (req.body.addstr == "初始化" || req.body.addstr == "clear") {
       for (var i = 0; i < session.length; i++) {
@@ -1062,7 +1049,7 @@ app.post('/addstr', function (req, res) {
       });
     }
     else if (df_data.result.parameters.type && df_data.result.parameters.geocity) {
-      console.log( df_data.result.parameters.geocity)
+    
       request('https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURI(df_data.result.parameters.geocity) + '&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
         json: true
       }, function (err, data) {
@@ -1074,8 +1061,7 @@ app.post('/addstr', function (req, res) {
           // if (google_map[0].user != req.cookies.accountStatus) {
           //   google_map[0] = ""
           // }//如果google map api非現在使用者就不給使用
-          console.log(data.results[0].geometry.location.lat,data.results[0].geometry.location.lng)
-          console.log(typeToEN(google_map[0].value) )
+      
           request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + data.results[0].geometry.location.lat + ',' + data.results[0].geometry.location.lng + '&radius=1500&type=' + typeToEN(df_data.result.parameters.type) + '&keyword=&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
             //' + encodeURI(req.body.addstr) + '暫時不用keyword
             json: true
@@ -1099,6 +1085,7 @@ app.post('/addstr', function (req, res) {
                     canadd: 1,
                     value: data2.results[i].name,
                     arraynum: bot.length,
+                    other:'<a href=https://www.google.com/maps/place/'+encodeURI(data2.results[i].name)+'/@'+data2.results[i].geometry.location.lat + ',' + data2.results[i].geometry.location.lng+',17z>查看地圖</a>',
                     type: 'str'
                   }
 
@@ -1352,6 +1339,7 @@ app.post('/addstr', function (req, res) {
                 canadd: 1,
                 value: '搭乘車次為高鐵' + response.data[i].DailyTrainInfo.TrainNo + '次 於'+ response.data[i].OriginStopTime.ArrivalTime+'發車 ，' + response.data[i].DestinationStopTime.ArrivalTime + '抵達',
                 arraynum: bot.length,
+                other:"<a href=https://irs.thsrc.com.tw/IMINT/?locale=tw>前往訂票</a>",
                 type: 'table'
               }
             }
@@ -1469,6 +1457,7 @@ app.post('/addstr', function (req, res) {
                 canadd: 1,
                 value: '搭乘車種為' + response.data[i].DailyTrainInfo.TrainTypeName.Zh_tw + '號 第' + response.data[i].DailyTrainInfo.TrainNo + '車次 於' + response.data[i].OriginStopTime.ArrivalTime + '抵達',
                 arraynum: bot.length,
+                other:"<a href=https://irs.thsrc.com.tw/IMINT/?locale=tw>前往訂票</a>",
                 type: 'table'
               }
             }
@@ -1814,15 +1803,15 @@ function get_str() {
     bot.forEach(input => {
       if (input.canadd == 1) {
         if (input.type == 'str') {
-          str += input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' + '<br/>'
+          str += input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="other" value="' + input.other + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> ' + '<br/>'
         }
         else if (input.type == 'table') {
           //   console.log('canadd 1 type table')
-          str += input.message + '<td><form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> </td></tr>'
+          str += input.message + '<td><form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="other" value="' + input.other + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> </td></tr>'
         }
         else {
           //  console.log('canadd 1 type other')
-          str += input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> '
+          str += input.message + '<form action="http://' + ip + '/addTOfavorite" method="POST"><input type="hidden" name="value" value="' + input.value + '"><input type="hidden" name="other" value="' + input.other + '"><input type="hidden" name="arrnum" value="' + input.arraynum + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> '
         }
       }
       else {
@@ -2248,18 +2237,33 @@ function typeTochinese(input) {
 function typeToEN(input) {
   switch (input) {
     case '大學':
+    case '學校':
+    case '國小':
+    case '國中':
+    case '高中':
       return 'university';
     case '住宿':
+    case '飯店':
+    case '旅館':
+    case '背包客棧':
+    case '客棧':
       return 'lodging';
     case '餐廳':
+    case '吃的':
+    case '吃飯':
+    case '好吃的':
+    case '好吃':
       return 'restaurant';
     case '寺廟':
       return 'place_of_worship';
     case '電器商店':
       return 'electronics_store';
       case '書局':
+      case '書店':
       return 'bookstore';
     case '商店':
+    case '便利商店':
+    case '超商':
       return 'store';
     case '超市':
       return 'supermarket';
