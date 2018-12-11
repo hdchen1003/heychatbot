@@ -779,6 +779,7 @@ app.get('/schedule', function (req, res) {
         for (var i = 0; i < result.length; i++) {
          
           str += ' <div class="sch_title"> <h2><form method="post" action="http://' + ip + '/schedule_content"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">' + result[i].sName + '</button></form></h2>'
+          str += '<div class="sch_name"><p><form method="post" action="http://' + ip + '/delete_schedule"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">刪除此行程</button></form></p></div>'
           str += '<div class="sch_name"><p>' + result[i].sDate + '</p></div></div>'
        //   str += '<form method="post" action="http://' + ip + '/delete_schedule"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">刪除此行程</button></form>'
         }
@@ -917,9 +918,12 @@ app.post('/delete_schedule', function (req, res) {
         if (result != '') {
           var str = ''
           for (var i = 0; i < result.length; i++) {
-            str += '<p>' + result[i].sName + result[i].sDate + '</p>'
-            str += '<form method="post" action="http://' + ip + '/schedule_content"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">' + result[i].sName + '</button></form>'
-            str += '<form method="post" action="http://' + ip + '/delete_schedule"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">刪除此行程</button></form>'
+            // str += '<p>' + result[i].sName + result[i].sDate + '</p>'
+            // str += '<form method="post" action="http://' + ip + '/schedule_content"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">' + result[i].sName + '</button></form>'
+            // str += '<form method="post" action="http://' + ip + '/delete_schedule"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">刪除此行程</button></form>'
+            str += ' <div class="sch_title"> <h2><form method="post" action="http://' + ip + '/schedule_content"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">' + result[i].sName + '</button></form></h2>'
+            str += '<div class="sch_name"><p><form method="post" action="http://' + ip + '/delete_schedule"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">刪除此行程</button></form></p></div>'
+            str += '<div class="sch_name"><p>' + result[i].sDate + '</p></div></div>'
           }
           res.render('pages/schedule', {
             message: "歡迎加入我們",
@@ -979,11 +983,19 @@ app.post('/delete_schedule_content', function (req, res) {
 });
 //回應後
 app.post('/addstr', function (req, res) {
+  // if(req.body.addstr == '' || req.body.addstr == undefined){
+  //   res.render('pages/main.ejs', {
+  //     message: "早安",
+  //     send: get_str(),
+  //     ID: req.cookies.accountStatus,
+  //     ip: ip,
+  //   });
+  // }
 
   //丟dailogflow
   var df_xhr = new XMLHttpRequest();
   
-  console.log(req.body.addstr)
+ // console.log(req.body.addstr)
   if(req.body.addstr == ''){
     df_xhr.open('get', "" + dfURL + encodeURI('沒輸入') + "");
   }
@@ -1001,11 +1013,11 @@ app.post('/addstr', function (req, res) {
       var df_intent = df_data.result.metadata.intentName
 
     }//確認是有傳回dailogflow資料
-    // google_map[0] = { value: '', user: '' }
-    // if (df_data.result.parameters.type) {
-    //   google_map[0] = { value: df_data.result.parameters.type, user: req.cookies.accountStatus }
-    // }
-
+     google_map[0] = { value: '', user: '' }
+     if (df_data.result.parameters.type) {
+       google_map[0] = { value: df_data.result.parameters.type, user: req.cookies.accountStatus }
+     }
+     
     //start <3 ~~
     if (req.body.addstr == "初始化" || req.body.addstr == "clear") {
       for (var i = 0; i < session.length; i++) {
@@ -1058,9 +1070,9 @@ app.post('/addstr', function (req, res) {
         }
         else {
 
-          if (google_map[0].user != req.cookies.accountStatus) {
-            google_map[0] = ""
-          }//如果google map api非現在使用者就不給使用
+          // if (google_map[0].user != req.cookies.accountStatus) {
+          //   google_map[0] = ""
+          // }//如果google map api非現在使用者就不給使用
           request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + data.results[0].geometry.location.lat + ',' + data.results[0].geometry.location.lng + '&radius=1500&type=' + df_data.result.parameters.type + '&keyword=' + encodeURI(req.body.addstr) + '&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
             json: true
           }, function (err, data2) {
@@ -1113,9 +1125,9 @@ app.post('/addstr', function (req, res) {
           }
           else {
 
-            if (google_map[0].user != req.cookies.accountStatus) {
-              google_map[0] = ""
-            }//如果google map api非現在使用者就不給使用
+            // if (google_map[0].user != req.cookies.accountStatus) {
+            //   google_map[0] = ""
+            // }//如果google map api非現在使用者就不給使用
             request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + data.results[0].geometry.location.lat + ',' + data.results[0].geometry.location.lng + '&radius=1500&type=' + google_map[0].value + '&keyword=' + encodeURI(req.body.addstr) + '&key=AIzaSyBESYepKT52UftY_Bad3sX7h1lbMB99CcE', {
               json: true
             }, function (err, data2) {
@@ -1290,7 +1302,7 @@ app.post('/addstr', function (req, res) {
         }
         
         bot[bot.length] = {
-          message: "<input type=\"date\" class=\"input\" name=\"time\">",
+          message: '<form action="http://' + ip + '/addstr" method="POST"><input  type="date" class="input" name="time"><button type="submit"> <img src="img/search2.PNG" height="30" width="60" alt="">  </button></form> ',
           class: "notif",
           canadd: 0,
           type: 'talbe'
@@ -1406,8 +1418,10 @@ app.post('/addstr', function (req, res) {
             }
             Train = [originName, originID, destinationName, destinationID]
             delTRA = bot.length
+            //
             bot[bot.length] = {
-              message: "<input type=\"date\" class=\"input\" name=\"time\">",
+            //  message: "<input type=\"date\" class=\"input\" name=\"time\">",
+            message: '<form action="http://' + ip + '/addstr" method="POST"><input  type="date" class="input" name="time"><button type="submit"> <img src="img/search2.PNG" height="30" width="60" alt="">  </button></form> ' ,
               class: "notif",
               canadd: 0,
               type: 'talbe'
@@ -1785,8 +1799,11 @@ function get_fstr(user) {
 function get_str() {
   var str = ''
   if (bot == '') {
-
+    
   }
+  // else if (bot == undefined) {
+  //   str += ' '
+  // }
   else {
     bot.forEach(input => {
       if (input.canadd == 1) {
