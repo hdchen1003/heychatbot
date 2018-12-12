@@ -1145,7 +1145,7 @@ app.post('/addstr', function (req, res) {
                       canadd: 1,
                       value: data2.results[i].name,
                       arraynum: bot.length,
-                      other:'<a href=https://www.google.com/maps/place/'+encodeURI(data2.results[i].name)+'/@'+data2.results[i].geometry.location.lat + ',' + data2.results[i].geometry.location.lng+',17z>查看地圖</a>',
+                      other:'<a href=https://www.google.com/maps/place/@'+data2.results[i].geometry.location.lat + ',' + data2.results[i].geometry.location.lng+',17z>查看地圖</a>',
                       type: 'str'
                     }
 
