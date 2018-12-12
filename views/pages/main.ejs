@@ -70,7 +70,7 @@
   
 
 
-  <div class="wrap" style="margin: 15px">
+  <div id='wrap' class="wrap" style="margin: 15px">
       <p>
           <%=message%>
         </p>
@@ -80,15 +80,13 @@
       <form action="http://<%-ip%>/addstr" method="post" class="form">
        
         
-      <div class="echo" id="scrolldIV">
-       
-      </div>
+      <!-- <div class="echo" id="scrolldIV">
+      </div> -->
       <div class="text">
         <input type="text" name="addstr" style="height :50px" autofocus>
       </div>
       <div class="send">
-
-        <input type="submit" class="submit" name="submit" value="提交">
+        <input type="submit" class="submit" name="submit" style="height :50px" value="提交">
       </div>
     </form>
 
@@ -96,6 +94,7 @@
 
 
   <script type="text/javascript">
+ 
     window.onload = function () {
       add();
     }
@@ -103,8 +102,8 @@
 
       var now = new Date();
       var div = document.getElementById('scrolldIV2');
-      console.log("eo4 " + div.scrollHeight)
-      div.scrollTop = div.scrollHeight;
+      
+      div.scrollTop = 999999999;
 
     }
 
