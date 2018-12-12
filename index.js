@@ -1258,7 +1258,7 @@ app.post('/addstr', function (req, res) {
                     canadd: 1,
                     value: '起點為' + response.data[i].Stops[j].StopName.Zh_tw + '站',
                     arraynum: bot.length,
-                    other: '公車編號' + response.data[i].SubRouteID + '號',
+                    other: '市公車' + response.data[i].SubRouteID + '號',
                     type: 'table'
                   }
                 }
