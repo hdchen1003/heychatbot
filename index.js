@@ -1457,7 +1457,7 @@ app.post('/addstr', function (req, res) {
                 canadd: 1,
                 value: '搭乘車種為' + response.data[i].DailyTrainInfo.TrainTypeName.Zh_tw + '號 第' + response.data[i].DailyTrainInfo.TrainNo + '車次 於' + response.data[i].OriginStopTime.ArrivalTime + '抵達',
                 arraynum: bot.length,
-                other:"<a href=https://irs.thsrc.com.tw/IMINT/?locale=tw>前往訂票</a>",
+                other:"<a href=http://railway.hinet.net/Foreign/TW/etno1.html>前往訂票</a>",
                 type: 'table'
               }
             }
