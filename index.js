@@ -691,7 +691,7 @@ app.get('/nearby', function (req, res) {
             if (rating != undefined) {
               Gplace_str += '<tr><td>' + data2.result.name + '<br>'
               Gplace_str += '評分：' + rating + '<br/>電話：' + phone + '<br/>類型：' + type + '<br/>地址：' + address + '<br/>評論：' + review + '<br/>'
-              Gplace_str += '<form action="http://' + ip + '/addTOfavorite_nearby" method="POST"><input type="hidden" name="other" value="<a href=https://www.google.com/maps/place/\''+encodeURI(data2.result.name)+'\'/@'+data2.result.geometry.location.lat + ',' + data2.result.geometry.location.lng+',17z>查看地圖</a>"><input type="hidden" name="value" value="' + review + '"><input type="hidden" name="address" value="' + address + '"><input type="hidden" name="type" value="' + type + '"><input type="hidden" name="phone" value="' + phone + '"><input type="hidden" name="arrnum" value="' + data2.result.name + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> '
+              Gplace_str += '<form action="http://' + ip + '/addTOfavorite_nearby" method="POST"><input type="hidden" name="other" value="<a href=https://www.google.com/maps/place/'+encodeURI(data2.result.name)+'/@'+data2.result.geometry.location.lat + ',' + data2.result.geometry.location.lng+',17z>查看地圖</a>"><input type="hidden" name="value" value="' + review + '"><input type="hidden" name="address" value="' + address + '"><input type="hidden" name="type" value="' + type + '"><input type="hidden" name="phone" value="' + phone + '"><input type="hidden" name="arrnum" value="' + data2.result.name + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> '
               Gplace_str += '</tr></td>'
             }
           })
