@@ -17,7 +17,7 @@
   var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
   var now = new Date();
-  console.log(dateFormat(now,"yyyy-mm-dd"))
+ 
   
 }
 //一些路徑設置
@@ -1545,6 +1545,7 @@ function search(input, user, df_input, data) {
       canadd: 0,
       type: 'str'
     }
+    console.log(input,df_input)
     bot[bot.length] = {
       message: "BOT：起點站和終點站？",
       class: "notif",
@@ -1560,6 +1561,7 @@ function search(input, user, df_input, data) {
       canadd: 0,
       type: 'str'
     }
+    console.log(input,df_input)
     bot[bot.length] = {
       message: "BOT：起點站和終點站？",
       class: "notif",
