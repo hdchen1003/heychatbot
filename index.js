@@ -1190,6 +1190,7 @@ app.post('/addstr', function (req, res) {
               canadd: 1,
               value: req.body.addstr + '的氣溫是' + data.cwbopendata.dataset.locations.location[1].weatherElement[0].time[i].elementValue.value + '°C 降雨機率為' + data.cwbopendata.dataset.locations.location[1].weatherElement[3].time[i].elementValue.value + '%',
               arraynum: bot.length,
+              other:'日期'+dateFormat(now,"yyyy-mm-dd"),
               type: 'table'
             }
           }
@@ -1236,10 +1237,12 @@ app.post('/addstr', function (req, res) {
 
       else if (session[0] == 'traffic_BUS') {
         session[2] = showIntFromString(req.body.addstr);
+        console.log(session[1])
         axios.get('http://ptx.transportdata.tw/MOTC/v2/Bus/StopOfRoute/City/' + session[1] + '?$format=json', { // 參考(抄襲XD)noobTW
           headers: getAuthorizationHeader(),
         })
           .then(function (response) {
+            
             for (var i = 0; i < response.data.length; i++) {
               if (response.data[i].RouteName.Zh_tw.match(session[2])) {
                 bot[bot.length] = {
@@ -1253,8 +1256,9 @@ app.post('/addstr', function (req, res) {
                     message: "<tr><td>" + (j + 1) + "</td><td>" + response.data[i].Stops[j].StopName.Zh_tw + "</td><td>" + response.data[i].Stops[response.data[i].Stops.length - j - 1].StopName.Zh_tw + "</td>",
                     class: "bus",
                     canadd: 1,
-                    value: '搭乘的公車為' + response.data[i].Stops[j].StopName.Zh_tw + '號',
+                    value: '起點為' + response.data[i].Stops[j].StopName.Zh_tw + '站',
                     arraynum: bot.length,
+                    other: '公車編號' + response.data[i].SubRouteID + '號',
                     type: 'table'
                   }
                 }
