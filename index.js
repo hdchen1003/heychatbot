@@ -16,7 +16,9 @@
   var cookieParser = require('cookie-parser');
   var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
-
+  var now = new Date();
+  console.log(dateFormat(now,"yyyy-mm-dd"))
+  
 }
 //一些路徑設置
 {
@@ -831,7 +833,7 @@ app.post('/schedule_content', function (req, res) {
 });
 app.get('/add_schedule', function (req, res) {
 
-  var str = '<form action="http://' + ip + '/do_add_schedule" method="post"> 行程名稱 <input type="text" name="sName" ><br/> 起始日期 <input type="date" name="sDate" ><br/>結束日期 <input type="date" name="sDate2" > <input type="hidden" name="id" value=' + req.cookies.accountStatus + ' ><input type="submit" value="創立行程"></form>'
+  var str = '<form action="http://' + ip + '/do_add_schedule" method="post"> 行程名稱 <input type="text" name="sName" ><br/> 起始日期 <input type="date" name="sDate" value="'+dateFormat(now,"yyyy-mm-dd")+'" ><br/>結束日期 <input type="date" name="sDate2"  value='+dateFormat(now,"yyyy-mm-dd")+'> <input type="hidden" name="id" value=' + req.cookies.accountStatus + ' ></br><input type="submit" value="創立行程"></form>'
 
   res.render('pages/schedule', {
     message: "歡迎加入我們",
@@ -1295,7 +1297,7 @@ app.post('/addstr', function (req, res) {
         }
         
         bot[bot.length] = {
-          message: '<form action="http://' + ip + '/addstr" method="POST"><input  type="date" class="input" name="time"><button type="submit"> <img src="img/search2.PNG" height="30" width="60" alt="">  </button></form> ',
+          message: '<form action="http://' + ip + '/addstr" method="POST"><input  type="date" class="input" name="time" value='+dateFormat(now,"yyyy-mm-dd")+'><button type="submit"> <img src="img/search2.PNG" height="30" width="60" alt="">  </button></form> ',
           class: "notif",
           canadd: 0,
           type: 'talbe'
@@ -1415,7 +1417,7 @@ app.post('/addstr', function (req, res) {
             //
             bot[bot.length] = {
             //  message: "<input type=\"date\" class=\"input\" name=\"time\">",
-            message: '<form action="http://' + ip + '/addstr" method="POST"><input  type="date" class="input" name="time"><button type="submit"> <img src="img/search2.PNG" height="30" width="60" alt="">  </button></form> ' ,
+            message: '<form action="http://' + ip + '/addstr" method="POST"><input  type="date" class="input" name="time" value='+dateFormat(now,"yyyy-mm-dd")+'><button type="submit"> <img src="img/search2.PNG" height="30" width="60" alt="">  </button></form> ' ,
               class: "notif",
               canadd: 0,
               type: 'talbe'
