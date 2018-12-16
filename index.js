@@ -760,6 +760,8 @@ app.post('/nearby_search', function (req, res) {
   })
 })
 app.post('/schedule_share',function(req,res){
+  console.log(req.cookies.accountStatus)
+  console.log(req.body.share)
   con.query('SELECT * FROM heychatbot.schedule_sharing WHERE receive=\'' + req.cookies.accountStatus + '\' AND share=\'' + req.body.share + '\' ', function (err, result, fields) {
     if(err){}
     else{
