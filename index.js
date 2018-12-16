@@ -1037,6 +1037,7 @@ app.post('/share_schedule',function(req,res){
   })
 })
 app.post('/share_schedule_receive',function(req,res){
+  console.log(req.body.sName)
   con.query('INSERT INTO heychatbot.schedule_sharing (`share`, `receive`,`sch_id`,`sName` ) VALUES (\'' + req.cookies.accountStatus + '\', \'' + req.body.receive + '\', \'' + req.body.sch_id + '\', \'' + req.body.sName + '\')', function (err, result, fields) {
     if(err){}
     else{
