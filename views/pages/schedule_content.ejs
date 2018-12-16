@@ -1,15 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+	<meta name="viewport" content="width=device-width, minimun-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+	<link rel="stylesheet" type="text/css" href="css/index.css" />
+
+	<link rel="import" href="components/bower_components/core-toolbar/core-toolbar.html">
+	<link rel="import" href="components/bower_components/paper-elements/paper-elements.html">
+
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+
+
+	<title>schedule</title>
 </head>
+
 <body>
+
+
+
+	<core-toolbar class="toolbar"  style=" position: fixed;bottom: top;">
+		<paper-icon-button icon="menu"></paper-icon-button>
+		<a class="list-group-item" href="http://<%-ip %>/loginin"><i class="fa fa-chevron-left fa-3x"></i> </a>
+		<!-- <span class="toolbar_title" flex>I am a toolbar!!!!</span> -->
+		<a class="list-rightbars" href="http://<%-ip %>/friend"><i class="fa fa-bars fa-3x"></i> </a>
+	</core-toolbar>
         <div class="back"><button onclick="window.location.href='http://<%=ip%>/schedule'">回上一頁</button></div>
     <div class="schedule_content"><%-send %></div>
     
-  
-</body>
-</html>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="js/bar.js" charset="UTF-8"></script>
+    </body>
+    </html>

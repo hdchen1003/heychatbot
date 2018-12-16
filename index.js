@@ -691,8 +691,8 @@ app.get('/nearby', function (req, res) {
 
 
             if (rating != undefined) {
-              Gplace_str += '<div class="near_title"><h3>' + data2.result.name + '</h3>'
-              Gplace_str += '<div style=text-align:left><h6>評分：' + rating + '</h6><h6>電話：' + phone + '</h6><h6>類型：' + type + '</h6><h6>地址：' + address + '</h6><h6>評論：' + review + '</h6>'
+              Gplace_str += '<div class="near_title"><h2>' + data2.result.name + '</h2>'
+              Gplace_str += '<div style=text-align:left><h3>評分：' + rating + '</h3><h3>電話：' + phone + '</h3><h3>類型：' + type + '</h3><h3>地址：' + address + '</h3><h3>評論：' + review + '</h3>'
               Gplace_str += '<form action="http://' + ip + '/addTOfavorite_nearby" method="POST"><input type="hidden" name="other" value="<a href=https://www.google.com/maps/place/'+encodeURI(data2.result.name)+'/@'+data2.result.geometry.location.lat + ',' + data2.result.geometry.location.lng+',17z>查看地圖</a>"><input type="hidden" name="value" value="' + review + '"><input type="hidden" name="address" value="' + address + '"><input type="hidden" name="type" value="' + type + '"><input type="hidden" name="phone" value="' + phone + '"><input type="hidden" name="arrnum" value="' + data2.result.name + '"><button type="submit"> <img src="img/7pF0p0K.jpg" height="10" width="10" alt=""> </button></form> '
               // Gplace_str += '</tr></td>'
               Gplace_str +=  '</div></div>'
@@ -759,6 +759,79 @@ app.post('/nearby_search', function (req, res) {
     });
   })
 })
+app.post('/schedule_share',function(req,res){
+  con.query('SELECT * FROM heychatbot.schedule_sharing WHERE receive=\'' + req.cookies.accountStatus + '\' AND share=\'' + req.body.share + '\' ', function (err, result, fields) {
+    if(err){}
+    else{
+      if(result==''){
+        res.render('pages/schedule_sharing', {
+          message: "歡迎加入我們",
+          ID: req.cookies.accountStatus,
+          ip: ip,
+          invite: '目前沒有分享的行程'
+        });
+      }
+      else{
+        var sstr;
+        for(var i =0 ;i<result.length;i++){
+          sstr+=result[i].sName
+          sstr+='<form method="post" action=accept_schedule_share><input type="hidden" name="share" value='+result[i].share+'><input type="hidden" name="ss_id" value='+result[i].ss_id+'><input type="hidden" name="sch_id" value='+result[i].sch_id+'><input type="hidden" name="sName" value='+result[i].sName+'><button type="submit">加入行程</button></form>'
+        }
+        res.render('pages/schedule_sharing', {
+          message: "歡迎加入我們",
+          ID: req.cookies.accountStatus,
+          ip: ip,
+          invite: sstr
+        });
+      }
+ 
+    }
+  })
+})
+app.post('/accept_schedule_share',function(req,res){
+  con.query('DELETE  FROM heychatbot.schedule_sharing WHERE ss_id=\'' + req.body.ss_id + '\'  ', function (err, result, fields) {})
+  var random = parseInt(99999*Math.random());
+  var sch_id
+  con.query('INSERT INTO heychatbot.schedule (`id`, `sName`,`sDate`,`other` ) VALUES (\'' + req.cookies.accountStatus + '\', \'' + req.body.sName + '\', \'' + dateFormat(now,"yyyy-mm-dd") + '\', \'' + random + '\')', function (err, result, fields) {
+    con.query('SELECT * FROM heychatbot.schedule WHERE other = \'' + random + '\' ', function (err, result, fields) {
+      sch_id = result[0].sch_id
+      console.log(req.body.sch_id )
+      
+      con.query('SELECT * FROM heychatbot.schedule_content WHERE sch_id=\'' + req.body.sch_id + '\'  ', function (err, result, fields) {
+        if(err){}
+        else{
+          console.log(result[0].c_name)
+          var c_name =[];
+          var c_class=[];
+          var c_content=[];
+          var other=[];
+          var count = 0;
+          for(var i =0 ;i<result.length ;i++){
+            c_name[c_name.length] = result[i].c_name
+            c_class[c_class.length] = result[i].c_class
+            c_content[c_content.length] = result[i].c_content
+            other[other.length] = result[i].other
+            count ++
+          }
+        }
+        
+        for(var i =0 ;i<count ;i++){
+          con.query('INSERT INTO heychatbot.schedule_content (`sch_id`, `c_name`,`c_class`,`c_content`,`other` ) VALUES (\'' + sch_id + '\', \'' + c_name[i] + '\', \'' + c_class[i] + '\', \'' + c_content[i] + '\', \'' + other[i] + '\')', function (err, result, fields) {
+    
+          })
+        }
+        res.render('pages/schedule_sharing', {
+          message: "歡迎加入我們",
+          ID: req.cookies.accountStatus,
+          ip: ip,
+          invite: '加入成功' + '<form action="http://'+ip+'/schedule_share" method="POST"><input type="hidden" name="share" value='+req.body.share+'><button type="submit">回上一頁</button></form>'
+        });
+      })
+    })
+  })
+
+  
+})
 app.get('/schedule', function (req, res) {
   con.query('SELECT * FROM heychatbot.schedule WHERE id=\'' + req.cookies.accountStatus + '\'  ', function (err, result, fields) {
     if (err) {
@@ -769,8 +842,9 @@ app.get('/schedule', function (req, res) {
         for (var i = 0; i < result.length; i++) {
          
           str += ' <div class="sch_title"> <h2><form method="post" action="http://' + ip + '/schedule_content"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">' + result[i].sName + '</button></form></h2>'
-          str += '<div class="sch_name"><p><form method="post" action="http://' + ip + '/delete_schedule"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">刪除此行程</button></form></p></div>'
-          str += '<div class="sch_name"><p>' + result[i].sDate + '</p></div></div>'
+         // str += '<div class="sch_name"><p><form method="post" action="http://' + ip + '/delete_schedule"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">刪除此行程</button></form></p></div>'
+        str += '<div class="sch_name"><form method=post action=share_schedule><input type=hidden name=sch_id value='+result[i].sch_id+'><input type=hidden name=sName value='+result[i].sName+'><button type="submit">分享此行程</button></form></div>'
+         str += '<div class="sch_name"><p>' + result[i].sDate + '</p></div></div>'
        //   str += '<form method="post" action="http://' + ip + '/delete_schedule"> <input type="hidden" name="sch_id" value=' + result[i].sch_id + '> <button type="submit">刪除此行程</button></form>'
         }
         str += '</div>'
@@ -935,6 +1009,44 @@ app.post('/delete_schedule', function (req, res) {
   })
 
 });
+app.post('/share_schedule',function(req,res){
+  con.query('SELECT * FROM heychatbot.myfriend WHERE u_id1=\'' + req.cookies.accountStatus + '\' OR u_id2=\'' + req.cookies.accountStatus + '\' ', function (err, result, fields) {
+    if(err){}
+    else{
+      
+      var fstr;
+      for(var i=0 ;i<result.length ;i++){
+        if(result[i].u_id1 ==  req.cookies.accountStatus){
+          fstr += result[i].u_id2
+          fstr += '<form method=post action=share_schedule_receive> <input type=hidden name=receive value='+result[i].u_id2+'> <input type=hidden name=sch_id value='+req.body.sch_id+'><input type=hidden name=sName value='+req.body.sName+'><button type="submit">邀請他</button></form><br/>'
+        }
+        else{
+          fstr += result[i].u_id1
+          fstr += '<form method=post action=share_schedule_receive> <input type=hidden name=receive value='+result[i].u_id1+'> <input type=hidden name=sch_id value='+req.body.sch_id+'><input type=hidden name=sName value='+req.body.sName+'><button type="submit">邀請他</button></form><br/>'
+        }
+      }
+      res.render('pages/schedule_sharing', {
+        message: "歡迎加入我們",
+        ID: req.cookies.accountStatus,
+        ip: ip,
+        invite: fstr
+      });
+    }
+  })
+})
+app.post('/share_schedule_receive',function(req,res){
+  con.query('INSERT INTO heychatbot.schedule_sharing (`share`, `receive`,`sch_id`,`sName` ) VALUES (\'' + req.cookies.accountStatus + '\', \'' + req.body.receive + '\', \'' + req.body.sch_id + '\', \'' + req.body.sName + '\')', function (err, result, fields) {
+    if(err){}
+    else{
+      res.render('pages/schedule_sharing', {
+        message: "歡迎加入我們",
+        ID: req.cookies.accountStatus,
+        ip: ip,
+        invite: '邀請成功'
+      });
+    }
+  })
+})
 app.post('/delete_schedule_content', function (req, res) {
 
   con.query('DELETE  FROM heychatbot.schedule_content WHERE content_id=\'' + req.body.content_id + '\'  ', function (err, result, fields) {
@@ -1794,7 +1906,7 @@ function get_fstr(user) {
   var str = "<table class='seeMf_table' border=1>"
   friendList.forEach(input => {
     if (input.user == user) {
-      str += "<tr><td class='seeMf_content'>" + input.item + "</td><td class='seeMf_content'>備註</td></tr>"
+      str += "<tr><td class='seeMf_content'>" + input.item + "</td><td class='seeMf_content'>"+'<form action="http://'+ip+'/schedule_share" method="POST"><input type="hidden" name="share" value='+input.item+'><button type="submit">他分享的行程</button></form></td></tr>'
     }
   });
   str += "</table>"
